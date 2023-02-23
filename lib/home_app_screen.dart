@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:intl/intl.dart';
+//import 'package:intl/intl.dart';
 import 'package:tanya_app_v1/Screen/AddMedicalInformation/medicine_editor_screen/medicine_info_editor_screen.dart';
 import 'package:tanya_app_v1/Screen/AddMedicalInformation/medicine_list_screen/components/display_medicine_info_list.dart';
-import 'package:tanya_app_v1/forTest/local_notify/style.dart';
+//import 'package:tanya_app_v1/utils/style.dart';
 import '../../GetXBinding/medicine_state_binding.dart';
 //import 'body_notify_list.dart';
 import 'Screen/Notify/notify_screen.dart';
-import 'forTest/local_notify/body_notify_list.dart';
+//import 'forTest/local_notify/body_notify_list.dart';
 
 class HomeAppScreen extends StatefulWidget {
   HomeAppScreen({super.key, this.selectedPage});
@@ -22,6 +22,7 @@ class HomeAppScreen extends StatefulWidget {
 class _HomeAppScreenState extends State<HomeAppScreen> {
   AppBar get myAppBar {
     return AppBar(
+      automaticallyImplyLeading: false,
       title: Text(titlePageList[_selectedIndex]),
       centerTitle: true,
       actions: <Widget>[
@@ -104,7 +105,7 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
           )
         ],
       ),
-      floatingActionButton: _selectedIndex == 1 || _selectedIndex == 0
+      floatingActionButton: _selectedIndex == 1
           ? FloatingActionButton(
               onPressed: _createMedicineInfo,
               child: const Icon(Icons.add),

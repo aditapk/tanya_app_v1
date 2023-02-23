@@ -10,11 +10,11 @@ class LoginAndSignupBtn extends StatelessWidget {
   }) : super(key: key);
 
   void toLoginScreen() {
-    Get.to(() => LoginScreen());
+    Get.to(() => const LoginScreen());
   }
 
   void toSignUpScreen() {
-    Get.to(() => SignUpScreen());
+    Get.to(() => const SignUpScreen());
   }
 
   @override

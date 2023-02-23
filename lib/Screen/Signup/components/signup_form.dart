@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:tanya_app_v1/Screen/Notify/notify_screen_old.dart';
+//import 'package:tanya_app_v1/Screen/Notify/notify_screen_old.dart';
 import 'package:tanya_app_v1/Screen/Login/login_screen.dart';
 import 'package:tanya_app_v1/components/already_have_an_account_acheck.dart';
 import 'package:tanya_app_v1/constants.dart';

@@ -11,15 +11,18 @@ class EmptyMedicineList extends StatelessWidget {
     return Center(
       child: Column(
         children: [
+          const SizedBox(
+            height: 50,
+          ),
           Image.asset(
-            "assets/images/empty_medicine_list.jpg",
+            "assets/images/empty_medicine_list.png",
             width: size.width * 0.8,
           ),
           SizedBox(
-            height: size.height * 0.1,
+            height: size.height * 0.05,
           ),
           const Text(
-            "ไม่พบรายการยา",
+            "ไม่มีรายการยา",
             style: TextStyle(
               fontSize: 30,
               fontWeight: FontWeight.bold,
