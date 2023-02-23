@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -10,42 +11,17 @@ class NotifyService {
   FlutterLocalNotificationsPlugin localNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
-  void onDidReceiveLocalNotification(
-      int id, String? title, String? body, String? payload) async {
-    // TODO
-  }
-
-  void onDidReceiveNotificationResponse(
-      NotificationResponse notificationResponse) {
-    switch (notificationResponse.notificationResponseType) {
-      case NotificationResponseType.selectedNotification:
-        // TODO: Handle this case.
-        // When click on notification
-        // .notificationResponseType
-        // .id
-        // .actonId
-        // .input
-        // .payload
-        print(notificationResponse.payload);
-
-        break;
-      case NotificationResponseType.selectedNotificationAction:
-        // TODO: Handle this case.
-        // When action on notification is clicked
-        print(notificationResponse.actionId);
-        print(notificationResponse.input);
-        break;
-    }
-  }
-
-  Future<void> inintializeNotification() async {
+  Future<void> inintializeNotification({
+    required onDidReceiveNotificationIOS,
+    required onDidReceiveNotificationAndroid,
+  }) async {
     tz.initializeTimeZones();
     final DarwinInitializationSettings iOSInitializationSettings =
         DarwinInitializationSettings(
             requestAlertPermission: false,
             requestBadgePermission: false,
             requestSoundPermission: false,
-            onDidReceiveLocalNotification: onDidReceiveLocalNotification);
+            onDidReceiveLocalNotification: onDidReceiveNotificationIOS);
 
     const AndroidInitializationSettings androidInitializationSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -56,7 +32,7 @@ class NotifyService {
             android: androidInitializationSettings);
 
     await localNotificationsPlugin.initialize(initializationSettings,
-        onDidReceiveNotificationResponse: onDidReceiveNotificationResponse);
+        onDidReceiveNotificationResponse: onDidReceiveNotificationAndroid);
   }
 
   Future<void> requestPermission() async {
@@ -77,7 +53,7 @@ class NotifyService {
     }
   }
 
-  Future<void> showNotification({
+  Future<void> scheduleNotify({
     required String channelID,
     required String channelName,
     String? channelDescription,
@@ -86,15 +62,56 @@ class NotifyService {
     String? notifyDetail,
     String? notifyPayload,
     String? notifyTicker,
+    required DateTime scheduleTime,
+    required int notifyId,
     List<AndroidNotificationAction>? notifyAction,
+    required String imagePath,
   }) async {
+    var notifyData = jsonDecode(notifyPayload!);
+    var medicineInfo = notifyData["notifyInfo"]["medicineInfo"];
+    var name = medicineInfo["name"];
+    var type = medicineInfo["type"];
+    var unit = medicineInfo["unit"];
+    var nTake = medicineInfo["nTake"];
+    var order = medicineInfo["order"];
+    var howToEat = "<type> $nTake $unit";
+    switch (type) {
+      case "pills":
+        howToEat = howToEat.replaceAll('<type>', "รับประทาน");
+        break;
+    }
+    var orderInThai = "";
+    switch (order) {
+      case "before":
+        orderInThai = "ก่อนอาหาร";
+        break;
+      case "after":
+        orderInThai = "หลังอาหาร";
+        break;
+    }
+    final contentTitle = "<b>$name<b>";
+    final summaryText = "$howToEat<br>$orderInThai";
+
+    // big picture
+    BigPictureStyleInformation bigPictureStyleInformation =
+        BigPictureStyleInformation(
+      FilePathAndroidBitmap(imagePath),
+      largeIcon: FilePathAndroidBitmap(imagePath),
+      contentTitle: contentTitle,
+      htmlFormatContentTitle: true,
+      summaryText: summaryText,
+      htmlFormatSummaryText: true,
+      hideExpandedLargeIcon: true,
+    );
+
     AndroidNotificationDetails androidNotificationDetails =
         AndroidNotificationDetails(channelID, channelName,
             channelDescription: channelDescription,
             importance: Importance.max,
             priority: Priority.high,
             ticker: notifyTicker,
-            actions: notifyAction);
+            actions: notifyAction,
+            styleInformation: bigPictureStyleInformation);
     NotificationDetails notificationDetails = NotificationDetails(
       android: androidNotificationDetails,
     );
@@ -102,24 +119,15 @@ class NotifyService {
     // await localNotificationsPlugin.show(
     //     notifyID, notifyTitle, notifyDetail, notificationDetails,
     //     payload: notifyPayload);
-    var schedule1 = tz.TZDateTime.now(tz.local).add(Duration(seconds: 5));
-    var schedule2 = schedule1.add(Duration(seconds: 5));
+    var schedule1 = tz.TZDateTime.from(scheduleTime, tz.local);
+    // var schedule2 = schedule1.add(Duration(seconds: 5));
     await localNotificationsPlugin.zonedSchedule(
-      1,
-      'title1',
-      'body1',
+      notifyId,
+      notifyTitle,
+      notifyDetail,
       schedule1,
       notificationDetails,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      androidAllowWhileIdle: true,
-    );
-    await localNotificationsPlugin.zonedSchedule(
-      2,
-      'title2',
-      'body2',
-      schedule2,
-      notificationDetails,
+      payload: notifyPayload,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
       androidAllowWhileIdle: true,

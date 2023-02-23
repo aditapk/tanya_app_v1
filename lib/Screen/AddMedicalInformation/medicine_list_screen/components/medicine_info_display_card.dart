@@ -20,11 +20,11 @@ class MedicineInfoDisplayCard extends StatelessWidget {
 
   _displayPrefixType(String type) {
     if (type == "pills" || type == "water") {
-      return "รับประทานจำนวน";
+      return "รับประทาน";
     } else if (type == "arrow") {
-      return "ใช้ฉีดจำนวน";
+      return "ใช้ฉีด";
     } else if (type == "drop") {
-      return "ใช้หยดจำนวน";
+      return "ใช้หยด";
     }
   }
 
@@ -59,36 +59,33 @@ class MedicineInfoDisplayCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          medicineData!.name,
-          style: const TextStyle(
-            fontSize: 18.0,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Text(medicineData!.description),
-        const SizedBox(
-          height: 5,
-        ),
-        Row(
-          children: [
-            Text(
-                "${_displayPrefixType(medicineData!.type)}   ${medicineData!.nTake.toFraction()}"),
-            const SizedBox(
-              width: 10,
+    return Padding(
+      padding: const EdgeInsets.only(top: 5),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            medicineData!.name,
+            style: const TextStyle(
+              fontSize: 16.0,
+              fontWeight: FontWeight.bold,
             ),
-            Text(medicineData!.unit)
-          ],
-        ),
-        const SizedBox(
-          height: 5,
-        ),
-        Text(_displayEatOrder(medicineData!.order)),
-        Text(_displayPeriodTime(medicineData!.period_time)),
-      ],
+          ),
+          Text(medicineData!.description),
+          Row(
+            children: [
+              Text(
+                  "${_displayPrefixType(medicineData!.type)}   ${medicineData!.nTake.toFraction()}"),
+              const SizedBox(
+                width: 10,
+              ),
+              Text(medicineData!.unit)
+            ],
+          ),
+          Text(_displayEatOrder(medicineData!.order)),
+          Text(_displayPeriodTime(medicineData!.period_time)),
+        ],
+      ),
     );
   }
 }

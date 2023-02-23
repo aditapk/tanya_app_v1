@@ -15,7 +15,7 @@ class DeleteMedicineInfoButton extends StatelessWidget {
       bottom: 10,
       child: IconButton(
         icon: const Icon(Icons.delete),
-        color: Colors.red,
+        color: Colors.red.shade400,
         onPressed: onPressed,
       ),
     );

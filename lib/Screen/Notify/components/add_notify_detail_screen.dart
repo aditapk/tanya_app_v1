@@ -1,15 +1,20 @@
-import 'dart:html';
+//import 'dart:html';
+
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:get/get_connect/http/src/utils/utils.dart';
+import 'package:hive/hive.dart';
 import 'package:intl/intl.dart'; // for datetime formatting
 import 'package:tanya_app_v1/Model/medicine_info_model.dart';
+import 'package:tanya_app_v1/Model/notify_info.dart';
 import 'dart:math';
 
 import '../../../Services/notify_services.dart';
-import '../../MedicineInformation/to_choose_medicine_info_list.dart'; // for random variable
+import '../../MedicineInformation/to_choose_medicine_info_list.dart';
+import '../notify_handle_screen.dart'; // for random variable
 
 class AddNotifyDetailScreen extends StatefulWidget {
   AddNotifyDetailScreen({
@@ -32,6 +37,18 @@ class MedicineInformation {
   String? order;
   List<bool>? periodTime;
   String? picturePath;
+
+  MedicineInfo asMedicineInfo() {
+    return MedicineInfo(
+        name: name!,
+        description: description!,
+        type: type!,
+        unit: unit!,
+        nTake: nTake!,
+        order: order!,
+        period_time: periodTime!,
+        picture_path: picturePath);
+  }
 
   MedicineInformation({
     this.name,
@@ -117,7 +134,7 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
       TextEditingController();
   TextEditingController selectedEndNotifyDateController =
       TextEditingController();
-  MedicineInformation seletedMedicine = MedicineInformation();
+  MedicineInformation selectedMedicine = MedicineInformation();
   TextEditingController selectedMedicineController = TextEditingController();
 
   TextEditingController notifyMorningTimeController = TextEditingController();
@@ -137,13 +154,101 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
   // List<DateTime> _notifyTimeList = [];
   // List<TextEditingController> _timeControllerList = [];
   // ---
+  getNotifyID(String payload) {
+    var notifyInfoObject = jsonDecode(payload);
+    return notifyInfoObject["notifyID"];
+  }
+
+  void onDidReceiveLocalNotificationIOS(
+      int id, String? title, String? body, String? payload) async {
+    // TODO
+    print("$id, $title");
+  }
+
+  void onDidReceiveNotificationAndroid(
+      NotificationResponse notificationResponse) async {
+    switch (notificationResponse.notificationResponseType) {
+      case NotificationResponseType.selectedNotification:
+        // TODO: Handle this case.
+        // When click on notification
+        // .notificationResponseType
+        // .id
+        // .actonId
+        // .input
+        // .payload
+        var notifyID = getNotifyID(notificationResponse.payload!);
+        Get.to(() => NotifyHandleScreen(
+              notifyID: notifyID,
+            ));
+
+        break;
+      case NotificationResponseType.selectedNotificationAction:
+        // TODO: Handle this case.
+        // When action on notification is clicked
+        //print(notificationResponse.actionId);
+        //print(notificationResponse.payload);
+        var notifyID = getNotifyID(notificationResponse.payload!);
+        var notifyBox = Hive.box<NotifyInfoModel>('user_notify_info');
+        var notifyInfo = notifyBox.getAt(notifyID);
+        if (notificationResponse.actionId == "OK") {
+          // notify status -> complete
+          notifyInfo!.status = 0;
+          notifyInfo.save();
+        }
+        if (notificationResponse.actionId == "PENDING") {
+          // set notify again
+          // set notification
+          var date = notifyInfo!.date;
+          var now = DateTime.now();
+          var minuteDiff = now.difference(date).inSeconds;
+          if (minuteDiff <= 35) {
+            var nextDateTime = now.add(const Duration(seconds: 15));
+            // Convert string payload
+            var notifyPayload = jsonEncode({
+              "notifyID": notifyID,
+              "notifyInfo": notifyInfo.toJson(),
+            });
+            notifySet(
+              id: notifyID,
+              scheduleTime: nextDateTime,
+              payload: notifyPayload,
+              numNotify: notifyInfo.status,
+              imagePath: notifyInfo.medicineInfo.picture_path!,
+            );
+          } else {
+            Get.dialog(
+              AlertDialog(
+                title: const Text(
+                  "คำเตือน!",
+                  style: TextStyle(color: Colors.red),
+                ),
+                content: const Text(
+                    "ไม่สามารถเลื่อนการแจ้งเตือนได้ เนื่องจากล่วงเลยกินยามามากกว่า 1 ชั่วโมงแล้ว"),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Get.back();
+                    },
+                    child: const Text("OK"),
+                  )
+                ],
+              ),
+            );
+          }
+        }
+        break;
+    }
+  }
 
   @override
   void initState() {
     super.initState();
 
     // intial notification service
-    notifyServices.inintializeNotification();
+    notifyServices.inintializeNotification(
+      onDidReceiveNotificationAndroid: onDidReceiveNotificationAndroid,
+      onDidReceiveNotificationIOS: onDidReceiveLocalNotificationIOS,
+    );
     notifyServices.requestPermission();
 
     // selectedStartNotifyDate = widget.selectedDate;
@@ -326,54 +431,126 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
     }
   }
 
+  DateTime cleanTimeOfDay(DateTime datetime) {
+    DateTime dateCleanTime = DateTime(
+      datetime.year,
+      datetime.month,
+      datetime.day,
+      0,
+      0,
+    );
+    return dateCleanTime;
+  }
+
   // ตกลง
   makeNotify() {
     // notification List
-    var startDate = notifyInformation.startDate;
-    var endDate = notifyInformation.endDate;
-    print('$startDate, $endDate');
-    var morningTime = notifyInformation.morningTime;
-    print(morningTime);
-    var days = endDate!.difference(startDate!).inDays;
+    var startDate = cleanTimeOfDay(notifyInformation.startDate!);
+    var endDate = cleanTimeOfDay(notifyInformation.endDate!);
+    var days = endDate.difference(startDate).inDays + 1;
 
-    if (notifyInformation.enableMorningTime) {}
-    if (notifyInformation.enableLunchTime) {}
-    if (notifyInformation.enableEveningTime) {}
-    if (notifyInformation.enableBeforeToBedTime) {
-      var startDateBeforeToBedTime = DateTime(
-          startDate.year,
-          startDate.month,
-          startDate.day,
-          notifyInformation.beforeToBedTime!.hour,
-          notifyInformation.beforeToBedTime!.minute);
-      for (int i = 0; i <= days; i++) {
-        print(startDateBeforeToBedTime.add(Duration(days: i)));
-      }
+    if (notifyInformation.enableMorningTime) {
+      generateNotifySchedule(startDate, days, notifyInformation.morningTime!);
     }
+    if (notifyInformation.enableLunchTime) {
+      generateNotifySchedule(startDate, days, notifyInformation.lunchTime!);
+    }
+    if (notifyInformation.enableEveningTime) {
+      generateNotifySchedule(startDate, days, notifyInformation.eveningTime!);
+    }
+    if (notifyInformation.enableBeforeToBedTime) {
+      generateNotifySchedule(
+          startDate, days, notifyInformation.beforeToBedTime!);
+    }
+    Get.back();
     // schedule notification
 
-    // show Notification
-    // notifyServices.showNotification(
-    //     channelID: "Medicine Notify",
-    //     channelName: "Medicine",
-    //     channelDescription: "Medicine Notification for user",
-    //     notifyID: 0,
-    //     notifyTitle: notifyNameController.text,
-    //     notifyDetail: notifyDetailController.text,
-    //     notifyPayload: "Notification Payload of medicine test1",
-    //     notifyTicker: "Notify Ticker",
-    //     notifyAction: <AndroidNotificationAction>[
-    //       AndroidNotificationAction(
-    //         'id_ok',
-    //         'OK',
-    //         showsUserInterface: true,
-    //       ),
-    //       AndroidNotificationAction(
-    //         'id_cancel',
-    //         'CANCEL',
-    //         showsUserInterface: true,
-    //       )
-    //     ]);
+    // write to hive database
+  }
+
+  // generate notify schedule
+  generateNotifySchedule(
+      DateTime startDate, int days, TimeOfDay scheduleTime) async {
+    var date = DateTime(
+      startDate.year,
+      startDate.month,
+      startDate.day,
+      scheduleTime.hour,
+      scheduleTime.minute,
+    );
+
+    var boxNotify = Hive.box<NotifyInfoModel>('user_notify_info');
+    for (int day = 0; day < days; day++) {
+      // write to hive database
+      var notifyData = NotifyInfoModel(
+        name: notifyNameController.text,
+        description: notifyDetailController.text,
+        medicineInfo: notifyInformation.selectedMedicine!.asMedicineInfo(),
+        date: date.add(Duration(days: day)),
+        time: TimeOfDayModel(
+          hour: scheduleTime.hour,
+          minute: scheduleTime.minute,
+        ),
+      );
+      var dataId = await boxNotify.add(notifyData);
+
+      // Convert string payload
+      var notifyPayload = jsonEncode({
+        "notifyID": dataId,
+        "notifyInfo": notifyData.toJson(),
+      });
+      // set notification
+      notifySet(
+        id: dataId,
+        scheduleTime: date.add(
+          Duration(days: day),
+        ),
+        payload: notifyPayload,
+        numNotify: notifyData.status,
+        imagePath: notifyData.medicineInfo.picture_path!,
+      );
+    }
+  }
+
+  notifySet(
+      {required int id,
+      required DateTime scheduleTime,
+      String? payload,
+      required String imagePath,
+      required int numNotify}) {
+    notifyServices.scheduleNotify(
+      channelID: "Medicine Notify",
+      channelName: "Medicine",
+      channelDescription: "Medicine Notification for user",
+      notifyID: id,
+      notifyTitle: notifyNameController.text,
+      notifyDetail: notifyDetailController.text,
+      notifyPayload: payload,
+      notifyTicker: "Notify Ticker",
+      scheduleTime: scheduleTime,
+      notifyId: id,
+      imagePath: imagePath,
+      notifyAction: numNotify != 4
+          ? const <AndroidNotificationAction>[
+              AndroidNotificationAction(
+                'OK',
+                'ตกลง',
+                showsUserInterface: true,
+              ),
+              AndroidNotificationAction(
+                'PENDING',
+                'เลื่อนไปก่อน',
+                showsUserInterface: true,
+              )
+            ]
+          : const <AndroidNotificationAction>[
+              AndroidNotificationAction(
+                'OK',
+                'ตกลง',
+                showsUserInterface: true,
+              )
+            ],
+    );
   }
 
   @override

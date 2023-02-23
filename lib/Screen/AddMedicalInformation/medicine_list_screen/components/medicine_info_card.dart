@@ -60,15 +60,15 @@ class MedicineInfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 10, right: 10, top: 10),
+      padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 8.0),
       child: Stack(
         children: [
           Card(
             elevation: 3.0,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(12),
             ),
-            color: Colors.blue[100],
+            color: Colors.blue.shade200,
             child: Padding(
               padding: const EdgeInsets.only(top: 5, bottom: 5),
               child: Row(
@@ -100,9 +100,6 @@ class MedicineInfoCard extends StatelessWidget {
                       medicineData: medicineData,
                     ),
                   ),
-                  const SizedBox(
-                    width: 50,
-                  )
                 ],
               ),
             ),

@@ -62,14 +62,16 @@ class PictureMedicineCard extends StatelessWidget {
           ),
         ),
         Positioned(
-          right: 0,
+          right: 10,
+          top: 10,
           child: IconButton(
             onPressed: () async => await _takePhotoToGallerry(),
             icon: const Icon(Icons.photo_camera),
           ),
         ),
         Positioned(
-          left: 0,
+          right: 10,
+          top: 60,
           child: IconButton(
             onPressed: () async => await _choosePhotoFromGallery(),
             icon: const Icon(Icons.image),

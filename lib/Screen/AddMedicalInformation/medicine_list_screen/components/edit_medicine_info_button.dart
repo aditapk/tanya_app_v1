@@ -14,8 +14,8 @@ class EditMedicineInfoButton extends StatelessWidget {
       right: 10,
       top: 10,
       child: IconButton(
-        icon: const Icon(Icons.edit),
-        color: Colors.black,
+        icon: const Icon(Icons.edit_note),
+        color: Colors.black87,
         onPressed: onPressed,
       ),
     );
