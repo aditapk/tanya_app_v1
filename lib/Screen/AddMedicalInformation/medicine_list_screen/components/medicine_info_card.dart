@@ -20,8 +20,13 @@ import 'medicine_info_display_card.dart';
 import 'picture_edit_bottomsheet.dart';
 
 class MedicineInfoCard extends StatelessWidget {
-  MedicineInfoCard({required this.medicineData, super.key});
+  MedicineInfoCard({
+    required this.index,
+    required this.medicineData,
+    super.key,
+  });
   MedicineInfo? medicineData;
+  int index;
 
   Future<void> _takePhotoToGallerry() async {
     try {
@@ -68,7 +73,7 @@ class MedicineInfoCard extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
-            color: Colors.blue.shade200,
+            color: Colors.primaries[index % 17][200],
             child: Padding(
               padding: const EdgeInsets.only(top: 5, bottom: 5),
               child: Row(

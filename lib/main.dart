@@ -1,12 +1,16 @@
 // import Library file
 
 //import 'package:animated_splash_screen/animated_splash_screen.dart';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 //import 'package:hive_flutter/hive_flutter.dart';
 //import 'package:intl/date_symbol_data_local.dart';
 import 'package:tanya_app_v1/Model/medicine_info_model.dart';
@@ -38,6 +42,7 @@ import 'forTest/local_notify/notify_list_screen.dart';
 // ---
 
 Future<void> main() async {
+  Intl.defaultLocale = 'th';
   // Initialization
   WidgetsFlutterBinding.ensureInitialized(); // Widget Binding before runApp
 
@@ -77,11 +82,27 @@ Future<void> main() async {
   //final firstCamera = cameras.first;
   // ---
 
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MyApp extends StatefulWidget {
+  MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  //final FlutterLocalization localization = FlutterLocalization.instance;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    // localization
+    //     .init(mapLocales: [MapLocale('th', {})], initLanguageCode: 'en');
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -100,6 +121,9 @@ class MyApp extends StatelessWidget {
           brightness: Brightness.dark,
         ),
         themeMode: ThemeMode.light,
+        // localizationsDelegates: localization.localizationsDelegates,
+        // supportedLocales: localization.supportedLocales,
+        // locale: const Locale('th'),
         // for test
         //home:
         //TestImagePickerApp(),

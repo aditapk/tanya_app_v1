@@ -5,6 +5,8 @@ import 'package:tanya_app_v1/Model/medicine_info_model.dart';
 import 'package:tanya_app_v1/Model/notify_info.dart';
 import 'package:tanya_app_v1/Model/user_login_model.dart';
 
+import '../Model/user_info_model.dart';
+
 class HiveDatabaseService {
   static initialization() async {
     await init(); // initial hive on flutter
@@ -27,6 +29,8 @@ class HiveDatabaseService {
     Hive.registerAdapter<TimeOfDayModel>(TimeOfDayModelAdapter());
     // register UserLogin Adapter
     Hive.registerAdapter<UserLogin>(UserLoginAdapter());
+    // register UserInfo Adapter
+    Hive.registerAdapter<UserInfo>(UserInfoAdapter());
   }
 
   static Future<void> openAllBox() async {
@@ -36,6 +40,8 @@ class HiveDatabaseService {
     await Hive.openBox<NotifyInfoModel>('user_notify_info');
     // open user_login box
     await Hive.openBox<UserLogin>('user_login');
+    // open user_info box
+    await Hive.openBox<UserInfo>('user_info');
   }
 
   static Future<void> deleteBox() async {

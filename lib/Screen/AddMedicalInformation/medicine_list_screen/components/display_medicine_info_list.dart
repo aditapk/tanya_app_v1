@@ -18,12 +18,15 @@ class DisplayMedicineInfoList extends StatelessWidget {
       builder: (_, box, __) {
         if (box.values.isNotEmpty) {
           var medicineboxInfo = box.values;
-          return ListView(
-            children: medicineboxInfo.map((medicineData) {
-              return MedicineInfoCard(
-                medicineData: medicineData,
-              );
-            }).toList(),
+          var medicineInfoList = medicineboxInfo.toList();
+          //var medicineInfoMap = medicineInfoList.asMap();
+
+          return ListView.builder(
+            itemCount: medicineInfoList.length,
+            itemBuilder: (context, index) => MedicineInfoCard(
+              index: index,
+              medicineData: medicineInfoList[index],
+            ),
           );
         } else {
           return EmptyMedicineList(

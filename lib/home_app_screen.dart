@@ -1,12 +1,18 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart';
 //import 'package:intl/intl.dart';
 import 'package:tanya_app_v1/Screen/AddMedicalInformation/medicine_editor_screen/medicine_info_editor_screen.dart';
 import 'package:tanya_app_v1/Screen/AddMedicalInformation/medicine_list_screen/components/display_medicine_info_list.dart';
+import 'package:tanya_app_v1/Screen/UserInfo/user_info_screen.dart';
 //import 'package:tanya_app_v1/utils/style.dart';
 import '../../GetXBinding/medicine_state_binding.dart';
 //import 'body_notify_list.dart';
+import 'Model/user_info_model.dart';
 import 'Screen/Notify/notify_screen.dart';
 //import 'forTest/local_notify/body_notify_list.dart';
 
@@ -34,8 +40,31 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
                 _selectedIndex = 3;
               });
             },
-            child: const CircleAvatar(
-              child: Icon(Icons.person),
+            child: ValueListenableBuilder(
+              valueListenable: Hive.box<UserInfo>('user_info').listenable(),
+              builder: (_, userInfoBox, __) {
+                var userInfo = userInfoBox.get(0);
+                if (userInfo != null) {
+                  if (userInfo.picturePath != null) {
+                    return CircleAvatar(
+                      child: ClipOval(
+                        child: Image.file(
+                          File(userInfo.picturePath!),
+                          fit: BoxFit.cover,
+                          width: 40,
+                          height: 40,
+                        ),
+                      ),
+                    );
+                  }
+                  return const CircleAvatar(
+                    child: Icon(Icons.person),
+                  );
+                }
+                return const CircleAvatar(
+                  child: Icon(Icons.person),
+                );
+              },
             ),
           ),
         ),
@@ -65,9 +94,7 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
     Center(
       child: Text("สรุป"),
     ),
-    Center(
-      child: Text("ผู้ใช้"),
-    )
+    UserInfoScreen(),
   ];
 
   int _selectedIndex = 0;

@@ -31,20 +31,21 @@ class _ToChooseMedicineState extends State<ToChooseMedicine> {
         builder: (_, box, __) {
           if (box.values.isNotEmpty) {
             var medicineboxInfo = box.values;
-            return ListView(
-              children: medicineboxInfo.map((medicineData) {
-                return GestureDetector(
-                  onTap: () {
-                    // get selected medicine infomation
+            var medicineboxInfoList = medicineboxInfo.toList();
+            return ListView.builder(
+              itemCount: medicineboxInfoList.length,
+              itemBuilder: (context, index) => GestureDetector(
+                onTap: () {
+                  // get selected medicine infomation
 
-                    // back and send medicine infomation
-                    Get.back(result: medicineData);
-                  },
-                  child: MedicineCardSelect(
-                    medicineData: medicineData,
-                  ),
-                );
-              }).toList(),
+                  // back and send medicine infomation
+                  Get.back(result: medicineboxInfoList[index]);
+                },
+                child: MedicineCardSelect(
+                  index: index,
+                  medicineData: medicineboxInfoList[index],
+                ),
+              ),
             );
           } else {
             return Column(
@@ -58,22 +59,23 @@ class _ToChooseMedicineState extends State<ToChooseMedicine> {
                 SizedBox(
                   height: 52,
                   child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      onPressed: () {
-                        Get.off(() => HomeAppScreen(
-                              selectedPage: 1,
-                            ));
-                      },
-                      child: Text(
-                        "เพิ่มรายการยา",
-                        style: TextStyle(
-                          fontSize: 20,
-                        ),
-                      )),
+                    ),
+                    onPressed: () {
+                      Get.off(() => HomeAppScreen(
+                            selectedPage: 1,
+                          ));
+                    },
+                    child: const Text(
+                      "เพิ่มรายการยา",
+                      style: TextStyle(
+                        fontSize: 20,
+                      ),
+                    ),
+                  ),
                 )
               ],
             );
@@ -85,10 +87,14 @@ class _ToChooseMedicineState extends State<ToChooseMedicine> {
 }
 
 class MedicineCardSelect extends StatelessWidget {
-  MedicineCardSelect({super.key, this.medicineData});
+  MedicineCardSelect({
+    super.key,
+    this.medicineData,
+    required this.index,
+  });
 
   MedicineInfo? medicineData;
-
+  int index;
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -100,7 +106,7 @@ class MedicineCardSelect extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
-            color: Colors.blue[100],
+            color: Colors.primaries[index][200],
             child: Padding(
               padding: const EdgeInsets.only(top: 5, bottom: 5),
               child: Row(

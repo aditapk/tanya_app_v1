@@ -30,6 +30,20 @@ class _NotifyScreenState extends State<NotifyScreen> {
     0,
   );
 
+  bool morningStatPanel = true;
+  bool lunchStatPanel = true;
+  bool eveningStatPanel = true;
+  bool beforeBedStatPanel = true;
+
+  TextStyle get panelHaderTextStyel {
+    return const TextStyle(fontSize: 25);
+  }
+
+  Color? getExpansionPanelColor(int index) {
+    int offset = 2;
+    return Colors.primaries[2 * index + offset][100];
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -76,26 +90,6 @@ class _NotifyScreenState extends State<NotifyScreen> {
             ],
           ),
         ),
-        // Container(
-        //   padding: const EdgeInsets.only(
-        //     left: 8.0,
-        //     right: 8.0,
-        //   ),
-        //   child: DatePicker(
-        //     DateTime(2023, 2, 1),
-        //     width: 60,
-        //     height: 100,
-        //     locale: 'th_TH',
-        //     selectedTextColor: Colors.white,
-        //     initialSelectedDate: DateTime.now(),
-        //     selectionColor: Colors.blue.shade500,
-        //     onDateChange: (selectedDate) {
-        //       setState(() {
-        //         currentDate = selectedDate;
-        //       });
-        //     },
-        //   ),
-        // ),
         SingleChildScrollView(
           child: ConstrainedBox(
             constraints: BoxConstraints(
@@ -117,14 +111,209 @@ class _NotifyScreenState extends State<NotifyScreen> {
                   if (notifyInfoListWithCurrentDate.isEmpty) {
                     return const EmptyNotifyList();
                   } else {
-                    return ListView(
-                      shrinkWrap: true,
-                      children: notifyInfoListWithCurrentDate.map((notifyInfo) {
-                        return NotifyCard(
-                          notifyInfo: notifyInfo,
-                        );
-                      }).toList(),
+                    // medicine in morning
+                    var notifyInfoListCurrentDateMorningTime =
+                        notifyInfoListWithCurrentDate
+                            .map((e) => e)
+                            .where((element) {
+                      TimeOfDay notifyTime = TimeOfDay(
+                        hour: element.time.hour,
+                        minute: element.time.minute,
+                      );
+                      if ((notifyTime.hour == 5 && notifyTime.minute >= 0) ||
+                          (notifyTime.hour > 5 && notifyTime.hour <= 9)) {
+                        // 5:00 -> 9:59
+                        return true;
+                      }
+                      return false;
+                    });
+
+                    // medicine in lunch
+                    var notifyInfoListCurrentDateLunchTime =
+                        notifyInfoListWithCurrentDate
+                            .map((e) => e)
+                            .where((element) {
+                      TimeOfDay notifyTime = TimeOfDay(
+                        hour: element.time.hour,
+                        minute: element.time.minute,
+                      );
+                      if ((notifyTime.hour == 10 && notifyTime.minute >= 0) ||
+                          (notifyTime.hour > 10 && notifyTime.hour <= 13)) {
+                        // 10:00 -> 13:59
+                        return true;
+                      }
+                      return false;
+                    });
+
+                    // medicine in evening
+                    var notifyInfoListCurrentDateEveningTime =
+                        notifyInfoListWithCurrentDate
+                            .map((e) => e)
+                            .where((element) {
+                      TimeOfDay notifyTime = TimeOfDay(
+                          hour: element.time.hour, minute: element.time.minute);
+                      if ((notifyTime.hour == 14 && notifyTime.minute >= 0) ||
+                          (notifyTime.hour > 14 && notifyTime.hour <= 19)) {
+                        // 14:00 - 19:59
+                        return true;
+                      }
+                      return false;
+                    });
+
+                    // medicine in before to bed
+                    var notifyInfoListCurrentDateBeforeBedTime =
+                        notifyInfoListWithCurrentDate
+                            .map((e) => e)
+                            .where((element) {
+                      TimeOfDay notifyTime = TimeOfDay(
+                          hour: element.time.hour, minute: element.time.minute);
+                      if ((notifyTime.hour == 20 && notifyTime.minute >= 0) ||
+                          (notifyTime.hour > 20 && notifyTime.hour <= 23) ||
+                          (notifyTime.hour >= 0 && notifyTime.hour <= 4)) {
+                        // 20:00 -> 4:59
+                        return true;
+                      }
+                      return false;
+                    });
+
+                    return SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ExpansionPanelList(
+                          expansionCallback: (panelIndex, isExpanded) {
+                            if (panelIndex == 0) {
+                              // selected on panel morning
+                              setState(() {
+                                morningStatPanel = !morningStatPanel;
+                              });
+                            }
+                            if (panelIndex == 1) {
+                              // selected on panel lunch
+                              setState(() {
+                                lunchStatPanel = !lunchStatPanel;
+                              });
+                            }
+                            if (panelIndex == 2) {
+                              // selected on panel evening
+                              setState(() {
+                                eveningStatPanel = !eveningStatPanel;
+                              });
+                            }
+                            if (panelIndex == 3) {
+                              // selected on panel before bed
+                              setState(() {
+                                beforeBedStatPanel = !beforeBedStatPanel;
+                              });
+                            }
+                          },
+                          children: [
+                            ExpansionPanel(
+                                backgroundColor: getExpansionPanelColor(0),
+                                canTapOnHeader: true,
+                                isExpanded: morningStatPanel,
+                                headerBuilder: (context, isExpanded) =>
+                                    Container(
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        "เช้า (${notifyInfoListCurrentDateMorningTime.length} รายการ)",
+                                        style: panelHaderTextStyel,
+                                      ),
+                                    ),
+                                body: notifyInfoListCurrentDateMorningTime
+                                        .isNotEmpty
+                                    ? MedicineListInMorning(
+                                        notifyInfoListCurrentDateMorningTime:
+                                            notifyInfoListCurrentDateMorningTime,
+                                      )
+                                    : Container()),
+                            ExpansionPanel(
+                                backgroundColor: getExpansionPanelColor(1),
+                                canTapOnHeader: true,
+                                isExpanded: lunchStatPanel,
+                                headerBuilder: (context, isExpanded) =>
+                                    Container(
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        "กลางวัน (${notifyInfoListCurrentDateLunchTime.length} รายการ)",
+                                        style: panelHaderTextStyel,
+                                      ),
+                                    ),
+                                body: notifyInfoListCurrentDateLunchTime
+                                        .isNotEmpty
+                                    ? MedicineListInLunch(
+                                        notifyInfoListCurrentDateLunchTime:
+                                            notifyInfoListCurrentDateLunchTime,
+                                      )
+                                    : Container()),
+                            ExpansionPanel(
+                                backgroundColor: getExpansionPanelColor(2),
+                                canTapOnHeader: true,
+                                isExpanded: eveningStatPanel,
+                                headerBuilder: (context, isExpanded) =>
+                                    Container(
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        "เย็น (${notifyInfoListCurrentDateEveningTime.length} รายการ)",
+                                        style: panelHaderTextStyel,
+                                      ),
+                                    ),
+                                body: notifyInfoListCurrentDateEveningTime
+                                        .isNotEmpty
+                                    ? MedicineListInEvening(
+                                        notifyInfoListCurrentDateEveningTime:
+                                            notifyInfoListCurrentDateEveningTime,
+                                      )
+                                    : Container()),
+                            ExpansionPanel(
+                                backgroundColor: getExpansionPanelColor(3),
+                                canTapOnHeader: true,
+                                isExpanded: beforeBedStatPanel,
+                                headerBuilder: (context, isExpanded) =>
+                                    Container(
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        "ก่อนนอน (${notifyInfoListCurrentDateBeforeBedTime.length} รายการ)",
+                                        style: panelHaderTextStyel,
+                                      ),
+                                    ),
+                                body: notifyInfoListCurrentDateBeforeBedTime
+                                        .isNotEmpty
+                                    ? MedicineListInBeforeBed(
+                                        notifyInfoListCurrentDateBeforeBedTime:
+                                            notifyInfoListCurrentDateBeforeBedTime,
+                                      )
+                                    : Container()),
+                          ],
+                        ),
+                      ),
                     );
+                    // SingleChildScrollView(
+                    //   child: Column(
+                    //     children: [
+                    //       notifyInfoListCurrentDateMorningTime.isNotEmpty
+                    //           ? MedicineListInMorning(
+                    //               notifyInfoListCurrentDateMorningTime:
+                    //                   notifyInfoListCurrentDateMorningTime,
+                    //             )
+                    //           : Container(),
+                    //       notifyInfoListCurrentDateLunchTime.isNotEmpty
+                    //           ? MedicineInLunch(
+                    //               notifyInfoListCurrentDateLunchTime:
+                    //                   notifyInfoListCurrentDateLunchTime)
+                    //           : Container(),
+                    //       notifyInfoListCurrentDateEveningTime.isNotEmpty
+                    //           ? MedicineInEvening(
+                    //               notifyInfoListCurrentDateEveningTime:
+                    //                   notifyInfoListCurrentDateEveningTime)
+                    //           : Container(),
+                    //       notifyInfoListCurrentDateBeforeBedTime.isNotEmpty
+                    //           ? MedicineInBeforeBed(
+                    //               notifyInfoListCurrentDateBeforeBedTime:
+                    //                   notifyInfoListCurrentDateBeforeBedTime)
+                    //           : Container(),
+                    //     ],
+                    //   ),
+                    // );
                   }
                 } else {
                   return const EmptyNotifyList();
@@ -138,6 +327,106 @@ class _NotifyScreenState extends State<NotifyScreen> {
   }
 }
 
+class MedicineListInBeforeBed extends StatelessWidget {
+  const MedicineListInBeforeBed({
+    super.key,
+    required this.notifyInfoListCurrentDateBeforeBedTime,
+  });
+
+  final Iterable<NotifyInfoModel> notifyInfoListCurrentDateBeforeBedTime;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        ListView(
+          shrinkWrap: true,
+          children: notifyInfoListCurrentDateBeforeBedTime.map((notifyInfo) {
+            return NotifyCard(
+              notifyInfo: notifyInfo,
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+}
+
+class MedicineListInEvening extends StatelessWidget {
+  const MedicineListInEvening({
+    super.key,
+    required this.notifyInfoListCurrentDateEveningTime,
+  });
+
+  final Iterable<NotifyInfoModel> notifyInfoListCurrentDateEveningTime;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        ListView(
+          shrinkWrap: true,
+          children: notifyInfoListCurrentDateEveningTime.map((notifyInfo) {
+            return NotifyCard(
+              notifyInfo: notifyInfo,
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+}
+
+class MedicineListInLunch extends StatelessWidget {
+  const MedicineListInLunch({
+    super.key,
+    required this.notifyInfoListCurrentDateLunchTime,
+  });
+
+  final Iterable<NotifyInfoModel> notifyInfoListCurrentDateLunchTime;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        ListView(
+          shrinkWrap: true,
+          children: notifyInfoListCurrentDateLunchTime.map((notifyInfo) {
+            return NotifyCard(
+              notifyInfo: notifyInfo,
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+}
+
+class MedicineListInMorning extends StatelessWidget {
+  const MedicineListInMorning({
+    super.key,
+    required this.notifyInfoListCurrentDateMorningTime,
+  });
+
+  final Iterable<NotifyInfoModel> notifyInfoListCurrentDateMorningTime;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        ListView(
+          shrinkWrap: true,
+          children: notifyInfoListCurrentDateMorningTime.map((notifyInfo) {
+            return NotifyCard(
+              notifyInfo: notifyInfo,
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+}
+
 class EmptyNotifyList extends StatelessWidget {
   const EmptyNotifyList({
     super.key,
@@ -145,22 +434,26 @@ class EmptyNotifyList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Image.asset(
-          "assets/images/empty_notify_list.png",
-          width: 200,
-          height: 200,
-        ),
-        const SizedBox(
-          height: 50,
-        ),
-        const Text(
-          "วันนี้ไม่มีรายการแจ้งเตือน",
-          style: TextStyle(fontSize: 20),
-        )
-      ],
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          const SizedBox(
+            height: 100,
+          ),
+          Image.asset(
+            "assets/images/empty_notify_list.png",
+            width: 200,
+            height: 200,
+          ),
+          const SizedBox(
+            height: 50,
+          ),
+          const Text(
+            "วันนี้ไม่มีรายการแจ้งเตือน",
+            style: TextStyle(fontSize: 20),
+          )
+        ],
+      ),
     );
   }
 }
@@ -187,7 +480,7 @@ class NotifyCard extends StatelessWidget {
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             child: SizedBox(
-              height: 160,
+              height: Platform.isAndroid ? 170 : 161,
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Row(

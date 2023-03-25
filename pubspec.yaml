@@ -65,6 +65,7 @@ dependencies:
   fraction: ^4.1.4
   timezone: ^0.9.1
   date_picker_timeline: ^1.2.3
+  flutter_localization: ^0.1.10
   
   
 dev_dependencies:

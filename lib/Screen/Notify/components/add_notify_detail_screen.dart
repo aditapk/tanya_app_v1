@@ -240,6 +240,15 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
     }
   }
 
+  //List<bool> peroidDateSelected = [false, true, true, true, true, true, true];
+  bool periodMondaySelected = false;
+  bool periodTuesdaySelected = false;
+  bool periodWednesdaySelected = false;
+  bool periodThursdaySelected = false;
+  bool periodFridaySelected = false;
+  bool periodSaturdaySelected = false;
+  bool periodSundaySelected = false;
+
   @override
   void initState() {
     super.initState();
@@ -312,11 +321,7 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
 
   //เลือกรายการยา
   selectMedicineItem() async {
-    var result = await Get.to(
-      () => ToChooseMedicine(),
-      duration: Duration(seconds: 1),
-      transition: Transition.leftToRightWithFade,
-    );
+    var result = await Get.to(() => ToChooseMedicine());
     // update field after choose
     if (result != null) {
       setState(() {
@@ -331,7 +336,7 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
             picturePath: result.picture_path);
 
         if (result.period_time[0]) {
-          notifyInformation.morningTime = TimeOfDay(hour: 8, minute: 0);
+          notifyInformation.morningTime = const TimeOfDay(hour: 8, minute: 0);
           notifyMorningTimeController.text =
               notifyInformation.morningTime!.format(context);
         } else {
@@ -339,7 +344,7 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
           notifyMorningTimeController.text = "";
         }
         if (result.period_time[1]) {
-          notifyInformation.lunchTime = TimeOfDay(hour: 12, minute: 0);
+          notifyInformation.lunchTime = const TimeOfDay(hour: 12, minute: 0);
           notifyLunchTimeController.text =
               notifyInformation.lunchTime!.format(context);
         } else {
@@ -348,7 +353,7 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
         }
 
         if (result.period_time[2]) {
-          notifyInformation.eveningTime = TimeOfDay(hour: 17, minute: 0);
+          notifyInformation.eveningTime = const TimeOfDay(hour: 17, minute: 0);
           notifyEveningTimeController.text =
               notifyInformation.eveningTime!.format(context);
         } else {
@@ -357,7 +362,8 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
         }
 
         if (result.period_time[3]) {
-          notifyInformation.beforeToBedTime = TimeOfDay(hour: 21, minute: 0);
+          notifyInformation.beforeToBedTime =
+              const TimeOfDay(hour: 21, minute: 0);
           notifyBeforetoBedTimeController.text =
               notifyInformation.beforeToBedTime!.format(context);
         } else {
@@ -450,27 +456,80 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
     var days = endDate.difference(startDate).inDays + 1;
 
     if (notifyInformation.enableMorningTime) {
-      generateNotifySchedule(startDate, days, notifyInformation.morningTime!);
+      generateNotifySchedule(
+        startDate: startDate,
+        nDate: days,
+        scheduleTime: notifyInformation.morningTime!,
+        periodDays: [
+          periodMondaySelected,
+          periodTuesdaySelected,
+          periodWednesdaySelected,
+          periodThursdaySelected,
+          periodFridaySelected,
+          periodSaturdaySelected,
+          periodSundaySelected,
+        ],
+      );
     }
     if (notifyInformation.enableLunchTime) {
-      generateNotifySchedule(startDate, days, notifyInformation.lunchTime!);
+      generateNotifySchedule(
+        startDate: startDate,
+        nDate: days,
+        scheduleTime: notifyInformation.lunchTime!,
+        periodDays: [
+          periodMondaySelected,
+          periodTuesdaySelected,
+          periodWednesdaySelected,
+          periodThursdaySelected,
+          periodFridaySelected,
+          periodSaturdaySelected,
+          periodSundaySelected,
+        ],
+      );
+      ;
     }
     if (notifyInformation.enableEveningTime) {
-      generateNotifySchedule(startDate, days, notifyInformation.eveningTime!);
+      generateNotifySchedule(
+        startDate: startDate,
+        nDate: days,
+        scheduleTime: notifyInformation.eveningTime!,
+        periodDays: [
+          periodMondaySelected,
+          periodTuesdaySelected,
+          periodWednesdaySelected,
+          periodThursdaySelected,
+          periodFridaySelected,
+          periodSaturdaySelected,
+          periodSundaySelected,
+        ],
+      );
     }
     if (notifyInformation.enableBeforeToBedTime) {
       generateNotifySchedule(
-          startDate, days, notifyInformation.beforeToBedTime!);
+        startDate: startDate,
+        nDate: days,
+        scheduleTime: notifyInformation.beforeToBedTime!,
+        periodDays: [
+          periodMondaySelected,
+          periodTuesdaySelected,
+          periodWednesdaySelected,
+          periodThursdaySelected,
+          periodFridaySelected,
+          periodSaturdaySelected,
+          periodSundaySelected,
+        ],
+      );
     }
     Get.back();
-    // schedule notification
-
-    // write to hive database
   }
 
   // generate notify schedule
-  generateNotifySchedule(
-      DateTime startDate, int days, TimeOfDay scheduleTime) async {
+  generateNotifySchedule({
+    required DateTime startDate,
+    required int nDate,
+    required List<bool> periodDays,
+    required TimeOfDay scheduleTime,
+  }) async {
     var date = DateTime(
       startDate.year,
       startDate.month,
@@ -479,37 +538,132 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
       scheduleTime.minute,
     );
 
-    var boxNotify = Hive.box<NotifyInfoModel>('user_notify_info');
-    for (int day = 0; day < days; day++) {
-      // write to hive database
-      var notifyData = NotifyInfoModel(
-        name: notifyNameController.text,
-        description: notifyDetailController.text,
-        medicineInfo: notifyInformation.selectedMedicine!.asMedicineInfo(),
-        date: date.add(Duration(days: day)),
-        time: TimeOfDayModel(
-          hour: scheduleTime.hour,
-          minute: scheduleTime.minute,
-        ),
-      );
-      var dataId = await boxNotify.add(notifyData);
+    var now = DateTime.now();
 
-      // Convert string payload
-      var notifyPayload = jsonEncode({
-        "notifyID": dataId,
-        "notifyInfo": notifyData.toJson(),
-      });
-      // set notification
-      notifySet(
-        id: dataId,
-        scheduleTime: date.add(
-          Duration(days: day),
-        ),
-        payload: notifyPayload,
-        numNotify: notifyData.status,
-        imagePath: notifyData.medicineInfo.picture_path!,
-      );
+    var boxNotify = Hive.box<NotifyInfoModel>('user_notify_info');
+    for (int day = 0; day < nDate; day++) {
+      DateTime nextDate = date.add(Duration(days: day));
+
+      if (nextDate.isAfter(now)) {
+        if (periodDays.every((selected) => selected == false)) {
+          // not selected generate every days
+          await generateNotifyItem(
+            specificDate: nextDate,
+            specificTime: scheduleTime,
+            boxNotify: boxNotify,
+            date: date,
+            day: day,
+          );
+        } else {
+          if (periodDays[0] && (nextDate.weekday == DateTime.monday)) {
+            // generate every Monday
+            await generateNotifyItem(
+              specificDate: nextDate,
+              specificTime: scheduleTime,
+              boxNotify: boxNotify,
+              date: date,
+              day: day,
+            );
+          }
+          if (periodDays[1] && (nextDate.weekday == DateTime.tuesday)) {
+            // generate every Tuesday
+            await generateNotifyItem(
+              specificDate: nextDate,
+              specificTime: scheduleTime,
+              boxNotify: boxNotify,
+              date: date,
+              day: day,
+            );
+          }
+          if (periodDays[2] && (nextDate.weekday == DateTime.wednesday)) {
+            // generate every Wednesday
+            await generateNotifyItem(
+              specificDate: nextDate,
+              specificTime: scheduleTime,
+              boxNotify: boxNotify,
+              date: date,
+              day: day,
+            );
+          }
+          if (periodDays[3] && (nextDate.weekday == DateTime.thursday)) {
+            // generate every Thursday
+            await generateNotifyItem(
+              specificDate: nextDate,
+              specificTime: scheduleTime,
+              boxNotify: boxNotify,
+              date: date,
+              day: day,
+            );
+          }
+          if (periodDays[4] && (nextDate.weekday == DateTime.friday)) {
+            // generate every Friday
+            await generateNotifyItem(
+              specificDate: nextDate,
+              specificTime: scheduleTime,
+              boxNotify: boxNotify,
+              date: date,
+              day: day,
+            );
+          }
+          if (periodDays[5] && (nextDate.weekday == DateTime.saturday)) {
+            // generate every Saturday
+            await generateNotifyItem(
+              specificDate: nextDate,
+              specificTime: scheduleTime,
+              boxNotify: boxNotify,
+              date: date,
+              day: day,
+            );
+          }
+          if (periodDays[6] && (nextDate.weekday == DateTime.sunday)) {
+            // generate every Sunday
+            await generateNotifyItem(
+              specificDate: nextDate,
+              specificTime: scheduleTime,
+              boxNotify: boxNotify,
+              date: date,
+              day: day,
+            );
+          }
+        }
+      }
     }
+  }
+
+  Future<void> generateNotifyItem({
+    required DateTime specificDate,
+    required TimeOfDay specificTime,
+    required Box<NotifyInfoModel> boxNotify,
+    required DateTime date,
+    required int day,
+  }) async {
+    var notifyData = NotifyInfoModel(
+      name: notifyNameController.text,
+      description: notifyDetailController.text,
+      medicineInfo: notifyInformation.selectedMedicine!.asMedicineInfo(),
+      date: specificDate,
+      time: TimeOfDayModel(
+        hour: specificTime.hour,
+        minute: specificTime.minute,
+      ),
+    );
+    var dataId = await boxNotify.add(notifyData);
+
+    // Convert string payload
+    var notifyPayload = jsonEncode({
+      "notifyID": dataId,
+      "notifyInfo": notifyData.toJson(),
+    });
+    // set notification
+    notifySet(
+      id: dataId,
+      scheduleTime: date.add(
+        Duration(days: day),
+      ),
+      payload: notifyPayload,
+      numNotify: notifyData.status,
+      imagePath: notifyData.medicineInfo.picture_path!,
+    );
   }
 
   notifySet(
@@ -551,6 +705,10 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
               )
             ],
     );
+  }
+
+  TextStyle get periodDayTextStyly {
+    return const TextStyle(fontSize: 13, fontWeight: FontWeight.bold);
   }
 
   @override
@@ -612,6 +770,73 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
                         ),
                       ),
                     ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  PeriodDateSeletedCard(
+                    text: 'จันทร์',
+                    isSelected: periodMondaySelected,
+                    onTap: () {
+                      setState(() {
+                        periodMondaySelected = !periodMondaySelected;
+                      });
+                    },
+                  ),
+                  PeriodDateSeletedCard(
+                    text: 'อังคาร',
+                    isSelected: periodTuesdaySelected,
+                    onTap: () {
+                      setState(() {
+                        periodTuesdaySelected = !periodTuesdaySelected;
+                      });
+                    },
+                  ),
+                  PeriodDateSeletedCard(
+                    text: 'พุธ',
+                    isSelected: periodWednesdaySelected,
+                    onTap: () {
+                      setState(() {
+                        periodWednesdaySelected = !periodWednesdaySelected;
+                      });
+                    },
+                  ),
+                  PeriodDateSeletedCard(
+                    text: 'พฤหัส',
+                    isSelected: periodThursdaySelected,
+                    onTap: () {
+                      setState(() {
+                        periodThursdaySelected = !periodThursdaySelected;
+                      });
+                    },
+                  ),
+                  PeriodDateSeletedCard(
+                    text: 'ศุกร์',
+                    isSelected: periodFridaySelected,
+                    onTap: () {
+                      setState(() {
+                        periodFridaySelected = !periodFridaySelected;
+                      });
+                    },
+                  ),
+                  PeriodDateSeletedCard(
+                    text: 'เสาร์',
+                    isSelected: periodSaturdaySelected,
+                    onTap: () {
+                      setState(() {
+                        periodSaturdaySelected = !periodSaturdaySelected;
+                      });
+                    },
+                  ),
+                  PeriodDateSeletedCard(
+                    text: 'อาทิตย์',
+                    isSelected: periodSundaySelected,
+                    onTap: () {
+                      setState(() {
+                        periodSundaySelected = !periodSundaySelected;
+                      });
+                    },
                   ),
                 ],
               ),
@@ -761,6 +986,54 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
     return const TextStyle(
       fontSize: 20,
       fontWeight: FontWeight.bold,
+    );
+  }
+}
+
+class PeriodDateSeletedCard extends StatelessWidget {
+  PeriodDateSeletedCard({
+    required this.isSelected,
+    required this.text,
+    this.onTap,
+    super.key,
+  });
+
+  bool isSelected;
+  String text;
+  Function()? onTap;
+
+  TextStyle periodDayTextStyly(bool isSelected) {
+    return isSelected
+        ? const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          )
+        : const TextStyle(fontSize: 13, fontWeight: FontWeight.bold);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Card(
+          elevation: 3.0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          color: isSelected ? Colors.blue.shade400 : Colors.grey.shade400,
+          child: SizedBox(
+            height: 50,
+            child: Center(
+              child: Text(
+                text,
+                style: periodDayTextStyly(isSelected),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
