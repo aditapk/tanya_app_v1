@@ -66,6 +66,8 @@ dependencies:
   timezone: ^0.9.1
   date_picker_timeline: ^1.2.3
   flutter_localization: ^0.1.10
+  buddhist_datetime_dateformat_sns: ^1.0.7
+  http: ^0.13.5
   
   
 dev_dependencies:

@@ -24,15 +24,16 @@ class UserInfoAdapter extends TypeAdapter<UserInfo> {
       picturePath: fields[4] as String?,
       weight: fields[5] as double?,
       hight: fields[7] as double?,
-      pressure: fields[6] as double?,
+      pressure: fields[6] as String?,
       lastUpdate: fields[8] as DateTime?,
+      lineToken: fields[9] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, UserInfo obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(10)
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
@@ -50,7 +51,9 @@ class UserInfoAdapter extends TypeAdapter<UserInfo> {
       ..writeByte(7)
       ..write(obj.hight)
       ..writeByte(8)
-      ..write(obj.lastUpdate);
+      ..write(obj.lastUpdate)
+      ..writeByte(9)
+      ..write(obj.lineToken);
   }
 
   @override

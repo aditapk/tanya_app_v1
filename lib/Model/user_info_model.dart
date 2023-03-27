@@ -23,13 +23,16 @@ class UserInfo extends HiveObject {
   double? weight;
 
   @HiveField(6)
-  double? pressure;
+  String? pressure;
 
   @HiveField(7)
   double? hight;
 
   @HiveField(8)
   DateTime? lastUpdate;
+
+  @HiveField(9)
+  String? lineToken;
 
   UserInfo({
     this.name,
@@ -41,5 +44,6 @@ class UserInfo extends HiveObject {
     this.hight,
     this.pressure,
     this.lastUpdate,
+    this.lineToken,
   });
 }

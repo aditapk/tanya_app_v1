@@ -133,4 +133,40 @@ class NotifyService {
       androidAllowWhileIdle: true,
     );
   }
+
+  Future<void> scheduleDoctorAppointmentNotify({
+    required int notifyID,
+    required DateTime notifyDate,
+    String? title,
+    String? detail,
+    String? payload,
+    List<AndroidNotificationAction>? actions,
+  }) async {
+    AndroidNotificationDetails androidNotificationDetails =
+        AndroidNotificationDetails(
+      'Doctor Appointment ID',
+      'Doctor Appointment',
+      channelDescription: 'Notify channel for Doctor Appointment',
+      importance: Importance.max,
+      priority: Priority.high,
+      ticker: 'notifyTicker',
+      actions: actions,
+    );
+    NotificationDetails notificationDetails = NotificationDetails(
+      android: androidNotificationDetails,
+    );
+
+    var scheduledDate = tz.TZDateTime.from(notifyDate, tz.local);
+    await localNotificationsPlugin.zonedSchedule(
+      notifyID,
+      title,
+      detail,
+      scheduledDate,
+      notificationDetails,
+      payload: payload,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      androidAllowWhileIdle: true,
+    );
+  }
 }

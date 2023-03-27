@@ -135,6 +135,8 @@ class _MedicineInfoEditorScreenState extends State<MedicineInfoEditorScreen> {
                         height: 60,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
                             backgroundColor: Colors.green.shade400,
                           ),
                           onPressed: () async {
@@ -150,7 +152,7 @@ class _MedicineInfoEditorScreenState extends State<MedicineInfoEditorScreen> {
                           child: const Text(
                             "ยืนยัน",
                             style: TextStyle(
-                              fontSize: 25,
+                              fontSize: 20,
                             ),
                           ),
                         ),
@@ -164,7 +166,9 @@ class _MedicineInfoEditorScreenState extends State<MedicineInfoEditorScreen> {
                         height: 60,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red.shade300,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                            backgroundColor: Colors.red.shade400,
                           ),
                           onPressed: () {
                             Get.back();
@@ -172,7 +176,7 @@ class _MedicineInfoEditorScreenState extends State<MedicineInfoEditorScreen> {
                           child: const Text(
                             "ยกเลิก",
                             style: TextStyle(
-                              fontSize: 25,
+                              fontSize: 20,
                             ),
                           ),
                         ),

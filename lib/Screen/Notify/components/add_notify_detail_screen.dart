@@ -12,9 +12,14 @@ import 'package:tanya_app_v1/Model/medicine_info_model.dart';
 import 'package:tanya_app_v1/Model/notify_info.dart';
 import 'dart:math';
 
+import '../../../Model/user_info_model.dart';
 import '../../../Services/notify_services.dart';
 import '../../MedicineInformation/to_choose_medicine_info_list.dart';
 import '../notify_handle_screen.dart'; // for random variable
+
+import 'package:buddhist_datetime_dateformat_sns/buddhist_datetime_dateformat_sns.dart';
+
+import 'package:http/http.dart' as http;
 
 class AddNotifyDetailScreen extends StatefulWidget {
   AddNotifyDetailScreen({
@@ -200,9 +205,9 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
           // set notification
           var date = notifyInfo!.date;
           var now = DateTime.now();
-          var minuteDiff = now.difference(date).inSeconds;
-          if (minuteDiff <= 35) {
-            var nextDateTime = now.add(const Duration(seconds: 15));
+          var minuteDiff = now.difference(date).inMinutes;
+          if (minuteDiff <= 60) {
+            var nextDateTime = now.add(const Duration(minutes: 15));
             // Convert string payload
             var notifyPayload = jsonEncode({
               "notifyID": notifyID,
@@ -234,9 +239,31 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
                 ],
               ),
             );
+
+            // แจ้งเตือนไปยังผู้ดูแล
+            await notifyToCarePerson();
           }
         }
         break;
+    }
+  }
+
+  notifyToCarePerson() async {
+    // LINE notify
+    var userInfoBox = Hive.box<UserInfo>('user_info');
+    var userInfo = userInfoBox.get(0);
+
+    if (userInfo?.lineToken != null) {
+      Uri lineNotifyUrl = Uri.https('notify-api.line.me', 'api/notify');
+      await http.post(
+        lineNotifyUrl,
+        headers: {
+          "Authorization": "Bearer ${userInfo?.lineToken}",
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body:
+            "message=\nญาติของท่านยังไม่กินยาตามเวลา กรุณาเตือนญาติของท่านกินยาด้วยค่ะ",
+      );
     }
   }
 
@@ -262,10 +289,10 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
 
     // selectedStartNotifyDate = widget.selectedDate;
     // selectedEndNotifyDate = widget.selectedDate;
-    selectedStartNotifyDateController.text =
-        DateFormat.yMd('th_TH').format(widget.selectedDate);
-    selectedEndNotifyDateController.text =
-        DateFormat.yMd('th_TH').format(widget.selectedDate);
+    selectedStartNotifyDateController.text = DateFormat.yMMMd('th_TH')
+        .formatInBuddhistCalendarThai(widget.selectedDate);
+    selectedEndNotifyDateController.text = DateFormat.yMMMd('th_TH')
+        .formatInBuddhistCalendarThai(widget.selectedDate);
     notifyInformation.startDate = widget.selectedDate;
     notifyInformation.endDate = widget.selectedDate;
   }
@@ -281,14 +308,14 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
     if (pickerDate != null) {
       setState(() {
         selectedStartNotifyDateController.text =
-            DateFormat.yMd('th_TH').format(pickerDate);
+            DateFormat.yMMMd('th_TH').formatInBuddhistCalendarThai(pickerDate);
         notifyInformation.startDate = pickerDate;
       });
 
       if (pickerDate.isAfter(notifyInformation.endDate!)) {
         setState(() {
-          selectedEndNotifyDateController.text =
-              DateFormat.yMd('th_TH').format(pickerDate);
+          selectedEndNotifyDateController.text = DateFormat.yMMMd('th_TH')
+              .formatInBuddhistCalendarThai(pickerDate);
           notifyInformation.endDate = pickerDate;
         });
       }
@@ -306,13 +333,13 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
     if (pickerDate != null) {
       setState(() {
         selectedEndNotifyDateController.text =
-            DateFormat.yMd('th_TH').format(pickerDate);
+            DateFormat.yMMMd('th_TH').formatInBuddhistCalendarThai(pickerDate);
         notifyInformation.endDate = pickerDate;
       });
       if (pickerDate.isBefore(notifyInformation.startDate!)) {
         setState(() {
-          selectedStartNotifyDateController.text =
-              DateFormat.yMd('th_TH').format(pickerDate);
+          selectedStartNotifyDateController.text = DateFormat.yMMMd('th_TH')
+              .formatInBuddhistCalendarThai(pickerDate);
           notifyInformation.startDate = pickerDate;
         });
       }
@@ -758,7 +785,8 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
                   Expanded(
                     child: TextFieldEditor(
                       title: "สิ้นสุดการแจ้งเตือน",
-                      hintText: DateFormat.yMd('th_TH').format(
+                      hintText: DateFormat.yMMMd('th_TH')
+                          .formatInBuddhistCalendarThai(
                         notifyInformation.endDate!,
                       ),
                       controller: selectedEndNotifyDateController,
@@ -941,16 +969,19 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
                   children: [
                     Expanded(
                       child: SizedBox(
-                        height: 52,
+                        height: 60,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
+                            backgroundColor: Colors.green.shade400,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
                           onPressed: makeNotify,
-                          child: const Text('ตกลง'),
+                          child: const Text(
+                            'ตกลง',
+                            style: TextStyle(fontSize: 20),
+                          ),
                         ),
                       ),
                     ),
@@ -959,16 +990,21 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
                     ),
                     Expanded(
                       child: SizedBox(
-                        height: 52,
+                        height: 60,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
+                              backgroundColor: Colors.red.shade400,
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12))),
                           onPressed: () {
                             Get.back();
                           },
-                          child: Text('ยกเลิก'),
+                          child: const Text(
+                            'ยกเลิก',
+                            style: TextStyle(
+                              fontSize: 20,
+                            ),
+                          ),
                         ),
                       ),
                     )

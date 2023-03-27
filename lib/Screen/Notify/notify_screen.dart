@@ -12,6 +12,8 @@ import 'package:tanya_app_v1/utils/style.dart';
 
 import 'components/add_notify_detail_screen.dart';
 
+import 'package:buddhist_datetime_dateformat_sns/buddhist_datetime_dateformat_sns.dart';
+
 class NotifyScreen extends StatefulWidget {
   const NotifyScreen({
     Key? key,
@@ -69,7 +71,7 @@ class _NotifyScreenState extends State<NotifyScreen> {
                   },
                   child: Center(
                     child: Text(
-                      DateFormat.yMMMMd('th').format(
+                      DateFormat.yMMMMd('th').formatInBuddhistCalendarThai(
                         currentDate,
                       ),
                       style: subHeadingStyle,
@@ -93,7 +95,7 @@ class _NotifyScreenState extends State<NotifyScreen> {
         SingleChildScrollView(
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height - 213,
+              maxHeight: MediaQuery.of(context).size.height - 213 - 15,
             ),
             child: ValueListenableBuilder(
               valueListenable:
@@ -697,13 +699,19 @@ class AddNotifyButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 45,
+      height: 60,
+      width: 60,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12))),
+            shape: const CircleBorder(), padding: EdgeInsets.all(10)),
+
         onPressed: onTap,
-        child: const Text("+ เพิ่มรายการ"),
+        child: const Icon(
+          Icons.add,
+          size: 35,
+        ),
+        // RoundedRectangleBorder(
+        //     borderRadius: BorderRadius.circular(25))),
       ),
     );
     // GestureDetector(
