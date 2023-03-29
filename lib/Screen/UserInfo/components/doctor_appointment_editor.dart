@@ -227,13 +227,15 @@ class _DoctorAppointmentEditorState extends State<DoctorAppointmentEditor> {
                     Icons.calendar_month_outlined,
                   ),
                 ),
-                border: const OutlineInputBorder(),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 hintText: 'วันที่',
               ),
             ),
           ),
           const Padding(
-            padding: const EdgeInsets.only(top: 5),
+            padding: EdgeInsets.only(top: 5),
             child: Text(
               'เวลานัดหมาย',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -263,7 +265,9 @@ class _DoctorAppointmentEditorState extends State<DoctorAppointmentEditor> {
                     Icons.access_alarm_outlined,
                   ),
                 ),
-                border: const OutlineInputBorder(),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 hintText: 'เวลา',
               ),
             ),
@@ -288,41 +292,41 @@ class _DoctorAppointmentEditorState extends State<DoctorAppointmentEditor> {
                     selectedTime.hour,
                     selectedTime.minute,
                   );
-                  if (appointmentDateTime.isAfter(DateTime.now())) {
-                    String appointmentDate = DateFormat.yMMMMEEEEd('th')
-                        .formatInBuddhistCalendarThai(appointmentDateTime);
-                    String appointmentTime = TimeOfDay(
-                            hour: appointmentDateTime.hour,
-                            minute: appointmentDateTime.minute)
-                        .format(context);
+                  //if (appointmentDateTime.isAfter(DateTime.now())) {
+                  String appointmentDate = DateFormat.yMMMMEEEEd('th')
+                      .formatInBuddhistCalendarThai(appointmentDateTime);
+                  String appointmentTime = TimeOfDay(
+                          hour: appointmentDateTime.hour,
+                          minute: appointmentDateTime.minute)
+                      .format(context);
 
-                    int delayDays = 7;
-                    var notifyTime =
-                        appointmentDateTime.subtract(Duration(days: delayDays));
+                  int delayDays = 7;
+                  var notifyTime =
+                      appointmentDateTime.subtract(Duration(days: delayDays));
 
-                    if (notifyTime.isAfter(DateTime.now())) {
-                      int appointmentID =
-                          await updateToDatabase(appointmentDateTime);
-                      // await setAppointmentNotify(
-                      //   notifyID: appointmentID,
-                      //   notifyTime: notifyTime,
-                      //   appointmentTime: appointmentDateTime,
-                      //   delayDays: delayDays,
-                      //   dateDisplay: appointmentDate,
-                      //   timeDisplay: appointmentTime,
-                      // );
-                      Get.back();
-                    } else {
-                      Get.defaultDialog(
-                          title: 'วันนัดหมายไม่ถูกต้อง',
-                          content: const Text(
-                              'กรุณากำหนดวันนัดหมายล่วงหน้า อย่างน้อย 7 วัน'));
-                    }
+                  if (notifyTime.isAfter(DateTime.now())) {
+                    int appointmentID =
+                        await updateToDatabase(appointmentDateTime);
+                    await setAppointmentNotify(
+                      notifyID: appointmentID,
+                      notifyTime: notifyTime,
+                      appointmentTime: appointmentDateTime,
+                      delayDays: delayDays,
+                      dateDisplay: appointmentDate,
+                      timeDisplay: appointmentTime,
+                    );
+                    Get.back();
                   } else {
                     Get.defaultDialog(
                         title: 'วันนัดหมายไม่ถูกต้อง',
-                        content: const Text('กรุณากำหนดวันนัดหมายล่วงหน้า'));
+                        content: Text(
+                            'กรุณากำหนดวันนัดหมายล่วงหน้า\nอย่างน้อย 7 วัน \nวันที่ ${DateFormat.yMMMd('th').formatInBuddhistCalendarThai(DateTime.now().add(const Duration(days: 8)))} เป็นต้นไป'));
                   }
+                  // } else {
+                  //   Get.defaultDialog(
+                  //       title: 'วันนัดหมายไม่ถูกต้อง',
+                  //       content: const Text('กรุณากำหนดวันนัดหมายล่วงหน้า'));
+                  // }
                 },
                 child: const Text(
                   'บันทึกนัดหมาย',

@@ -8,6 +8,7 @@ import 'package:intl/date_symbol_data_local.dart';
 //import 'package:intl/intl.dart';
 import 'package:tanya_app_v1/Screen/AddMedicalInformation/medicine_editor_screen/medicine_info_editor_screen.dart';
 import 'package:tanya_app_v1/Screen/AddMedicalInformation/medicine_list_screen/components/display_medicine_info_list.dart';
+import 'package:tanya_app_v1/Screen/Report/medical_report_screen.dart';
 import 'package:tanya_app_v1/Screen/UserInfo/user_info_screen.dart';
 //import 'package:tanya_app_v1/utils/style.dart';
 import '../../GetXBinding/medicine_state_binding.dart';
@@ -28,6 +29,7 @@ class HomeAppScreen extends StatefulWidget {
 class _HomeAppScreenState extends State<HomeAppScreen> {
   AppBar get myAppBar {
     return AppBar(
+      elevation: 2,
       automaticallyImplyLeading: false,
       title: Text(titlePageList[_selectedIndex]),
       centerTitle: true,
@@ -88,12 +90,10 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
     "ข้อมูลผู้ใช้",
   ];
 
-  List<Widget> bodyPageList = const <Widget>[
+  List<Widget> bodyPageList = <Widget>[
     NotifyScreen(), // หน้า รายการแจ้งเตือน
     DisplayMedicineInfoList(), //หน้า รายการยา
-    Center(
-      child: Text("สรุป"),
-    ),
+    MedicineReportScreen(),
     UserInfoScreen(),
   ];
 

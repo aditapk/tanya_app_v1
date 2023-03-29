@@ -42,17 +42,20 @@ class MedicineInformation {
   String? order;
   List<bool>? periodTime;
   String? picturePath;
+  int? color;
 
   MedicineInfo asMedicineInfo() {
     return MedicineInfo(
-        name: name!,
-        description: description!,
-        type: type!,
-        unit: unit!,
-        nTake: nTake!,
-        order: order!,
-        period_time: periodTime!,
-        picture_path: picturePath);
+      name: name!,
+      description: description!,
+      type: type!,
+      unit: unit!,
+      nTake: nTake!,
+      order: order!,
+      period_time: periodTime!,
+      picture_path: picturePath,
+      color: color!,
+    );
   }
 
   MedicineInformation({
@@ -64,6 +67,7 @@ class MedicineInformation {
     this.order,
     this.periodTime,
     this.picturePath,
+    this.color,
   });
 }
 
@@ -360,7 +364,8 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
             order: result.order,
             nTake: result.nTake,
             periodTime: result.period_time,
-            picturePath: result.picture_path);
+            picturePath: result.picture_path,
+            color: result.color);
 
         if (result.period_time[0]) {
           notifyInformation.morningTime = const TimeOfDay(hour: 8, minute: 0);

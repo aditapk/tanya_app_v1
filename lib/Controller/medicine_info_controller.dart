@@ -1,5 +1,6 @@
 // ignore_for_file: non_constant_identifier_names
 
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class MedicineEditorState extends GetxController {
@@ -14,4 +15,5 @@ class MedicineEditorState extends GetxController {
   final evening_time = false.obs;
   final bed_time = false.obs;
   final picture_path = "".obs;
+  final color = Colors.blue.shade200.obs;
 }

@@ -16,7 +16,7 @@ class MedicineTypeCard extends StatelessWidget {
   _borderSelected(bool selecteState) {
     if (selecteState) {
       return RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(30),
         side: const BorderSide(
           width: 4.0,
           color: Colors.green,
@@ -24,7 +24,7 @@ class MedicineTypeCard extends StatelessWidget {
       );
     } else {
       return RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(30),
       );
     }
   }

@@ -124,7 +124,8 @@ class _NumberOfDoseSelectionState extends State<NumberOfDoseSelection> {
             child: TextField(
               controller: widget.controller,
               decoration: InputDecoration(
-                border: const OutlineInputBorder(),
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 labelText: doseDisplay(medicineInfoState.selected_type.value),
                 errorText: _nDoseError,
               ),
@@ -164,8 +165,9 @@ class _NumberOfDoseSelectionState extends State<NumberOfDoseSelection> {
               child: DropdownButtonFormField<String>(
                 decoration: InputDecoration(
                   enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(width: 1, color: Colors.blue)),
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide:
+                          const BorderSide(width: 1, color: Colors.blue)),
                 ),
                 onChanged: (value) {
                   medicineInfoState.selected_type_unit(value);

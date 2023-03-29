@@ -9,7 +9,7 @@ TextStyle get subHeadingStyle {
 
 TextStyle get headingStyle {
   return const TextStyle(
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: FontWeight.bold,
     color: Colors.black,
   );

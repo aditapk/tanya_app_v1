@@ -1,6 +1,7 @@
 // ignore_for_file: must_be_immutable
 
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:tanya_app_v1/Controller/medicine_info_controller.dart';
@@ -58,6 +59,8 @@ class _MedicineInfoEditorScreenState extends State<MedicineInfoEditorScreen> {
     medicineInfoState.lunch_time(medicineData.period_time[1]);
     medicineInfoState.evening_time(medicineData.period_time[2]);
     medicineInfoState.bed_time(medicineData.period_time[3]);
+
+    medicineInfoState.color.value = Color(medicineData.color);
   }
 
   @override
@@ -90,12 +93,15 @@ class _MedicineInfoEditorScreenState extends State<MedicineInfoEditorScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 PictureMedicineCard(),
-                const SizedBox(height: 30),
+                const SizedBox(
+                  height: 20,
+                ),
                 // Name
                 TextFormField(
                   controller: _nameTextController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12)),
                     labelText: 'ชื่อยา',
                   ),
                 ),
@@ -105,8 +111,9 @@ class _MedicineInfoEditorScreenState extends State<MedicineInfoEditorScreen> {
                   maxLines: null,
                   keyboardType: TextInputType.multiline,
                   controller: _detailTextController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12)),
                     labelText: 'รายละเอียดยา',
                   ),
                 ),
@@ -207,6 +214,7 @@ class _MedicineInfoEditorScreenState extends State<MedicineInfoEditorScreen> {
       medicineInfoState.bed_time.value,
     ];
     widget.medicineData!.picture_path = medicineInfoState.picture_path.value;
+    widget.medicineData!.color = medicineInfoState.color.value.value;
 
     await widget.medicineData?.save();
   }
@@ -230,6 +238,7 @@ class _MedicineInfoEditorScreenState extends State<MedicineInfoEditorScreen> {
       picture_path: medicineInfoState.picture_path.value == _emptyPicture
           ? null
           : medicineInfoState.picture_path.value,
+      color: medicineInfoState.color.value.value,
     );
     await medicineInfoBox.add(newMedicineData);
   }

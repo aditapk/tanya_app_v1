@@ -95,6 +95,7 @@ class MedicineCardSelect extends StatelessWidget {
 
   MedicineInfo? medicineData;
   int index;
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -106,7 +107,7 @@ class MedicineCardSelect extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
-            color: Colors.primaries[index][200],
+            color: Color(medicineData!.color),
             child: Padding(
               padding: const EdgeInsets.only(top: 5, bottom: 5),
               child: Row(

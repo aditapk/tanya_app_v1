@@ -25,13 +25,14 @@ class MedicineInfoAdapter extends TypeAdapter<MedicineInfo> {
       order: fields[5] as String,
       period_time: (fields[6] as List).cast<bool>(),
       picture_path: fields[7] as String?,
+      color: fields[8] as int,
     );
   }
 
   @override
   void write(BinaryWriter writer, MedicineInfo obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
@@ -47,7 +48,9 @@ class MedicineInfoAdapter extends TypeAdapter<MedicineInfo> {
       ..writeByte(6)
       ..write(obj.period_time)
       ..writeByte(7)
-      ..write(obj.picture_path);
+      ..write(obj.picture_path)
+      ..writeByte(8)
+      ..write(obj.color);
   }
 
   @override

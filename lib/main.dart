@@ -53,33 +53,6 @@ Future<void> main() async {
   //log("-> initial Date Formatting");
   HiveDatabaseService.initialization();
 
-  //await Hive.initFlutter(); // initial Hive database
-  //log("-> initial Hive Database");
-  // register task adapter
-  //Hive.registerAdapter<Task>(TaskAdapter());
-  //Hive.registerAdapter<TestMedicineInfo>(TestMedicineInfoAdapter());
-  //Hive.registerAdapter<MedicineInfo>(MedicineInfoAdapter());
-  //Hive.registerAdapter<NotifyInfoModel>(NotifyInfoModelAdapter());
-  //log("-> register Adapter for Task");
-  //HiveDatabaseService.init();
-  ///HiveDatabaseService.registerAdapter();
-  // clean database for test
-  //await Hive.deleteBoxFromDisk('tasks');
-  //await Hive.deleteBoxFromDisk('medicine_info');
-  //await Hive.deleteBoxFromDisk('user_medicine_info');
-  //log("->[Test] Clean database before run");
-
-  // open box
-  //await Hive.openBox<Task>('tasks');
-  //await Hive.openBox<TestMedicineInfo>('medicine_info');
-  //await Hive.openBox<MedicineInfo>('user_medicine_info');
-  //log("-> open task database");
-
-  // camera initial
-  //final cameras = await availableCameras();
-  //log("-> get available cameras");
-
-  //final firstCamera = cameras.first;
   // ---
 
   runApp(MyApp());

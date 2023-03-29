@@ -11,10 +11,10 @@ class EditMedicineInfoButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      right: 10,
-      top: 10,
+      right: 5,
+      top: 5,
       child: IconButton(
-        icon: const Icon(Icons.edit_note),
+        icon: const Icon(Icons.edit),
         color: Colors.black87,
         onPressed: onPressed,
       ),

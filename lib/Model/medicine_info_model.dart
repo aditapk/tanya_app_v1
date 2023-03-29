@@ -30,15 +30,20 @@ class MedicineInfo extends HiveObject {
   // ignore: non_constant_identifier_names
   String? picture_path;
 
-  MedicineInfo(
-      {required this.name,
-      required this.description,
-      required this.type,
-      required this.unit,
-      required this.nTake,
-      required this.order,
-      // ignore: non_constant_identifier_names
-      required this.period_time,
-      // ignore: non_constant_identifier_names
-      this.picture_path});
+  @HiveField(8)
+  int color;
+
+  MedicineInfo({
+    required this.name,
+    required this.description,
+    required this.type,
+    required this.unit,
+    required this.nTake,
+    required this.order,
+    // ignore: non_constant_identifier_names
+    required this.period_time,
+    // ignore: non_constant_identifier_names
+    this.picture_path,
+    required this.color,
+  });
 }

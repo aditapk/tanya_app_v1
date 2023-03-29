@@ -73,7 +73,9 @@ class MedicineInfoCard extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
-            color: Colors.primaries[index % 17][200],
+            color: medicineData?.color == null
+                ? Colors.blue.shade200
+                : Color(medicineData!.color),
             child: Padding(
               padding: const EdgeInsets.only(top: 5, bottom: 5),
               child: Row(

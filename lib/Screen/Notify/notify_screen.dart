@@ -2,6 +2,7 @@ import 'dart:io';
 
 //import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:flutter/material.dart';
+import 'package:fraction/fraction.dart';
 import 'package:get/get.dart';
 //import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -32,18 +33,23 @@ class _NotifyScreenState extends State<NotifyScreen> {
     0,
   );
 
-  bool morningStatPanel = true;
-  bool lunchStatPanel = true;
-  bool eveningStatPanel = true;
-  bool beforeBedStatPanel = true;
+  bool morningStatPanel = false;
+  bool lunchStatPanel = false;
+  bool eveningStatPanel = false;
+  bool beforeBedStatPanel = false;
 
   TextStyle get panelHaderTextStyel {
-    return const TextStyle(fontSize: 25);
+    return const TextStyle(fontSize: 20);
   }
 
   Color? getExpansionPanelColor(int index) {
-    int offset = 2;
-    return Colors.primaries[2 * index + offset][100];
+    final List<Color> panelColor = [
+      Colors.pink.shade200,
+      Colors.lime.shade200,
+      Colors.yellow.shade200,
+      Colors.cyan.shade200,
+    ];
+    return panelColor[index];
   }
 
   @override
@@ -71,9 +77,9 @@ class _NotifyScreenState extends State<NotifyScreen> {
                   },
                   child: Center(
                     child: Text(
-                      DateFormat.yMMMMd('th').formatInBuddhistCalendarThai(
+                      'วันที่ ${DateFormat.yMMMMd('th').formatInBuddhistCalendarThai(
                         currentDate,
-                      ),
+                      )}',
                       style: subHeadingStyle,
                     ),
                   ),
@@ -92,11 +98,9 @@ class _NotifyScreenState extends State<NotifyScreen> {
             ],
           ),
         ),
-        SingleChildScrollView(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height - 213 - 15,
-            ),
+        Expanded(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.vertical,
             child: ValueListenableBuilder(
               valueListenable:
                   Hive.box<NotifyInfoModel>('user_notify_info').listenable(),
@@ -181,111 +185,128 @@ class _NotifyScreenState extends State<NotifyScreen> {
                     return SingleChildScrollView(
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: ExpansionPanelList(
-                          expansionCallback: (panelIndex, isExpanded) {
-                            if (panelIndex == 0) {
-                              // selected on panel morning
-                              setState(() {
-                                morningStatPanel = !morningStatPanel;
-                              });
-                            }
-                            if (panelIndex == 1) {
-                              // selected on panel lunch
-                              setState(() {
-                                lunchStatPanel = !lunchStatPanel;
-                              });
-                            }
-                            if (panelIndex == 2) {
-                              // selected on panel evening
-                              setState(() {
-                                eveningStatPanel = !eveningStatPanel;
-                              });
-                            }
-                            if (panelIndex == 3) {
-                              // selected on panel before bed
-                              setState(() {
-                                beforeBedStatPanel = !beforeBedStatPanel;
-                              });
-                            }
-                          },
-                          children: [
-                            ExpansionPanel(
-                                backgroundColor: getExpansionPanelColor(0),
-                                canTapOnHeader: true,
-                                isExpanded: morningStatPanel,
-                                headerBuilder: (context, isExpanded) =>
-                                    Container(
-                                      alignment: Alignment.centerLeft,
-                                      child: Text(
-                                        "เช้า (${notifyInfoListCurrentDateMorningTime.length} รายการ)",
-                                        style: panelHaderTextStyel,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: ExpansionPanelList(
+                            animationDuration:
+                                const Duration(milliseconds: 1000),
+                            expansionCallback: (panelIndex, isExpanded) {
+                              if (panelIndex == 0) {
+                                // selected on panel morning
+                                setState(() {
+                                  morningStatPanel = !morningStatPanel;
+                                });
+                              }
+                              if (panelIndex == 1) {
+                                // selected on panel lunch
+                                setState(() {
+                                  lunchStatPanel = !lunchStatPanel;
+                                });
+                              }
+                              if (panelIndex == 2) {
+                                // selected on panel evening
+                                setState(() {
+                                  eveningStatPanel = !eveningStatPanel;
+                                });
+                              }
+                              if (panelIndex == 3) {
+                                // selected on panel before bed
+                                setState(() {
+                                  beforeBedStatPanel = !beforeBedStatPanel;
+                                });
+                              }
+                            },
+                            children: [
+                              ExpansionPanel(
+                                  backgroundColor: getExpansionPanelColor(0),
+                                  canTapOnHeader: true,
+                                  isExpanded: morningStatPanel,
+                                  headerBuilder: (context, isExpanded) =>
+                                      Padding(
+                                        padding: const EdgeInsets.all(8),
+                                        child: Container(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                            "เช้า (${notifyInfoListCurrentDateMorningTime.length} รายการ)",
+                                            style: panelHaderTextStyel,
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                body: notifyInfoListCurrentDateMorningTime
-                                        .isNotEmpty
-                                    ? MedicineListInMorning(
-                                        notifyInfoListCurrentDateMorningTime:
-                                            notifyInfoListCurrentDateMorningTime,
-                                      )
-                                    : Container()),
-                            ExpansionPanel(
-                                backgroundColor: getExpansionPanelColor(1),
-                                canTapOnHeader: true,
-                                isExpanded: lunchStatPanel,
-                                headerBuilder: (context, isExpanded) =>
-                                    Container(
-                                      alignment: Alignment.centerLeft,
-                                      child: Text(
-                                        "กลางวัน (${notifyInfoListCurrentDateLunchTime.length} รายการ)",
-                                        style: panelHaderTextStyel,
+                                  body: notifyInfoListCurrentDateMorningTime
+                                          .isNotEmpty
+                                      ? MedicineListInMorning(
+                                          notifyInfoListCurrentDateMorningTime:
+                                              notifyInfoListCurrentDateMorningTime,
+                                        )
+                                      : Container()),
+                              ExpansionPanel(
+                                  backgroundColor: getExpansionPanelColor(1),
+                                  canTapOnHeader: true,
+                                  isExpanded: lunchStatPanel,
+                                  headerBuilder: (context, isExpanded) =>
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Container(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                            "กลางวัน (${notifyInfoListCurrentDateLunchTime.length} รายการ)",
+                                            style: panelHaderTextStyel,
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                body: notifyInfoListCurrentDateLunchTime
-                                        .isNotEmpty
-                                    ? MedicineListInLunch(
-                                        notifyInfoListCurrentDateLunchTime:
-                                            notifyInfoListCurrentDateLunchTime,
-                                      )
-                                    : Container()),
-                            ExpansionPanel(
-                                backgroundColor: getExpansionPanelColor(2),
-                                canTapOnHeader: true,
-                                isExpanded: eveningStatPanel,
-                                headerBuilder: (context, isExpanded) =>
-                                    Container(
-                                      alignment: Alignment.centerLeft,
-                                      child: Text(
-                                        "เย็น (${notifyInfoListCurrentDateEveningTime.length} รายการ)",
-                                        style: panelHaderTextStyel,
+                                  body: notifyInfoListCurrentDateLunchTime
+                                          .isNotEmpty
+                                      ? MedicineListInLunch(
+                                          notifyInfoListCurrentDateLunchTime:
+                                              notifyInfoListCurrentDateLunchTime,
+                                        )
+                                      : Container()),
+                              ExpansionPanel(
+                                  backgroundColor: getExpansionPanelColor(2),
+                                  canTapOnHeader: true,
+                                  isExpanded: eveningStatPanel,
+                                  headerBuilder: (context, isExpanded) =>
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Container(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                            "เย็น (${notifyInfoListCurrentDateEveningTime.length} รายการ)",
+                                            style: panelHaderTextStyel,
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                body: notifyInfoListCurrentDateEveningTime
-                                        .isNotEmpty
-                                    ? MedicineListInEvening(
-                                        notifyInfoListCurrentDateEveningTime:
-                                            notifyInfoListCurrentDateEveningTime,
-                                      )
-                                    : Container()),
-                            ExpansionPanel(
-                                backgroundColor: getExpansionPanelColor(3),
-                                canTapOnHeader: true,
-                                isExpanded: beforeBedStatPanel,
-                                headerBuilder: (context, isExpanded) =>
-                                    Container(
-                                      alignment: Alignment.centerLeft,
-                                      child: Text(
-                                        "ก่อนนอน (${notifyInfoListCurrentDateBeforeBedTime.length} รายการ)",
-                                        style: panelHaderTextStyel,
+                                  body: notifyInfoListCurrentDateEveningTime
+                                          .isNotEmpty
+                                      ? MedicineListInEvening(
+                                          notifyInfoListCurrentDateEveningTime:
+                                              notifyInfoListCurrentDateEveningTime,
+                                        )
+                                      : Container()),
+                              ExpansionPanel(
+                                  backgroundColor: getExpansionPanelColor(3),
+                                  canTapOnHeader: true,
+                                  isExpanded: beforeBedStatPanel,
+                                  headerBuilder: (context, isExpanded) =>
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Container(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                            "ก่อนนอน (${notifyInfoListCurrentDateBeforeBedTime.length} รายการ)",
+                                            style: panelHaderTextStyel,
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                body: notifyInfoListCurrentDateBeforeBedTime
-                                        .isNotEmpty
-                                    ? MedicineListInBeforeBed(
-                                        notifyInfoListCurrentDateBeforeBedTime:
-                                            notifyInfoListCurrentDateBeforeBedTime,
-                                      )
-                                    : Container()),
-                          ],
+                                  body: notifyInfoListCurrentDateBeforeBedTime
+                                          .isNotEmpty
+                                      ? MedicineListInBeforeBed(
+                                          notifyInfoListCurrentDateBeforeBedTime:
+                                              notifyInfoListCurrentDateBeforeBedTime,
+                                        )
+                                      : Container()),
+                            ],
+                          ),
                         ),
                       ),
                     );
@@ -482,66 +503,143 @@ class NotifyCard extends StatelessWidget {
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             child: SizedBox(
-              height: Platform.isAndroid ? 170 : 161,
+              height: 220,
               child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: notifyInfo.medicineInfo.picture_path == '' ||
-                                notifyInfo.medicineInfo.picture_path == null
-                            ? Image.asset(
-                                _emptyPicture,
-                                fit: BoxFit.cover,
-                                height: 150,
-                              )
-                            : Image.file(
-                                File(notifyInfo.medicineInfo.picture_path!),
-                                fit: BoxFit.cover,
-                                height: 150,
-                              ),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: Container(
-                        padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-                        height: 200,
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      Expanded(
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               notifyInfo.name,
                               style: const TextStyle(
-                                fontSize: 16,
+                                fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             Text(notifyInfo.description),
-                            Text("เวลา ${TimeOfDay(
-                              hour: notifyInfo.time.hour,
-                              minute: notifyInfo.time.minute,
-                            ).format(context)}"),
+                            Text(
+                              "เวลา ${TimeOfDay(
+                                hour: notifyInfo.time.hour,
+                                minute: notifyInfo.time.minute,
+                              ).format(context)}",
+                              style: const TextStyle(fontSize: 16),
+                            ),
                             const Divider(
                               thickness: 2,
                             ),
-                            MedicineInfoOnCard(notifyInfo: notifyInfo),
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                color: Color(notifyInfo.medicineInfo.color),
+                              ),
+                              child: Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        flex: 2,
+                                        child: Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 5),
+                                          child: MedicineInfoOnCard(
+                                              notifyInfo: notifyInfo),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        flex: 1,
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          child: notifyInfo.medicineInfo
+                                                          .picture_path ==
+                                                      '' ||
+                                                  notifyInfo.medicineInfo
+                                                          .picture_path ==
+                                                      null
+                                              ? Image.asset(
+                                                  _emptyPicture,
+                                                  fit: BoxFit.cover,
+                                                  height: 110,
+                                                )
+                                              : Image.file(
+                                                  File(notifyInfo.medicineInfo
+                                                      .picture_path!),
+                                                  fit: BoxFit.cover,
+                                                  height: 110,
+                                                ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
                           ],
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+                      )
+                    ],
+                  )
+                  // Row(
+                  //   children: [
+                  //     Expanded(
+                  //       flex: 1,
+                  //       child: ClipRRect(
+                  //         borderRadius: BorderRadius.circular(20),
+                  //         child: notifyInfo.medicineInfo.picture_path == '' ||
+                  //                 notifyInfo.medicineInfo.picture_path == null
+                  //             ? Image.asset(
+                  //                 _emptyPicture,
+                  //                 fit: BoxFit.cover,
+                  //                 height: 150,
+                  //               )
+                  //             : Image.file(
+                  //                 File(notifyInfo.medicineInfo.picture_path!),
+                  //                 fit: BoxFit.cover,
+                  //                 height: 150,
+                  //               ),
+                  //       ),
+                  //     ),
+                  //     Expanded(
+                  //       flex: 2,
+                  //       child: Container(
+                  //         padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+                  //         height: 200,
+                  //         child: Column(
+                  //           mainAxisAlignment: MainAxisAlignment.start,
+                  //           crossAxisAlignment: CrossAxisAlignment.start,
+                  //           children: [
+                  //             Text(
+                  //               notifyInfo.name,
+                  //               style: const TextStyle(
+                  //                 fontSize: 16,
+                  //                 fontWeight: FontWeight.bold,
+                  //               ),
+                  //             ),
+                  //             Text(notifyInfo.description),
+                  //             Text("เวลา ${TimeOfDay(
+                  //               hour: notifyInfo.time.hour,
+                  //               minute: notifyInfo.time.minute,
+                  //             ).format(context)}"),
+                  //             const Divider(
+                  //               thickness: 2,
+                  //             ),
+                  //             MedicineInfoOnCard(notifyInfo: notifyInfo),
+                  //           ],
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
+                  ),
             ),
           ),
           Positioned(
-            right: 10,
-            top: 10,
+            right: 4,
+            top: 4,
             child: GestureDetector(
                 onTap: () {
                   Get.dialog(
@@ -569,19 +667,54 @@ class MedicineInfoOnCard extends StatelessWidget {
   getHowtoEat(NotifyInfoModel notifyInfo) {
     String type = notifyInfo.medicineInfo.type;
     var nTake = notifyInfo.medicineInfo.nTake;
+    var period =
+        notifyInfo.medicineInfo.period_time.where((e) => e == true).length;
+    String periodThai = '$period เวลา';
+    String nTakeStr;
+    if (nTake % 1 == 0) {
+      nTakeStr = nTake.toInt().toString();
+    } else {
+      nTakeStr = Fraction.fromDouble(nTake).toString();
+    }
     var unit = notifyInfo.medicineInfo.unit;
     String prefixType = (type == 'pills' || type == 'water')
         ? "รับประทาน"
         : (type == 'arrow')
             ? "ใช้ฉีด"
             : "ใช้หยด";
-    return "$prefixType $nTake $unit";
+    return "$prefixType $nTakeStr $unit ($periodThai)";
   }
 
   getOrderInThai(NotifyInfoModel notifyInfo) {
     var order = notifyInfo.medicineInfo.order;
+
     String orderThai = order == "before" ? "ก่อนอาหาร" : "หลังอาหาร";
     return orderThai;
+  }
+
+  getPeroidInThai(NotifyInfoModel notifyInfo) {
+    var period = notifyInfo.medicineInfo.period_time;
+
+    List<String> periodStrList = [];
+    for (int i = 0; i < period.length; i++) {
+      if (period[i]) {
+        switch (i) {
+          case 0:
+            periodStrList.add('เช้า');
+            break;
+          case 1:
+            periodStrList.add('กลางวัน');
+            break;
+          case 2:
+            periodStrList.add('เย็น');
+            break;
+          case 3:
+            periodStrList.add('ก่อนนอน');
+            break;
+        }
+      }
+    }
+    return periodStrList.join(', ');
   }
 
   @override
@@ -593,14 +726,24 @@ class MedicineInfoOnCard extends StatelessWidget {
           notifyInfo.medicineInfo.name,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 16,
+            fontSize: 18,
           ),
         ),
         Text(
           notifyInfo.medicineInfo.description,
         ),
-        Text(getHowtoEat(notifyInfo)),
-        Text(getOrderInThai(notifyInfo)),
+        Text(
+          getHowtoEat(notifyInfo),
+          style: const TextStyle(fontSize: 16),
+        ),
+        Text(
+          getOrderInThai(notifyInfo),
+          style: const TextStyle(fontSize: 16),
+        ),
+        Text(
+          getPeroidInThai(notifyInfo),
+          style: const TextStyle(fontSize: 16),
+        )
       ],
     );
   }
@@ -662,27 +805,32 @@ class NotifyStatus extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 100,
-      height: 40,
+      width: 125,
+      height: 45,
       padding: const EdgeInsets.all(8),
       decoration: notifyInfo.status == 0
           ? BoxDecoration(
               color: Colors.green.shade200,
-              border: Border.all(color: Colors.green),
-              borderRadius: BorderRadius.circular(8))
+              border: Border.all(color: Colors.transparent),
+              borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(12),
+                  bottomLeft: Radius.circular(12)),
+            )
           : BoxDecoration(
-              color: Colors.red.shade200,
-              border: Border.all(color: Colors.red),
-              borderRadius: BorderRadius.circular(8)),
+              color: Colors.blue.shade100,
+              border: Border.all(color: Colors.transparent),
+              borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(12),
+                  bottomLeft: Radius.circular(12))),
       child: notifyInfo.status == 0
           ? const Text(
               "กินยาแล้ว",
-              style: TextStyle(fontSize: 16),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             )
           : const Text(
               "ยังไม่กินยา",
-              style: TextStyle(fontSize: 16),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
     );

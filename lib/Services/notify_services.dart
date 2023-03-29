@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:fraction/fraction.dart';
 //import 'package:timezone/data/latest_all.dart' as tz;
 //import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -72,9 +73,19 @@ class NotifyService {
     var name = medicineInfo["name"];
     var type = medicineInfo["type"];
     var unit = medicineInfo["unit"];
-    var nTake = medicineInfo["nTake"];
+    double nTake = medicineInfo["nTake"];
     var order = medicineInfo["order"];
-    var howToEat = "<type> $nTake $unit";
+
+    String nTakeStr;
+
+    // check is intisInt(double num) {
+    if (nTake % 1 == 0) {
+      nTakeStr = nTake.toInt().toString();
+    } else {
+      nTakeStr = Fraction.fromDouble(nTake).toString();
+    }
+
+    var howToEat = "<type> $nTakeStr $unit";
     switch (type) {
       case "pills":
         howToEat = howToEat.replaceAll('<type>', "รับประทาน");
