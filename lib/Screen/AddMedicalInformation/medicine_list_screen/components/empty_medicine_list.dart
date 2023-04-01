@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class EmptyMedicineList extends StatelessWidget {
-  EmptyMedicineList({super.key, required this.emptyDescription});
+  const EmptyMedicineList({super.key, required this.emptyDescription});
 
-  String emptyDescription;
+  final String emptyDescription;
 
   @override
   Widget build(BuildContext context) {

@@ -1,12 +1,8 @@
 import 'package:buddhist_datetime_dateformat_sns/buddhist_datetime_dateformat_sns.dart';
-import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:tanya_app_v1/Model/doctor_appointment.dart';
-
-import '../../../Model/user_info_model.dart';
 
 class AppointmentWithDoctorInfo extends StatelessWidget {
   const AppointmentWithDoctorInfo({

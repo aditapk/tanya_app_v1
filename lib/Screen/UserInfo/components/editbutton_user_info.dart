@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import '../../../Model/user_info_model.dart';
 
 class EditButtonUserInfo extends StatelessWidget {
-  EditButtonUserInfo({
+  const EditButtonUserInfo({
     super.key,
     required this.userInfo,
     required this.onPressed,
   });
 
   final UserInfo? userInfo;
-  Function()? onPressed;
+  final Function()? onPressed;
 
   checkPersonalInfo(UserInfo? userInfo) {
     if (userInfo != null) {

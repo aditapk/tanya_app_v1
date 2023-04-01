@@ -1,32 +1,23 @@
 // import Library file
 
 //import 'package:animated_splash_screen/animated_splash_screen.dart';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_localization/flutter_localization.dart';
+
 import 'package:get/get.dart';
-import 'package:hive/hive.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+
 //import 'package:hive_flutter/hive_flutter.dart';
 //import 'package:intl/date_symbol_data_local.dart';
-import 'package:tanya_app_v1/Model/medicine_info_model.dart';
-import 'package:tanya_app_v1/Model/notify_info.dart';
-import 'package:tanya_app_v1/Screen/AddMedicalInformation/medicine_list_screen/medicine_list_screen.dart';
+
 import 'package:tanya_app_v1/Services/hive_db_services.dart';
 import 'package:tanya_app_v1/components/app_pages_route.dart';
-import 'dart:developer';
 
 import 'GetXBinding/medicine_state_binding.dart';
-import 'Screen/Login/login_screen.dart';
-import 'Screen/Notify/notify_screen_old.dart';
-import 'Screen/Welcome/welcome_screen.dart';
-import 'Screen/splash/splash_screen.dart';
-import 'forTest/local_notify/notify.dart';
-import 'forTest/local_notify/notify_list_screen.dart';
+
+import 'Screen/Login/login_screen_selection.dart';
 
 // ---
 
@@ -51,15 +42,15 @@ Future<void> main() async {
   //log("main()");
   await initializeDateFormatting('th'); // initialize local date time format
   //log("-> initial Date Formatting");
-  HiveDatabaseService.initialization();
+  await HiveDatabaseService.initialization();
 
   // ---
 
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {
-  MyApp({super.key});
+  const MyApp({super.key});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -70,6 +61,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void initState() {
+    // ignore: todo
     // TODO: implement initState
     // localization
     //     .init(mapLocales: [MapLocale('th', {})], initLanguageCode: 'en');
@@ -80,42 +72,42 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-        initialBinding: MedicineInfoBinding(),
-        initialRoute: "/",
-        getPages: AppPageRoute.appPageRoute,
-        debugShowCheckedModeBanner: false,
-        title: 'Medical Reminder',
-        theme: ThemeData(
-          primaryColor: Colors.blue,
-          brightness: Brightness.light,
-        ),
-        darkTheme: ThemeData(
-          primaryColor: Colors.blue,
-          brightness: Brightness.dark,
-        ),
-        themeMode: ThemeMode.light,
-        // localizationsDelegates: localization.localizationsDelegates,
-        // supportedLocales: localization.supportedLocales,
-        // locale: const Locale('th'),
-        // for test
-        //home:
-        //TestImagePickerApp(),
-        //const MedicineListScreen(),
-        //MedicineListScreen(),
+      initialBinding: MedicineInfoBinding(),
+      initialRoute: "/",
+      getPages: AppPageRoute.appPageRoute,
+      debugShowCheckedModeBanner: false,
+      title: 'Medical Reminder',
+      theme: ThemeData(
+        primaryColor: Colors.blue,
+        brightness: Brightness.light,
+      ),
+      darkTheme: ThemeData(
+        primaryColor: Colors.blue,
+        brightness: Brightness.dark,
+      ),
+      themeMode: ThemeMode.light,
+      // localizationsDelegates: localization.localizationsDelegates,
+      // supportedLocales: localization.supportedLocales,
+      // locale: const Locale('th'),
+      // for test
+      //home:
+      //TestImagePickerApp(),
+      //const MedicineListScreen(),
+      //MedicineListScreen(),
 
-        home: LoginScreen()
-        //WelcomeScreen(),
-        //SplashScreen(),
-        //ShowNotifyListScreen(), // Home App
-        //TestLocalNotify(),
-        // AnimatedSplashScreen(
-        //   duration: 3000,
-        //   splashIconSize: 500,
-        //   splash: const SplashScreen(),
-        //   nextScreen: const WelcomeScreen(),
-        //   splashTransition: SplashTransition.slideTransition,
-        //   //pageTransitionType: PageTransitionType.bottomToTop,
-        // ),
-        );
+      home: const LoginScreenSelection(),
+      //WelcomeScreen(),
+      //SplashScreen(),
+      //ShowNotifyListScreen(), // Home App
+      //TestLocalNotify(),
+      // AnimatedSplashScreen(
+      //   duration: 3000,
+      //   splashIconSize: 500,
+      //   splash: const SplashScreen(),
+      //   nextScreen: const WelcomeScreen(),
+      //   splashTransition: SplashTransition.slideTransition,
+      //   //pageTransitionType: PageTransitionType.bottomToTop,
+      // ),
+    );
   }
 }

@@ -2,8 +2,6 @@ import 'dart:io';
 
 import 'package:buddhist_datetime_dateformat_sns/buddhist_datetime_dateformat_sns.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
@@ -63,7 +61,7 @@ class _MedicineReportScreenState extends State<MedicineReportScreen> {
       medicineSet.add(notify.medicineInfo.name);
       notifySet.add(notify.name);
     }
-    var medicineList = medicineSet.toList();
+    //var medicineList = medicineSet.toList();
     var notifyList = notifySet.toList();
 
     // find number of notify each medicine

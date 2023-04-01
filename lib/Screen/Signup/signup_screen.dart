@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:tanya_app_v1/components/background.dart';
+
 import 'package:tanya_app_v1/constants.dart';
-import 'package:tanya_app_v1/responsive.dart';
+
 import 'components/sign_up_top_image.dart';
 import 'components/signup_form.dart';
 //import 'components/socal_sign_up.dart';
@@ -11,24 +11,25 @@ class SignUpScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Background(
-      child: SingleChildScrollView(
-        child: Responsive(
-          mobile: const MobileSignupScreen(),
-          desktop: Row(
+    return Scaffold(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
             children: [
-              const Expanded(
-                child: SignUpScreenTopImage(),
+              const SizedBox(
+                height: 40,
               ),
-              Expanded(
-                child: Column(
+              const SignUpScreenTopImage(),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
+                  children: [
                     SizedBox(
-                      width: 450,
-                      child: SignUpForm(),
+                      width: MediaQuery.of(context).size.width * 0.85,
+                      child: const SignUpForm(),
                     ),
-                    SizedBox(height: defaultPadding / 2),
+                    const SizedBox(height: defaultPadding / 2),
                     // SocalSignUp()
                   ],
                 ),
@@ -37,33 +38,6 @@ class SignUpScreen extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class MobileSignupScreen extends StatelessWidget {
-  const MobileSignupScreen({
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        const SignUpScreenTopImage(),
-        Row(
-          children: const [
-            Spacer(),
-            Expanded(
-              flex: 8,
-              child: SignUpForm(),
-            ),
-            Spacer(),
-          ],
-        ),
-        // const SocalSignUp()
-      ],
     );
   }
 }

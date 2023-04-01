@@ -1,6 +1,4 @@
 import 'dart:convert';
-
-import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
@@ -8,7 +6,6 @@ import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:tanya_app_v1/Model/doctor_appointment.dart';
 
-import '../../../Model/user_info_model.dart';
 import '../../../Services/notify_services.dart';
 
 import 'package:buddhist_datetime_dateformat_sns/buddhist_datetime_dateformat_sns.dart';
@@ -30,14 +27,48 @@ class _DoctorAppointmentEditorState extends State<DoctorAppointmentEditor> {
 
   void onDidReceiveLocalNotificationIOS(
       int id, String? title, String? body, String? payload) async {
+    // ignore: todo
     // TODO
-    print("$id, $title");
+    //print("$id, $title");
+  }
+
+  createNewDoctorAppointmentNotification(dynamic payload) {
+    int appointmentID = payload['id'];
+    var appointmentDateTime = DateTime.parse(payload['appointmentDateTime']);
+    int delayDays = payload['delayDays'];
+    var dateDisplay = payload['dateDisplay'];
+    var timeDisplay = payload['timeDisplay'];
+
+    if (delayDays == 1) {
+      return;
+    }
+    switch (delayDays) {
+      case 7:
+        delayDays = 3; // notify before 3 day
+        break;
+      case 3:
+        delayDays = 1; // notify before 1 day
+        break;
+    }
+    // set notify again
+    DateTime notifyTime =
+        appointmentDateTime.subtract(Duration(days: delayDays)); // test
+
+    setAppointmentNotify(
+      notifyID: appointmentID,
+      notifyTime: notifyTime,
+      appointmentTime: appointmentDateTime,
+      delayDays: delayDays,
+      dateDisplay: dateDisplay,
+      timeDisplay: timeDisplay,
+    );
   }
 
   void onDidReceiveNotificationAndroid(
       NotificationResponse notificationResponse) async {
     switch (notificationResponse.notificationResponseType) {
       case NotificationResponseType.selectedNotification:
+        // ignore: todo
         // TODO: Handle this case.
         // When click on notification
         // .notificationResponseType
@@ -49,9 +80,43 @@ class _DoctorAppointmentEditorState extends State<DoctorAppointmentEditor> {
         //Get.to(() => NotifyHandleScreen(
         //      notifyID: notifyID,
         //    ));
-        print(notificationResponse.payload);
+        var payload = jsonDecode(notificationResponse.payload!);
+        var dateDisplay = payload['dateDisplay'];
+        var timeDisplay = payload['timeDisplay'];
+        Get.defaultDialog(
+            title: 'แจ้งเตือนนัดหมายพบแพทย์',
+            middleText: 'วันที่ $dateDisplay\nเวลา $timeDisplay',
+            middleTextStyle: const TextStyle(
+              fontSize: 16,
+            ),
+            confirm: Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      createNewDoctorAppointmentNotification(payload);
+                      Get.back();
+                    },
+                    child: const Text(
+                      'แจ้งเตือนอีกครั้ง',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                  ),
+                  TextButton(
+                      onPressed: () {
+                        Get.back();
+                      },
+                      child: const Text(
+                        'ไม่ต้องแจ้งเตือน',
+                        style: TextStyle(fontSize: 18),
+                      )),
+                ],
+              ),
+            ));
         break;
       case NotificationResponseType.selectedNotificationAction:
+        // ignore: todo
         // TODO: Handle this case.
         // When action on notification is clicked
         //print(notificationResponse.actionId);
@@ -63,48 +128,20 @@ class _DoctorAppointmentEditorState extends State<DoctorAppointmentEditor> {
           // // notify status -> complete
           // notifyInfo!.status = 0;
           // notifyInfo.save();
-          print(notificationResponse.payload);
+          //print(notificationResponse.payload);
         }
         if (notificationResponse.actionId == "PENDING") {
-          print(notificationResponse.payload);
+          //print(notificationResponse.payload);
           var payload = jsonDecode(notificationResponse.payload!);
-          int appointmentID = payload['id'];
-          var appointmentDateTime =
-              DateTime.parse(payload['appointmentDateTime']);
-          int delayDays = payload['delayDays'];
-          var dateDisplay = payload['dateDisplay'];
-          var timeDisplay = payload['timeDisplay'];
-
-          if (delayDays == 1) {
-            return;
-          }
-          switch (delayDays) {
-            case 7:
-              delayDays = 3; // notify before 3 day
-              break;
-            case 3:
-              delayDays = 1; // notify before 1 day
-              break;
-          }
-          // set notify again
-          DateTime notifyTime =
-              appointmentDateTime.subtract(Duration(days: delayDays)); // test
-
-          setAppointmentNotify(
-            notifyID: appointmentID,
-            notifyTime: notifyTime,
-            appointmentTime: appointmentDateTime,
-            delayDays: delayDays,
-            dateDisplay: dateDisplay,
-            timeDisplay: timeDisplay,
-          );
-        } else {}
+          createNewDoctorAppointmentNotification(payload);
+        }
         break;
     }
   }
 
   @override
   void initState() {
+    // ignore: todo
     // TODO: implement initState
     selectedDate = DateTime.now();
     selectedTime = TimeOfDay.now();
@@ -127,20 +164,6 @@ class _DoctorAppointmentEditorState extends State<DoctorAppointmentEditor> {
     doctorAppointment!.notifyID = appointmendID;
     await doctorAppointment.save();
     return appointmendID;
-    // if (userInfo != null) {
-    //   if (userInfo.appointmentWithDoctor != null) {
-    //     userInfo.appointmentWithDoctor!.add(appointmentDateTime);
-    //     userInfo.appointmentWithDoctor!.sort((a, b) => a.compareTo(b));
-    //     await userInfo.save();
-    //   } else {
-    //     userInfo.appointmentWithDoctor = <DateTime>[appointmentDateTime];
-    //     await userInfo.save();
-    //   }
-    // } else {
-    //   UserInfo newUserInfo =
-    //       UserInfo(appointmentWithDoctor: <DateTime>[appointmentDateTime]);
-    //   userInfoBox.add(newUserInfo);
-    // }
   }
 
   setAppointmentNotify({
@@ -151,9 +174,6 @@ class _DoctorAppointmentEditorState extends State<DoctorAppointmentEditor> {
     required String dateDisplay,
     required String timeDisplay,
   }) async {
-    //var notifyTime = DateTime.now().add(const Duration(seconds: 5));
-    // to Database
-
     var payload = json.encode(
       {
         "id": notifyID,
@@ -322,11 +342,6 @@ class _DoctorAppointmentEditorState extends State<DoctorAppointmentEditor> {
                         content: Text(
                             'กรุณากำหนดวันนัดหมายล่วงหน้า\nอย่างน้อย 7 วัน \nวันที่ ${DateFormat.yMMMd('th').formatInBuddhistCalendarThai(DateTime.now().add(const Duration(days: 8)))} เป็นต้นไป'));
                   }
-                  // } else {
-                  //   Get.defaultDialog(
-                  //       title: 'วันนัดหมายไม่ถูกต้อง',
-                  //       content: const Text('กรุณากำหนดวันนัดหมายล่วงหน้า'));
-                  // }
                 },
                 child: const Text(
                   'บันทึกนัดหมาย',

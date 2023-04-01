@@ -29,8 +29,8 @@ class DisplayMedicineInfoList extends StatelessWidget {
             ),
           );
         } else {
-          return EmptyMedicineList(
-            emptyDescription: "กรุณาเพิ่มรายการยา โดยกดที่ปุ่ม +",
+          return const EmptyMedicineList(
+            emptyDescription: "เพิ่มรายการยา กรุณากดปุ่ม + ",
           );
         }
       },

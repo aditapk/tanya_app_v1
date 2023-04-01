@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:tanya_app_v1/components/background.dart';
-import 'package:tanya_app_v1/responsive.dart';
 
 import 'components/login_form.dart';
 import 'components/login_screen_top_image.dart';
@@ -10,22 +8,23 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Background(
-      child: SingleChildScrollView(
-        child: Responsive(
-          mobile: const MobileLoginScreen(),
-          desktop: Row(
+    return Scaffold(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
             children: [
-              const Expanded(
-                child: LoginScreenTopImage(),
+              const SizedBox(
+                height: 40,
               ),
-              Expanded(
+              const LoginScreenTopImage(),
+              Padding(
+                padding: const EdgeInsets.only(left: 20, right: 20),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
+                  children: [
                     SizedBox(
-                      width: 450,
-                      child: LoginForm(),
+                      width: MediaQuery.of(context).size.width * 0.85,
+                      child: const LoginForm(),
                     ),
                   ],
                 ),
@@ -34,32 +33,6 @@ class LoginScreen extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class MobileLoginScreen extends StatelessWidget {
-  const MobileLoginScreen({
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        const LoginScreenTopImage(),
-        Row(
-          children: const [
-            Spacer(),
-            Expanded(
-              flex: 8,
-              child: LoginForm(),
-            ),
-            Spacer(),
-          ],
-        ),
-      ],
     );
   }
 }

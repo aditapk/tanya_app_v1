@@ -7,9 +7,9 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
    <application
-        android:label="tanya_app_v1"
+        android:label="เตือนกินยา"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/med_icon">
         <activity
             android:name=".MainActivity"
             android:exported="true"

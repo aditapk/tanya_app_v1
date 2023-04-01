@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import '../../../Model/user_info_model.dart';
 import 'editbutton_user_medical_info.dart';
@@ -20,12 +19,12 @@ class UserMedicalInfoCard extends StatelessWidget {
       width: MediaQuery.of(context).size.width,
       child: Card(
         elevation: 2,
-        color: Colors.yellow.shade200,
+        color: Colors.yellow.shade600,
         child: Stack(
           children: [
             const UserMedicalInfo(),
             Positioned(
-              top: 8,
+              top: 14,
               right: 8,
               child: EditButtonUserMedicalInfo(
                 onPressed: () async {

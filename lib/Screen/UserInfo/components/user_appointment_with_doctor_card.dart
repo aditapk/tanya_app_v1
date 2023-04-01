@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import 'appointment_with_doctor_info.dart';
 import 'doctor_appointment_editor.dart';
@@ -61,14 +60,6 @@ class DoctorAppointmentAddingButton extends StatelessWidget {
                 ),
               );
             });
-        // await Get.defaultDialog(
-        //   title: 'เพิ่มข้อมูลนัดพบแพทย์',
-        //   titleStyle: const TextStyle(
-        //     fontSize: 20,
-        //     fontWeight: FontWeight.bold,
-        //   ),
-        //   content: const DoctorAppointmentEditor(),
-        // );
       },
       child: const CircleAvatar(
         backgroundColor: Colors.white54,

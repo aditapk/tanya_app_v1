@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import '../../../Model/user_info_model.dart';
 
 class EditButtonUserMedicalInfo extends StatelessWidget {
-  EditButtonUserMedicalInfo({
+  const EditButtonUserMedicalInfo({
     super.key,
     required this.userInfo,
     required this.onPressed,
   });
 
   final UserInfo? userInfo;
-  Function()? onPressed;
+  final Function()? onPressed;
 
   checkMedicalInfo(UserInfo? userInfo) {
     if (userInfo != null) {

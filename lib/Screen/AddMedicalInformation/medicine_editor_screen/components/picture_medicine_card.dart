@@ -11,7 +11,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:tanya_app_v1/Controller/medicine_info_controller.dart';
 
 class PictureMedicineCard extends StatefulWidget {
-  PictureMedicineCard({super.key});
+  const PictureMedicineCard({super.key});
 
   @override
   State<PictureMedicineCard> createState() => _PictureMedicineCardState();

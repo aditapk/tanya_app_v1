@@ -12,21 +12,25 @@ class SignUpScreenTopImage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(
-          "Sign Up".toUpperCase(),
-          style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+        const Text(
+          'สมัครสมาชิก',
+          style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
         ),
-        const Text('You can sign up here!'),
+        const Text(
+          'เพื่อเข้าใช้งานแอปพลิเคชั่นเตือนกินยา',
+          style: TextStyle(
+            fontSize: 20,
+          ),
+        ),
         const SizedBox(height: defaultPadding),
         Row(
           children: [
-            const Spacer(),
             Expanded(
-                flex: 8,
-                child: Lottie.asset('assets/lotties/online-doctor.json')
+                child: SizedBox(
+                    height: MediaQuery.of(context).size.width * 0.85,
+                    child: Lottie.asset('assets/lotties/online-doctor.json'))
                 //SvgPicture.asset("assets/icons/signup.svg"),
                 ),
-            const Spacer(),
           ],
         ),
         const SizedBox(height: defaultPadding),

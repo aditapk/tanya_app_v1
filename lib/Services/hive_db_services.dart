@@ -12,7 +12,7 @@ class HiveDatabaseService {
   static initialization() async {
     await init(); // initial hive on flutter
     registerAdapter(); // register all adapter
-    await deleteBox(); // delete box for test
+    //await deleteBox(); // delete box for test
     await openAllBox(); // open all box
   }
 
@@ -51,9 +51,9 @@ class HiveDatabaseService {
 
   static Future<void> deleteBox() async {
     //await Hive.deleteBoxFromDisk('user_notify_info');
-    await Hive.deleteBoxFromDisk('doctor_appointment');
-    await Hive.deleteBoxFromDisk('user_info');
-    await Hive.deleteBoxFromDisk('user_notify_info');
-    await Hive.deleteBoxFromDisk('user_medicine_info');
+    // await Hive.deleteBoxFromDisk('doctor_appointment');
+    // await Hive.deleteBoxFromDisk('user_info');
+    // await Hive.deleteBoxFromDisk('user_notify_info');
+    // await Hive.deleteBoxFromDisk('user_medicine_info');
   }
 }

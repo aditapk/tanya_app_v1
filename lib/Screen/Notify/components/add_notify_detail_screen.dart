@@ -5,12 +5,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart'; // for datetime formatting
 import 'package:tanya_app_v1/Model/medicine_info_model.dart';
 import 'package:tanya_app_v1/Model/notify_info.dart';
-import 'dart:math';
 
 import '../../../Model/user_info_model.dart';
 import '../../../Services/notify_services.dart';
@@ -22,12 +20,12 @@ import 'package:buddhist_datetime_dateformat_sns/buddhist_datetime_dateformat_sn
 import 'package:http/http.dart' as http;
 
 class AddNotifyDetailScreen extends StatefulWidget {
-  AddNotifyDetailScreen({
+  const AddNotifyDetailScreen({
     super.key,
     required this.selectedDate,
   });
 
-  DateTime selectedDate;
+  final DateTime selectedDate;
 
   @override
   State<AddNotifyDetailScreen> createState() => _AddNotifyDetailScreenState();
@@ -152,16 +150,6 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
   TextEditingController notifyBeforetoBedTimeController =
       TextEditingController();
 
-  // test
-  // List<List<String>> testNotifyTimeList = [
-  //   ["เช้า"],
-  //   ["เช้า", "กลางวัน"],
-  //   ["เช้า", "เย็น"],
-  //   ["กลางวัน", "เย็น", "ก่อนนอน"]
-  // ];
-  // List<TextFieldEditor> notifyTimeWidgetList = [];
-  // List<DateTime> _notifyTimeList = [];
-  // List<TextEditingController> _timeControllerList = [];
   // ---
   getNotifyID(String payload) {
     var notifyInfoObject = jsonDecode(payload);
@@ -170,83 +158,140 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
 
   void onDidReceiveLocalNotificationIOS(
       int id, String? title, String? body, String? payload) async {
-    // TODO
-    print("$id, $title");
+    //print("$id, $title");
+  }
+
+  generateNewSchedule(int notifyID, NotifyInfoModel? notifyInfo) async {
+    var date = notifyInfo!.date;
+    var now = DateTime.now();
+    var minuteDiff = now.difference(date).inMinutes;
+    if (minuteDiff <= 60) {
+      var nextDateTime = now.add(const Duration(minutes: 15));
+      // Convert string payload
+      var notifyPayload = jsonEncode({
+        "notifyID": notifyID,
+        "notifyInfo": notifyInfo.toJson(),
+      });
+      notifySet(
+        id: notifyID,
+        scheduleTime: nextDateTime,
+        payload: notifyPayload,
+        numNotify: notifyInfo.status,
+        imagePath: notifyInfo.medicineInfo.picture_path!,
+      );
+    } else {
+      Get.dialog(
+        AlertDialog(
+          title: const Text(
+            "คำเตือน!",
+            style: TextStyle(color: Colors.red),
+          ),
+          content: const Text(
+              "ไม่สามารถเลื่อนการแจ้งเตือนได้ เนื่องจากล่วงเลยกินยามามากกว่า 1 ชั่วโมงแล้ว"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Get.back();
+              },
+              child: const Text("OK"),
+            )
+          ],
+        ),
+      );
+
+      // แจ้งเตือนไปยังผู้ดูแล
+      await notifyToCarePerson();
+    }
   }
 
   void onDidReceiveNotificationAndroid(
       NotificationResponse notificationResponse) async {
     switch (notificationResponse.notificationResponseType) {
       case NotificationResponseType.selectedNotification:
-        // TODO: Handle this case.
+        // ignore: todo
+        // TODO: Handle this case. for Android, IOS
         // When click on notification
         // .notificationResponseType
         // .id
         // .actonId
         // .input
         // .payload
+        //print(notificationResponse.payload);
         var notifyID = getNotifyID(notificationResponse.payload!);
-        Get.to(() => NotifyHandleScreen(
+        var notifyBox = Hive.box<NotifyInfoModel>('user_notify_info');
+        var notifyInfo = notifyBox.getAt(notifyID);
+        var status = await Get.to(() => NotifyHandleScreen(
               notifyID: notifyID,
             ));
 
+        if (status == "OK") {
+          notifyInfo!.status = 0;
+          notifyInfo.save();
+        }
+        if (status == "PENDING") {
+          generateNewSchedule(notifyID, notifyInfo);
+        }
+
         break;
       case NotificationResponseType.selectedNotificationAction:
-        // TODO: Handle this case.
+        // ignore: todo
+        // TODO: Handle this case. for Android
         // When action on notification is clicked
         //print(notificationResponse.actionId);
         //print(notificationResponse.payload);
         var notifyID = getNotifyID(notificationResponse.payload!);
         var notifyBox = Hive.box<NotifyInfoModel>('user_notify_info');
         var notifyInfo = notifyBox.getAt(notifyID);
+
         if (notificationResponse.actionId == "OK") {
           // notify status -> complete
           notifyInfo!.status = 0;
           notifyInfo.save();
         }
         if (notificationResponse.actionId == "PENDING") {
+          generateNewSchedule(notifyID, notifyInfo);
           // set notify again
           // set notification
-          var date = notifyInfo!.date;
-          var now = DateTime.now();
-          var minuteDiff = now.difference(date).inMinutes;
-          if (minuteDiff <= 60) {
-            var nextDateTime = now.add(const Duration(minutes: 15));
-            // Convert string payload
-            var notifyPayload = jsonEncode({
-              "notifyID": notifyID,
-              "notifyInfo": notifyInfo.toJson(),
-            });
-            notifySet(
-              id: notifyID,
-              scheduleTime: nextDateTime,
-              payload: notifyPayload,
-              numNotify: notifyInfo.status,
-              imagePath: notifyInfo.medicineInfo.picture_path!,
-            );
-          } else {
-            Get.dialog(
-              AlertDialog(
-                title: const Text(
-                  "คำเตือน!",
-                  style: TextStyle(color: Colors.red),
-                ),
-                content: const Text(
-                    "ไม่สามารถเลื่อนการแจ้งเตือนได้ เนื่องจากล่วงเลยกินยามามากกว่า 1 ชั่วโมงแล้ว"),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Get.back();
-                    },
-                    child: const Text("OK"),
-                  )
-                ],
-              ),
-            );
+          // var date = notifyInfo!.date;
+          // var now = DateTime.now();
+          // var minuteDiff = now.difference(date).inMinutes;
+          // if (minuteDiff <= 60) {
+          //   var nextDateTime = now.add(const Duration(minutes: 15));
+          //   // Convert string payload
+          //   var notifyPayload = jsonEncode({
+          //     "notifyID": notifyID,
+          //     "notifyInfo": notifyInfo.toJson(),
+          //   });
+          //   notifySet(
+          //     id: notifyID,
+          //     scheduleTime: nextDateTime,
+          //     payload: notifyPayload,
+          //     numNotify: notifyInfo.status,
+          //     imagePath: notifyInfo.medicineInfo.picture_path!,
+          //   );
+          // } else {
+          //   Get.dialog(
+          //     AlertDialog(
+          //       title: const Text(
+          //         "คำเตือน!",
+          //         style: TextStyle(color: Colors.red),
+          //       ),
+          //       content: const Text(
+          //           "ไม่สามารถเลื่อนการแจ้งเตือนได้ เนื่องจากล่วงเลยกินยามามากกว่า 1 ชั่วโมงแล้ว"),
+          //       actions: [
+          //         TextButton(
+          //           onPressed: () {
+          //             Get.back();
+          //           },
+          //           child: const Text("OK"),
+          //         )
+          //       ],
+          //     ),
+          //   );
 
-            // แจ้งเตือนไปยังผู้ดูแล
-            await notifyToCarePerson();
-          }
+          //   // แจ้งเตือนไปยังผู้ดูแล
+          //   await notifyToCarePerson();
+          // }
         }
         break;
     }
@@ -352,7 +397,7 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
 
   //เลือกรายการยา
   selectMedicineItem() async {
-    var result = await Get.to(() => ToChooseMedicine());
+    var result = await Get.to(() => const ToChooseMedicine());
     // update field after choose
     if (result != null) {
       setState(() {
@@ -518,7 +563,6 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
           periodSundaySelected,
         ],
       );
-      ;
     }
     if (notifyInformation.enableEveningTime) {
       generateNotifySchedule(
@@ -716,26 +760,18 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
       scheduleTime: scheduleTime,
       notifyId: id,
       imagePath: imagePath,
-      notifyAction: numNotify != 4
-          ? const <AndroidNotificationAction>[
-              AndroidNotificationAction(
-                'OK',
-                'ตกลง',
-                showsUserInterface: true,
-              ),
-              AndroidNotificationAction(
-                'PENDING',
-                'เลื่อนไปก่อน',
-                showsUserInterface: true,
-              )
-            ]
-          : const <AndroidNotificationAction>[
-              AndroidNotificationAction(
-                'OK',
-                'ตกลง',
-                showsUserInterface: true,
-              )
-            ],
+      notifyAction: const <AndroidNotificationAction>[
+        AndroidNotificationAction(
+          'OK',
+          'ตกลง',
+          showsUserInterface: true,
+        ),
+        AndroidNotificationAction(
+          'PENDING',
+          'เลื่อนไปก่อน',
+          showsUserInterface: true,
+        )
+      ],
     );
   }
 
@@ -1032,16 +1068,16 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
 }
 
 class PeriodDateSeletedCard extends StatelessWidget {
-  PeriodDateSeletedCard({
+  const PeriodDateSeletedCard({
     required this.isSelected,
     required this.text,
     this.onTap,
     super.key,
   });
 
-  bool isSelected;
-  String text;
-  Function()? onTap;
+  final bool isSelected;
+  final String text;
+  final Function()? onTap;
 
   TextStyle periodDayTextStyly(bool isSelected) {
     return isSelected
@@ -1080,7 +1116,7 @@ class PeriodDateSeletedCard extends StatelessWidget {
 }
 
 class TextFieldEditor extends StatelessWidget {
-  TextFieldEditor({
+  const TextFieldEditor({
     super.key,
     required this.title,
     required this.hintText,
@@ -1088,10 +1124,10 @@ class TextFieldEditor extends StatelessWidget {
     this.widget,
   });
 
-  String title;
-  String hintText;
-  TextEditingController? controller;
-  Widget? widget;
+  final String title;
+  final String hintText;
+  final TextEditingController? controller;
+  final Widget? widget;
 
   //
   TextStyle get titleStyle {
@@ -1157,16 +1193,16 @@ class TextFieldEditor extends StatelessWidget {
 }
 
 class NotifyTimeWidget extends StatelessWidget {
-  NotifyTimeWidget({
+  const NotifyTimeWidget({
     super.key,
     required this.titleNotifyTime,
     required this.hintText,
     required this.onPressed,
   });
 
-  List<String> titleNotifyTime;
-  List<String> hintText;
-  List<Function()?> onPressed;
+  final List<String> titleNotifyTime;
+  final List<String> hintText;
+  final List<Function()?> onPressed;
 
   //titleNotifyTime = ["เช้า","กลางวัน", "เย็น", "ก่อนนอน"];
   @override

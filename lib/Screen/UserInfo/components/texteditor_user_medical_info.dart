@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:hive/hive.dart';
 
 import '../../../Model/user_info_model.dart';
@@ -47,6 +46,7 @@ class _TextFieldUserMedicalInfoState extends State<TextFieldUserMedicalInfo> {
 
   @override
   void initState() {
+    // ignore: todo
     // TODO: implement initState
     if (widget.userInfo != null) {
       if (widget.userInfo!.weight != null) {

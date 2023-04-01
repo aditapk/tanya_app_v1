@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gallery_saver/gallery_saver.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
@@ -12,13 +11,13 @@ import 'package:path_provider/path_provider.dart';
 import '../../../Model/user_info_model.dart';
 
 class UserAvatarPicture extends StatelessWidget {
-  UserAvatarPicture({
+  const UserAvatarPicture({
     this.userInfo,
     super.key,
   });
 
-  UserInfo? userInfo;
-  Icon userTempAvatar = const Icon(
+  final UserInfo? userInfo;
+  final Icon userTempAvatar = const Icon(
     Icons.person,
     size: 80 * 2 * 0.7,
     color: Colors.white,

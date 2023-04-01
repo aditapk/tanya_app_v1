@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:tanya_app_v1/home_app_screen.dart';
 
 import '../../Model/medicine_info_model.dart';
 import '../AddMedicalInformation/medicine_list_screen/components/empty_medicine_list.dart';
 import '../AddMedicalInformation/medicine_list_screen/components/image_card.dart';
-import '../AddMedicalInformation/medicine_list_screen/components/medicine_info_card.dart';
 import '../AddMedicalInformation/medicine_list_screen/components/medicine_info_display_card.dart';
 
 class ToChooseMedicine extends StatefulWidget {
@@ -50,7 +48,7 @@ class _ToChooseMedicineState extends State<ToChooseMedicine> {
           } else {
             return Column(
               children: [
-                EmptyMedicineList(
+                const EmptyMedicineList(
                   emptyDescription: "กรุณาไปที่หน้าเพิ่มรายการยา",
                 ),
                 const SizedBox(
@@ -65,7 +63,7 @@ class _ToChooseMedicineState extends State<ToChooseMedicine> {
                       ),
                     ),
                     onPressed: () {
-                      Get.off(() => HomeAppScreen(
+                      Get.off(() => const HomeAppScreen(
                             selectedPage: 1,
                           ));
                     },
@@ -87,14 +85,14 @@ class _ToChooseMedicineState extends State<ToChooseMedicine> {
 }
 
 class MedicineCardSelect extends StatelessWidget {
-  MedicineCardSelect({
+  const MedicineCardSelect({
     super.key,
     this.medicineData,
     required this.index,
   });
 
-  MedicineInfo? medicineData;
-  int index;
+  final MedicineInfo? medicineData;
+  final int index;
 
   @override
   Widget build(BuildContext context) {

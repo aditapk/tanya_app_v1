@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tanya_app_v1/Controller/medicine_info_controller.dart';
-
-import 'number_of_dose_card.dart';
 import 'package:fraction/fraction.dart';
 
 class NumberOfDoseSelection extends StatefulWidget {
-  NumberOfDoseSelection({super.key, required this.controller});
+  const NumberOfDoseSelection({super.key, required this.controller});
 
   final TextEditingController controller;
 
@@ -64,11 +62,11 @@ class _NumberOfDoseSelectionState extends State<NumberOfDoseSelection> {
       return "ข้อผิดพลาด : กรุณาระบุขนาด";
     }
     // check number & support /
-    final text_number = double.tryParse(text);
-    if (text_number == null) {
+    final textNumber = double.tryParse(text);
+    if (textNumber == null) {
       // check "/" in word
-      int slash_idx = text.indexOf("/");
-      if (slash_idx != -1) {
+      int slashIdx = text.indexOf("/");
+      if (slashIdx != -1) {
         final splitted = text.split("/");
         final prenum = splitted[0];
         final postnum = splitted[1];
@@ -81,19 +79,19 @@ class _NumberOfDoseSelectionState extends State<NumberOfDoseSelection> {
     } else {
       // check over for เม็ด
       if (medicineInfoState.selected_type_unit.value == "เม็ด") {
-        if (text_number > 30) {
+        if (textNumber > 30) {
           return "คำเตือน : ระบุขนาดเกิน 30 เม็ด";
         }
       }
       // check over for cc
       if (medicineInfoState.selected_type_unit.value == "cc") {
-        if (text_number > 120) {
+        if (textNumber > 120) {
           return "คำเตือน : ระบุขนาดเกิน 120 cc";
         }
       }
       // check over for ml
       if (medicineInfoState.selected_type_unit.value == "ml") {
-        if (text_number > 45) {
+        if (textNumber > 45) {
           return "คำเตือน : ระบุขนาดเกิน 45 ml";
         }
       }
@@ -136,14 +134,14 @@ class _NumberOfDoseSelectionState extends State<NumberOfDoseSelection> {
                     _nDoseError == "คำเตือน : ระบุขนาดเกิน 120 cc" ||
                     _nDoseError == "คำเตือน : ระบุขนาดเกิน 45 ml") {
                   // check slash /
-                  int? slash_ind = value.indexOf("/");
-                  if (slash_ind == -1) {
+                  int? slashIndex = value.indexOf("/");
+                  if (slashIndex == -1) {
                     medicineInfoState.nTake(double.tryParse(value));
                   } else {
                     final splitted = value.split("/");
                     final prenum = splitted[0];
                     final posenum = splitted[1];
-                    if (!prenum.isEmpty && !posenum.isEmpty) {
+                    if (prenum.isNotEmpty && posenum.isNotEmpty) {
                       final number = int.tryParse(splitted[0])! /
                           int.tryParse(splitted[1])!;
                       medicineInfoState.nTake(number);
@@ -159,28 +157,31 @@ class _NumberOfDoseSelectionState extends State<NumberOfDoseSelection> {
           const SizedBox(
             width: 10,
           ),
-          SizedBox(
-            width: 159,
-            child: Center(
-              child: DropdownButtonFormField<String>(
-                decoration: InputDecoration(
-                  enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide:
-                          const BorderSide(width: 1, color: Colors.blue)),
+          Expanded(
+            child: SizedBox(
+              width: 159,
+              child: Center(
+                child: DropdownButtonFormField<String>(
+                  decoration: InputDecoration(
+                    enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide:
+                            const BorderSide(width: 1, color: Colors.blue)),
+                  ),
+                  onChanged: (value) {
+                    medicineInfoState.selected_type_unit(value);
+                  },
+                  value: medicineInfoState.selected_type_unit.value,
+                  items:
+                      selectedListType(medicineInfoState.selected_type.value)!
+                          .map(
+                            (item) => DropdownMenuItem(
+                              value: item,
+                              child: Text(item),
+                            ),
+                          )
+                          .toList(),
                 ),
-                onChanged: (value) {
-                  medicineInfoState.selected_type_unit(value);
-                },
-                value: medicineInfoState.selected_type_unit.value,
-                items: selectedListType(medicineInfoState.selected_type.value)!
-                    .map(
-                      (item) => DropdownMenuItem(
-                        value: item,
-                        child: Text(item),
-                      ),
-                    )
-                    .toList(),
               ),
             ),
           ),

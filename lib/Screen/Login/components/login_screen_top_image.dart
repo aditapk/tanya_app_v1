@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lottie/lottie.dart';
 import 'package:tanya_app_v1/constants.dart';
 
@@ -13,22 +12,27 @@ class LoginScreenTopImage extends StatelessWidget {
     return Column(
       children: [
         const Text(
-          "LOGIN",
+          "เข้าสู่ระบบ",
           style: TextStyle(
             fontSize: 30,
             fontWeight: FontWeight.bold,
           ),
         ),
-        const Text("You can login here!"),
+        const Text(
+          "แอปพลิเคชันเตือนกินยา",
+          style: TextStyle(
+            fontSize: 20,
+          ),
+        ),
         const SizedBox(height: defaultPadding * 2),
         Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Spacer(),
             Expanded(
-              flex: 8,
-              child: Lottie.asset('assets/lotties/doctor.json'),
+              child: SizedBox(
+                  height: MediaQuery.of(context).size.width * 0.85,
+                  child: Lottie.asset('assets/lotties/doctor.json')),
             ),
-            const Spacer(),
           ],
         ),
         const SizedBox(height: defaultPadding * 1),

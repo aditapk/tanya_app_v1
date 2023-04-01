@@ -17,12 +17,45 @@ class NotifyService {
     required onDidReceiveNotificationAndroid,
   }) async {
     tz.initializeTimeZones();
+    List<DarwinNotificationCategory> iosNotificationCategories =
+        const <DarwinNotificationCategory>[
+      DarwinNotificationCategory(
+        'default',
+        // actions: <DarwinNotificationAction>[
+        //   DarwinNotificationAction.text(
+        //     'OK',
+        //     'ตกลง',
+        //     buttonTitle: 'ตกลง',
+        //   ),
+        //   DarwinNotificationAction.text(
+        //     'PENDING',
+        //     'เลื่อนไปก่อน',
+        //     buttonTitle: 'เลื่อนไปก่อน',
+        //   ),
+        // ],
+      ),
+      DarwinNotificationCategory(
+        'Doctor Appointment',
+        // actions: <DarwinNotificationAction>[
+        //   DarwinNotificationAction.plain(
+        //     'OK',
+        //     'ตกลง',
+        //   ),
+        //   DarwinNotificationAction.plain(
+        //     'PENDING',
+        //     'เตือนอีกครั้ง',
+        //   ),
+        // ],
+      ),
+    ];
     final DarwinInitializationSettings iOSInitializationSettings =
         DarwinInitializationSettings(
-            requestAlertPermission: false,
-            requestBadgePermission: false,
-            requestSoundPermission: false,
-            onDidReceiveLocalNotification: onDidReceiveNotificationIOS);
+      requestAlertPermission: false,
+      requestBadgePermission: false,
+      requestSoundPermission: false,
+      onDidReceiveLocalNotification: onDidReceiveNotificationIOS,
+      notificationCategories: iosNotificationCategories,
+    );
 
     const AndroidInitializationSettings androidInitializationSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -123,8 +156,16 @@ class NotifyService {
             ticker: notifyTicker,
             actions: notifyAction,
             styleInformation: bigPictureStyleInformation);
+
+    // check file is exist
+    DarwinNotificationDetails? iosNotificationDetails =
+        const DarwinNotificationDetails(
+      categoryIdentifier: 'default',
+    );
+
     NotificationDetails notificationDetails = NotificationDetails(
       android: androidNotificationDetails,
+      iOS: iosNotificationDetails,
     );
 
     // await localNotificationsPlugin.show(
@@ -163,8 +204,14 @@ class NotifyService {
       ticker: 'notifyTicker',
       actions: actions,
     );
+
+    DarwinNotificationDetails iosNotificationDetails =
+        const DarwinNotificationDetails(
+      categoryIdentifier: 'Doctor Appointment',
+    );
     NotificationDetails notificationDetails = NotificationDetails(
       android: androidNotificationDetails,
+      iOS: iosNotificationDetails,
     );
 
     var scheduledDate = tz.TZDateTime.from(notifyDate, tz.local);

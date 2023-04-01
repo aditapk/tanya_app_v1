@@ -69,6 +69,8 @@ dependencies:
   buddhist_datetime_dateformat_sns: ^1.0.7
   http: ^0.13.5
   flutter_colorpicker: ^1.0.3
+  awesome_notifications: ^0.7.4+1
+  flutter_launcher_icons: ^0.12.0
   
   
 dev_dependencies:

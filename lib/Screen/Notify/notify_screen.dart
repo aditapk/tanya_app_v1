@@ -44,10 +44,10 @@ class _NotifyScreenState extends State<NotifyScreen> {
 
   Color? getExpansionPanelColor(int index) {
     final List<Color> panelColor = [
-      Colors.pink.shade200,
-      Colors.lime.shade200,
-      Colors.yellow.shade200,
-      Colors.cyan.shade200,
+      Colors.greenAccent.shade200,
+      Colors.yellow.shade300,
+      Colors.limeAccent.shade100,
+      Colors.lightGreenAccent.shade200,
     ];
     return panelColor[index];
   }
@@ -100,7 +100,6 @@ class _NotifyScreenState extends State<NotifyScreen> {
         ),
         Expanded(
           child: SingleChildScrollView(
-            scrollDirection: Axis.vertical,
             child: ValueListenableBuilder(
               valueListenable:
                   Hive.box<NotifyInfoModel>('user_notify_info').listenable(),
@@ -191,30 +190,91 @@ class _NotifyScreenState extends State<NotifyScreen> {
                             animationDuration:
                                 const Duration(milliseconds: 1000),
                             expansionCallback: (panelIndex, isExpanded) {
-                              if (panelIndex == 0) {
-                                // selected on panel morning
-                                setState(() {
-                                  morningStatPanel = !morningStatPanel;
-                                });
+                              if (isExpanded) {
+                                // set to close
+                                switch (panelIndex) {
+                                  case 0:
+                                    setState(() {
+                                      morningStatPanel = !isExpanded;
+                                    });
+                                    break;
+                                  case 1:
+                                    setState(() {
+                                      lunchStatPanel = !isExpanded;
+                                    });
+                                    break;
+                                  case 2:
+                                    setState(() {
+                                      eveningStatPanel = !isExpanded;
+                                    });
+                                    break;
+                                  case 3:
+                                    setState(() {
+                                      beforeBedStatPanel = !isExpanded;
+                                    });
+                                    break;
+                                }
+                              } else {
+                                // set to open
+                                switch (panelIndex) {
+                                  case 0:
+                                    setState(() {
+                                      morningStatPanel = !isExpanded;
+                                      lunchStatPanel = isExpanded;
+                                      eveningStatPanel = isExpanded;
+                                      beforeBedStatPanel = isExpanded;
+                                    });
+                                    break;
+                                  case 1:
+                                    setState(() {
+                                      morningStatPanel = isExpanded;
+                                      lunchStatPanel = !isExpanded;
+                                      eveningStatPanel = isExpanded;
+                                      beforeBedStatPanel = isExpanded;
+                                    });
+                                    break;
+                                  case 2:
+                                    setState(() {
+                                      morningStatPanel = isExpanded;
+                                      lunchStatPanel = isExpanded;
+                                      eveningStatPanel = !isExpanded;
+                                      beforeBedStatPanel = isExpanded;
+                                    });
+                                    break;
+                                  case 3:
+                                    setState(() {
+                                      morningStatPanel = isExpanded;
+                                      lunchStatPanel = isExpanded;
+                                      eveningStatPanel = isExpanded;
+                                      beforeBedStatPanel = !isExpanded;
+                                    });
+                                    break;
+                                }
                               }
-                              if (panelIndex == 1) {
-                                // selected on panel lunch
-                                setState(() {
-                                  lunchStatPanel = !lunchStatPanel;
-                                });
-                              }
-                              if (panelIndex == 2) {
-                                // selected on panel evening
-                                setState(() {
-                                  eveningStatPanel = !eveningStatPanel;
-                                });
-                              }
-                              if (panelIndex == 3) {
-                                // selected on panel before bed
-                                setState(() {
-                                  beforeBedStatPanel = !beforeBedStatPanel;
-                                });
-                              }
+                              // if (panelIndex == 0) {
+                              //   // selected on panel morning
+                              //   setState(() {
+                              //     morningStatPanel = !morningStatPanel;
+                              //   });
+                              // }
+                              // if (panelIndex == 1) {
+                              //   // selected on panel lunch
+                              //   setState(() {
+                              //     lunchStatPanel = !lunchStatPanel;
+                              //   });
+                              // }
+                              // if (panelIndex == 2) {
+                              //   // selected on panel evening
+                              //   setState(() {
+                              //     eveningStatPanel = !eveningStatPanel;
+                              //   });
+                              // }
+                              // if (panelIndex == 3) {
+                              //   // selected on panel before bed
+                              //   setState(() {
+                              //     beforeBedStatPanel = !beforeBedStatPanel;
+                              //   });
+                              // }
                             },
                             children: [
                               ExpansionPanel(
@@ -234,9 +294,27 @@ class _NotifyScreenState extends State<NotifyScreen> {
                                       ),
                                   body: notifyInfoListCurrentDateMorningTime
                                           .isNotEmpty
-                                      ? MedicineListInMorning(
-                                          notifyInfoListCurrentDateMorningTime:
-                                              notifyInfoListCurrentDateMorningTime,
+                                      ? Padding(
+                                          padding: const EdgeInsets.all(8),
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                                color: Colors.white70,
+                                                borderRadius:
+                                                    BorderRadius.circular(12)),
+                                            height:
+                                                notifyInfoListCurrentDateMorningTime
+                                                            .length <=
+                                                        1
+                                                    ? null
+                                                    : MediaQuery.of(context)
+                                                            .size
+                                                            .height *
+                                                        0.5,
+                                            child: MedicineCardList(
+                                              notifyInfoListCurrentDate:
+                                                  notifyInfoListCurrentDateMorningTime,
+                                            ),
+                                          ),
                                         )
                                       : Container()),
                               ExpansionPanel(
@@ -256,9 +334,27 @@ class _NotifyScreenState extends State<NotifyScreen> {
                                       ),
                                   body: notifyInfoListCurrentDateLunchTime
                                           .isNotEmpty
-                                      ? MedicineListInLunch(
-                                          notifyInfoListCurrentDateLunchTime:
-                                              notifyInfoListCurrentDateLunchTime,
+                                      ? Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                                color: Colors.white70,
+                                                borderRadius:
+                                                    BorderRadius.circular(12)),
+                                            height:
+                                                notifyInfoListCurrentDateLunchTime
+                                                            .length <=
+                                                        1
+                                                    ? null
+                                                    : MediaQuery.of(context)
+                                                            .size
+                                                            .height *
+                                                        0.5,
+                                            child: MedicineCardList(
+                                              notifyInfoListCurrentDate:
+                                                  notifyInfoListCurrentDateLunchTime,
+                                            ),
+                                          ),
                                         )
                                       : Container()),
                               ExpansionPanel(
@@ -278,9 +374,27 @@ class _NotifyScreenState extends State<NotifyScreen> {
                                       ),
                                   body: notifyInfoListCurrentDateEveningTime
                                           .isNotEmpty
-                                      ? MedicineListInEvening(
-                                          notifyInfoListCurrentDateEveningTime:
-                                              notifyInfoListCurrentDateEveningTime,
+                                      ? Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                                color: Colors.white70,
+                                                borderRadius:
+                                                    BorderRadius.circular(12)),
+                                            height:
+                                                notifyInfoListCurrentDateEveningTime
+                                                            .length <=
+                                                        1
+                                                    ? null
+                                                    : MediaQuery.of(context)
+                                                            .size
+                                                            .height *
+                                                        0.5,
+                                            child: MedicineCardList(
+                                              notifyInfoListCurrentDate:
+                                                  notifyInfoListCurrentDateEveningTime,
+                                            ),
+                                          ),
                                         )
                                       : Container()),
                               ExpansionPanel(
@@ -300,9 +414,27 @@ class _NotifyScreenState extends State<NotifyScreen> {
                                       ),
                                   body: notifyInfoListCurrentDateBeforeBedTime
                                           .isNotEmpty
-                                      ? MedicineListInBeforeBed(
-                                          notifyInfoListCurrentDateBeforeBedTime:
-                                              notifyInfoListCurrentDateBeforeBedTime,
+                                      ? Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                                color: Colors.white70,
+                                                borderRadius:
+                                                    BorderRadius.circular(12)),
+                                            height:
+                                                notifyInfoListCurrentDateBeforeBedTime
+                                                            .length <=
+                                                        1
+                                                    ? null
+                                                    : MediaQuery.of(context)
+                                                            .size
+                                                            .height *
+                                                        0.5,
+                                            child: MedicineCardList(
+                                              notifyInfoListCurrentDate:
+                                                  notifyInfoListCurrentDateBeforeBedTime,
+                                            ),
+                                          ),
                                         )
                                       : Container()),
                             ],
@@ -350,105 +482,118 @@ class _NotifyScreenState extends State<NotifyScreen> {
   }
 }
 
-class MedicineListInBeforeBed extends StatelessWidget {
-  const MedicineListInBeforeBed({
+class MedicineCardList extends StatelessWidget {
+  const MedicineCardList({
     super.key,
-    required this.notifyInfoListCurrentDateBeforeBedTime,
+    required this.notifyInfoListCurrentDate,
   });
 
-  final Iterable<NotifyInfoModel> notifyInfoListCurrentDateBeforeBedTime;
+  final Iterable<NotifyInfoModel> notifyInfoListCurrentDate;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        ListView(
-          shrinkWrap: true,
-          children: notifyInfoListCurrentDateBeforeBedTime.map((notifyInfo) {
-            return NotifyCard(
-              notifyInfo: notifyInfo,
-            );
-          }).toList(),
-        ),
-      ],
+    return ListView(
+      shrinkWrap: true,
+      children: notifyInfoListCurrentDate.map((notifyInfo) {
+        return NotifyCard(
+          notifyInfo: notifyInfo,
+        );
+      }).toList(),
     );
   }
 }
 
-class MedicineListInEvening extends StatelessWidget {
-  const MedicineListInEvening({
-    super.key,
-    required this.notifyInfoListCurrentDateEveningTime,
-  });
+// class MedicineListInBeforeBed extends StatelessWidget {
+//   const MedicineListInBeforeBed({
+//     super.key,
+//     required this.notifyInfoListCurrentDateBeforeBedTime,
+//   });
 
-  final Iterable<NotifyInfoModel> notifyInfoListCurrentDateEveningTime;
+//   final Iterable<NotifyInfoModel> notifyInfoListCurrentDateBeforeBedTime;
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        ListView(
-          shrinkWrap: true,
-          children: notifyInfoListCurrentDateEveningTime.map((notifyInfo) {
-            return NotifyCard(
-              notifyInfo: notifyInfo,
-            );
-          }).toList(),
-        ),
-      ],
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Column(
+//       children: [
+//         ListView(
+//           shrinkWrap: true,
+//           children: notifyInfoListCurrentDateBeforeBedTime.map((notifyInfo) {
+//             return NotifyCard(
+//               notifyInfo: notifyInfo,
+//             );
+//           }).toList(),
+//         ),
+//       ],
+//     );
+//   }
+// }
 
-class MedicineListInLunch extends StatelessWidget {
-  const MedicineListInLunch({
-    super.key,
-    required this.notifyInfoListCurrentDateLunchTime,
-  });
+// class MedicineListInEvening extends StatelessWidget {
+//   const MedicineListInEvening({
+//     super.key,
+//     required this.notifyInfoListCurrentDateEveningTime,
+//   });
 
-  final Iterable<NotifyInfoModel> notifyInfoListCurrentDateLunchTime;
+//   final Iterable<NotifyInfoModel> notifyInfoListCurrentDateEveningTime;
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        ListView(
-          shrinkWrap: true,
-          children: notifyInfoListCurrentDateLunchTime.map((notifyInfo) {
-            return NotifyCard(
-              notifyInfo: notifyInfo,
-            );
-          }).toList(),
-        ),
-      ],
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Column(
+//       children: [
+//         ListView(
+//           shrinkWrap: true,
+//           children: notifyInfoListCurrentDateEveningTime.map((notifyInfo) {
+//             return NotifyCard(
+//               notifyInfo: notifyInfo,
+//             );
+//           }).toList(),
+//         ),
+//       ],
+//     );
+//   }
+// }
 
-class MedicineListInMorning extends StatelessWidget {
-  const MedicineListInMorning({
-    super.key,
-    required this.notifyInfoListCurrentDateMorningTime,
-  });
+// class MedicineListInLunch extends StatelessWidget {
+//   const MedicineListInLunch({
+//     super.key,
+//     required this.notifyInfoListCurrentDateLunchTime,
+//   });
 
-  final Iterable<NotifyInfoModel> notifyInfoListCurrentDateMorningTime;
+//   final Iterable<NotifyInfoModel> notifyInfoListCurrentDateLunchTime;
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        ListView(
-          shrinkWrap: true,
-          children: notifyInfoListCurrentDateMorningTime.map((notifyInfo) {
-            return NotifyCard(
-              notifyInfo: notifyInfo,
-            );
-          }).toList(),
-        ),
-      ],
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return ListView(
+//       shrinkWrap: true,
+//       children: notifyInfoListCurrentDateLunchTime.map((notifyInfo) {
+//         return NotifyCard(
+//           notifyInfo: notifyInfo,
+//         );
+//       }).toList(),
+//     );
+//   }
+// }
+
+// class MedicineListInMorning extends StatelessWidget {
+//   const MedicineListInMorning({
+//     super.key,
+//     required this.notifyInfoListCurrentDateMorningTime,
+//   });
+
+//   final Iterable<NotifyInfoModel> notifyInfoListCurrentDateMorningTime;
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return ListView(
+//       shrinkWrap: true,
+//       children: notifyInfoListCurrentDateMorningTime.map((notifyInfo) {
+//         return NotifyCard(
+//           notifyInfo: notifyInfo,
+//         );
+//       }).toList(),
+//     );
+//   }
+// }
 
 class EmptyNotifyList extends StatelessWidget {
   const EmptyNotifyList({
@@ -482,11 +627,11 @@ class EmptyNotifyList extends StatelessWidget {
 }
 
 class NotifyCard extends StatelessWidget {
-  NotifyCard({
+  const NotifyCard({
     required this.notifyInfo,
     super.key,
   });
-  NotifyInfoModel notifyInfo;
+  final NotifyInfoModel notifyInfo;
 
   final String _emptyPicture = "assets/images/dummy_picture.jpg";
   @override
@@ -503,7 +648,7 @@ class NotifyCard extends StatelessWidget {
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             child: SizedBox(
-              height: 220,
+              height: 225,
               child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Column(
@@ -519,7 +664,9 @@ class NotifyCard extends StatelessWidget {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            Text(notifyInfo.description),
+                            Text(
+                              notifyInfo.description,
+                            ),
                             Text(
                               "เวลา ${TimeOfDay(
                                 hour: notifyInfo.time.hour,
@@ -535,46 +682,42 @@ class NotifyCard extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(12),
                                 color: Color(notifyInfo.medicineInfo.color),
                               ),
-                              child: Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        flex: 2,
-                                        child: Padding(
-                                          padding:
-                                              const EdgeInsets.only(top: 5),
-                                          child: MedicineInfoOnCard(
-                                              notifyInfo: notifyInfo),
-                                        ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      flex: 2,
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(top: 5),
+                                        child: MedicineInfoOnCard(
+                                            notifyInfo: notifyInfo),
                                       ),
-                                      Expanded(
-                                        flex: 1,
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                          child: notifyInfo.medicineInfo
-                                                          .picture_path ==
-                                                      '' ||
-                                                  notifyInfo.medicineInfo
-                                                          .picture_path ==
-                                                      null
-                                              ? Image.asset(
-                                                  _emptyPicture,
-                                                  fit: BoxFit.cover,
-                                                  height: 110,
-                                                )
-                                              : Image.file(
-                                                  File(notifyInfo.medicineInfo
-                                                      .picture_path!),
-                                                  fit: BoxFit.cover,
-                                                  height: 110,
-                                                ),
-                                        ),
+                                    ),
+                                    Expanded(
+                                      flex: 1,
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: notifyInfo.medicineInfo
+                                                        .picture_path ==
+                                                    '' ||
+                                                notifyInfo.medicineInfo
+                                                        .picture_path ==
+                                                    null
+                                            ? Image.asset(
+                                                _emptyPicture,
+                                                fit: BoxFit.cover,
+                                                height: 110,
+                                              )
+                                            : Image.file(
+                                                File(notifyInfo.medicineInfo
+                                                    .picture_path!),
+                                                fit: BoxFit.cover,
+                                                height: 110,
+                                              ),
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
@@ -582,59 +725,7 @@ class NotifyCard extends StatelessWidget {
                         ),
                       )
                     ],
-                  )
-                  // Row(
-                  //   children: [
-                  //     Expanded(
-                  //       flex: 1,
-                  //       child: ClipRRect(
-                  //         borderRadius: BorderRadius.circular(20),
-                  //         child: notifyInfo.medicineInfo.picture_path == '' ||
-                  //                 notifyInfo.medicineInfo.picture_path == null
-                  //             ? Image.asset(
-                  //                 _emptyPicture,
-                  //                 fit: BoxFit.cover,
-                  //                 height: 150,
-                  //               )
-                  //             : Image.file(
-                  //                 File(notifyInfo.medicineInfo.picture_path!),
-                  //                 fit: BoxFit.cover,
-                  //                 height: 150,
-                  //               ),
-                  //       ),
-                  //     ),
-                  //     Expanded(
-                  //       flex: 2,
-                  //       child: Container(
-                  //         padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-                  //         height: 200,
-                  //         child: Column(
-                  //           mainAxisAlignment: MainAxisAlignment.start,
-                  //           crossAxisAlignment: CrossAxisAlignment.start,
-                  //           children: [
-                  //             Text(
-                  //               notifyInfo.name,
-                  //               style: const TextStyle(
-                  //                 fontSize: 16,
-                  //                 fontWeight: FontWeight.bold,
-                  //               ),
-                  //             ),
-                  //             Text(notifyInfo.description),
-                  //             Text("เวลา ${TimeOfDay(
-                  //               hour: notifyInfo.time.hour,
-                  //               minute: notifyInfo.time.minute,
-                  //             ).format(context)}"),
-                  //             const Divider(
-                  //               thickness: 2,
-                  //             ),
-                  //             MedicineInfoOnCard(notifyInfo: notifyInfo),
-                  //           ],
-                  //         ),
-                  //       ),
-                  //     ),
-                  //   ],
-                  // ),
-                  ),
+                  )),
             ),
           ),
           Positioned(
@@ -730,7 +821,8 @@ class MedicineInfoOnCard extends StatelessWidget {
           ),
         ),
         Text(
-          notifyInfo.medicineInfo.description,
+          '${notifyInfo.medicineInfo.description.replaceAll('\n', ' ').substring(0, notifyInfo.medicineInfo.description.length >= 40 ? 40 : notifyInfo.medicineInfo.description.length)}...',
+          overflow: TextOverflow.ellipsis,
         ),
         Text(
           getHowtoEat(notifyInfo),
@@ -838,12 +930,12 @@ class NotifyStatus extends StatelessWidget {
 }
 
 class AddNotifyButton extends StatelessWidget {
-  AddNotifyButton({
+  const AddNotifyButton({
     Key? key,
     required this.onTap,
   }) : super(key: key);
 
-  Function()? onTap;
+  final Function()? onTap;
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -851,7 +943,7 @@ class AddNotifyButton extends StatelessWidget {
       width: 60,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-            shape: const CircleBorder(), padding: EdgeInsets.all(10)),
+            shape: const CircleBorder(), padding: const EdgeInsets.all(10)),
 
         onPressed: onTap,
         child: const Icon(

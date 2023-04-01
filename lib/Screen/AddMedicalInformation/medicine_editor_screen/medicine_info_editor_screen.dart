@@ -1,7 +1,6 @@
 // ignore_for_file: must_be_immutable
 
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:tanya_app_v1/Controller/medicine_info_controller.dart';
@@ -92,7 +91,7 @@ class _MedicineInfoEditorScreenState extends State<MedicineInfoEditorScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                PictureMedicineCard(),
+                const PictureMedicineCard(),
                 const SizedBox(
                   height: 20,
                 ),

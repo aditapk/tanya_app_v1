@@ -60,7 +60,7 @@ class MedicineInfoDisplayCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 5),
+      padding: const EdgeInsets.only(top: 5, right: 40),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

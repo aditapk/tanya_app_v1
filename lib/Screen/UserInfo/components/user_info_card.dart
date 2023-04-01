@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import '../../../Model/user_info_model.dart';
 import 'editbutton_user_info.dart';
 import 'texteditor_user_info.dart';
@@ -23,10 +22,10 @@ class UserInfoCard extends StatelessWidget {
         elevation: 2,
         child: Column(
           children: [
-            UserAvatarPicture(),
+            const UserAvatarPicture(),
             Stack(
               children: [
-                UserInfoWidget(),
+                const UserInfoWidget(),
                 Positioned(
                   top: 8,
                   right: 8,

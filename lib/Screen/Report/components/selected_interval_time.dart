@@ -4,9 +4,13 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 class SelectedIntervalTime extends StatefulWidget {
-  SelectedIntervalTime({super.key, this.startDateTime, this.endDateTime});
-  DateTime? startDateTime;
-  DateTime? endDateTime;
+  const SelectedIntervalTime({
+    super.key,
+    this.startDateTime,
+    this.endDateTime,
+  });
+  final DateTime? startDateTime;
+  final DateTime? endDateTime;
   @override
   State<SelectedIntervalTime> createState() => _SelectedIntervalTimeState();
 }
@@ -25,6 +29,7 @@ class _SelectedIntervalTimeState extends State<SelectedIntervalTime> {
 
   @override
   void initState() {
+    // ignore: todo
     // TODO: implement initState
     //widget.startDateTime = widget.startDateTime ?? DateTime.now();
     //widget.endDateTime = widget.endDateTime ?? DateTime.now().add(const Duration(days: 1));

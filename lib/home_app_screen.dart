@@ -2,12 +2,13 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:tanya_app_v1/Model/user_login_model.dart';
 //import 'package:intl/intl.dart';
 import 'package:tanya_app_v1/Screen/AddMedicalInformation/medicine_editor_screen/medicine_info_editor_screen.dart';
 import 'package:tanya_app_v1/Screen/AddMedicalInformation/medicine_list_screen/components/display_medicine_info_list.dart';
+import 'package:tanya_app_v1/Screen/Login/login_screen_selection.dart';
 import 'package:tanya_app_v1/Screen/Report/medical_report_screen.dart';
 import 'package:tanya_app_v1/Screen/UserInfo/user_info_screen.dart';
 //import 'package:tanya_app_v1/utils/style.dart';
@@ -18,9 +19,9 @@ import 'Screen/Notify/notify_screen.dart';
 //import 'forTest/local_notify/body_notify_list.dart';
 
 class HomeAppScreen extends StatefulWidget {
-  HomeAppScreen({super.key, this.selectedPage});
+  const HomeAppScreen({super.key, this.selectedPage});
 
-  int? selectedPage;
+  final int? selectedPage;
 
   @override
   State<HomeAppScreen> createState() => _HomeAppScreenState();
@@ -31,6 +32,18 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
     return AppBar(
       elevation: 2,
       automaticallyImplyLeading: false,
+      leading: IconButton(
+        icon: const Icon(
+          Icons.logout,
+        ),
+        onPressed: () async {
+          var userLoginBox = Hive.box<UserLogin>('user_login');
+          var userLogin = userLoginBox.get(0);
+          userLogin!.logOut = true;
+          await userLogin.save();
+          Get.to(const LoginScreenSelection());
+        },
+      ),
       title: Text(titlePageList[_selectedIndex]),
       centerTitle: true,
       actions: <Widget>[
@@ -83,18 +96,18 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
     }
   }
 
-  List<String> titlePageList = <String>[
+  final List<String> titlePageList = <String>[
     "รายการแจ้งเตือน",
     "รายการยา",
     "ข้อมูลสรุป",
     "ข้อมูลผู้ใช้",
   ];
 
-  List<Widget> bodyPageList = <Widget>[
-    NotifyScreen(), // หน้า รายการแจ้งเตือน
-    DisplayMedicineInfoList(), //หน้า รายการยา
-    MedicineReportScreen(),
-    UserInfoScreen(),
+  final List<Widget> bodyPageList = <Widget>[
+    const NotifyScreen(), // หน้า รายการแจ้งเตือน
+    const DisplayMedicineInfoList(), //หน้า รายการยา
+    const MedicineReportScreen(),
+    const UserInfoScreen(),
   ];
 
   int _selectedIndex = 0;

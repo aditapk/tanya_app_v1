@@ -3,7 +3,7 @@ import 'package:hive/hive.dart';
 part 'user_login_model.g.dart';
 
 @HiveType(typeId: 4)
-class UserLogin {
+class UserLogin extends HiveObject {
   @HiveField(0)
   String username;
 
@@ -11,11 +11,15 @@ class UserLogin {
   String password;
 
   @HiveField(2)
-  DateTime lastTimeLogin;
+  String lastTimeLogin;
+
+  @HiveField(3)
+  bool? logOut;
 
   UserLogin({
     required this.username,
     required this.password,
     required this.lastTimeLogin,
+    this.logOut,
   });
 }

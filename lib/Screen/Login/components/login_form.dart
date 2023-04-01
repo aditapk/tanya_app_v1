@@ -1,35 +1,78 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:tanya_app_v1/Screen/Notify/notify_screen_old.dart';
+import 'package:hive/hive.dart';
+import 'package:tanya_app_v1/Model/user_login_model.dart';
 import 'package:tanya_app_v1/Screen/Signup/signup_screen.dart';
 import 'package:tanya_app_v1/components/already_have_an_account_acheck.dart';
 import 'package:tanya_app_v1/constants.dart';
+import 'package:tanya_app_v1/home_app_screen.dart';
 
-import '../../../home_app_screen.dart';
-
-class LoginForm extends StatelessWidget {
+class LoginForm extends StatefulWidget {
   const LoginForm({
     Key? key,
   }) : super(key: key);
 
-  void toHomeScreen() {
-    Get.to(() => HomeAppScreen());
+  @override
+  State<LoginForm> createState() => _LoginFormState();
+}
+
+class _LoginFormState extends State<LoginForm> {
+  void loginAction() async {
+    var userLoginBox = Hive.box<UserLogin>('user_login');
+    var userLogin = userLoginBox.get(0);
+    if (userLogin == null) {
+      Get.defaultDialog(
+          title: 'เข้าสู่ระบบผิดพลาด',
+          middleText: 'ยังไม่มีข้อมุลผู้ใช้\nกรุณาสมัครสมาชิกก่อนเข้าระบบ',
+          confirm: TextButton(
+              onPressed: () {
+                Get.to(const SignUpScreen());
+              },
+              child: const Text(
+                'สมัครสมาชิก',
+                style: TextStyle(fontSize: 18),
+              )));
+    } else {
+      if (userTextController.text == userLogin.username &&
+          passwordTextController.text == userLogin.password) {
+        userLogin.logOut = false;
+        await userLogin.save();
+        Get.to(const HomeAppScreen());
+      } else {
+        Get.defaultDialog(
+          title: 'เข้าสู่ระบบผิดพลาด',
+          middleText: 'ข้อมูลผู้ใช้ หรือ รหัสผ่านไม่ผู้ต้อง',
+          confirm: TextButton(
+            onPressed: () {
+              Get.to(const SignUpScreen());
+            },
+            child: const Text(
+              'สมัครสมาชิกใหม่',
+              style: TextStyle(fontSize: 18),
+            ),
+          ),
+        );
+      }
+    }
   }
 
   void toSignUpScreen() {
-    Get.to(() => SignUpScreen());
+    Get.to(() => const SignUpScreen());
   }
+
+  TextEditingController userTextController = TextEditingController();
+
+  TextEditingController passwordTextController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Form(
       child: Column(
         children: [
-          TextFormField(
-            keyboardType: TextInputType.emailAddress,
-            textInputAction: TextInputAction.next,
+          TextField(
+            controller: userTextController,
             cursorColor: kPrimaryColor,
-            onSaved: (email) {},
+            textInputAction: TextInputAction.next,
             decoration: const InputDecoration(
               hintText: "ข้อมูลผู้ใช้",
               prefixIcon: Padding(
@@ -40,10 +83,11 @@ class LoginForm extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: defaultPadding),
-            child: TextFormField(
-              textInputAction: TextInputAction.done,
+            child: TextField(
+              controller: passwordTextController,
               obscureText: true,
               cursorColor: kPrimaryColor,
+              textInputAction: TextInputAction.done,
               decoration: const InputDecoration(
                 hintText: "รหัสผ่าน",
                 prefixIcon: Padding(
@@ -55,14 +99,17 @@ class LoginForm extends StatelessWidget {
           ),
           const SizedBox(height: defaultPadding),
           SizedBox(
-            width: double.infinity,
-            height: hSizeButton,
+            width: MediaQuery.of(context).size.width,
+            height: 60,
             child: ElevatedButton(
-              onPressed: toHomeScreen,
-              child: Text(
-                "Login".toUpperCase(),
-                style: const TextStyle(
-                  fontSize: 18,
+              style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12))),
+              onPressed: loginAction,
+              child: const Text(
+                'เข้าสู่ระบบ',
+                style: TextStyle(
+                  fontSize: 20,
                 ),
               ),
             ),

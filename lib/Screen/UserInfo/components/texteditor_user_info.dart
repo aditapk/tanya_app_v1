@@ -11,8 +11,8 @@ class TextFieldUserInfo extends StatefulWidget {
     fontSize: 18,
     fontWeight: FontWeight.bold,
   );
-  UserInfo? userInfo;
-  TextFieldUserInfo({
+  final UserInfo? userInfo;
+  const TextFieldUserInfo({
     required this.userInfo,
     super.key,
   });
@@ -32,6 +32,7 @@ class _TextFieldUserInfoState extends State<TextFieldUserInfo> {
 
   @override
   void initState() {
+    // ignore: todo
     // TODO: implement initState
     if (widget.userInfo != null) {
       if (widget.userInfo!.name != null) {
