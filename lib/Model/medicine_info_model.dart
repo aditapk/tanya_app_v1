@@ -33,6 +33,9 @@ class MedicineInfo extends HiveObject {
   @HiveField(8)
   int color;
 
+  @HiveField(9)
+  int? id;
+
   MedicineInfo({
     required this.name,
     required this.description,
@@ -45,5 +48,6 @@ class MedicineInfo extends HiveObject {
     // ignore: non_constant_identifier_names
     this.picture_path,
     required this.color,
+    this.id,
   });
 }

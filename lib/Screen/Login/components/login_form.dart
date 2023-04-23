@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
+import 'package:tanya_app_v1/GetXBinding/medicine_state_binding.dart';
 import 'package:tanya_app_v1/Model/user_login_model.dart';
 import 'package:tanya_app_v1/Screen/Signup/signup_screen.dart';
 import 'package:tanya_app_v1/components/already_have_an_account_acheck.dart';
@@ -37,7 +38,10 @@ class _LoginFormState extends State<LoginForm> {
           passwordTextController.text == userLogin.password) {
         userLogin.logOut = false;
         await userLogin.save();
-        Get.to(const HomeAppScreen());
+        Get.to(
+          () => const HomeAppScreen(),
+          binding: MedicineInfoBinding(),
+        );
       } else {
         Get.defaultDialog(
           title: 'เข้าสู่ระบบผิดพลาด',

@@ -11,8 +11,6 @@ import 'package:intl/intl.dart';
 import 'package:tanya_app_v1/Model/notify_info.dart';
 import 'package:tanya_app_v1/utils/style.dart';
 
-import 'components/add_notify_detail_screen.dart';
-
 import 'package:buddhist_datetime_dateformat_sns/buddhist_datetime_dateformat_sns.dart';
 
 class NotifyScreen extends StatefulWidget {
@@ -77,24 +75,24 @@ class _NotifyScreenState extends State<NotifyScreen> {
                   },
                   child: Center(
                     child: Text(
-                      'วันที่ ${DateFormat.yMMMMd('th').formatInBuddhistCalendarThai(
+                      DateFormat.yMMMMEEEEd('th').formatInBuddhistCalendarThai(
                         currentDate,
-                      )}',
+                      ),
                       style: subHeadingStyle,
                     ),
                   ),
                 ),
               ),
-              AddNotifyButton(
-                onTap: () {
-                  // ไปยังหน้า เพิ่มรายการแจ้งเตือน
-                  Get.to(
-                    () => AddNotifyDetailScreen(
-                      selectedDate: currentDate,
-                    ),
-                  );
-                },
-              )
+              // AddNotifyButton(
+              //   onTap: () {
+              //     // ไปยังหน้า เพิ่มรายการแจ้งเตือน
+              //     Get.to(
+              //       () => AddNotifyDetailScreen(
+              //         selectedDate: currentDate,
+              //       ),
+              //     );
+              //   },
+              // )
             ],
           ),
         ),
@@ -648,7 +646,7 @@ class NotifyCard extends StatelessWidget {
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             child: SizedBox(
-              height: 225,
+              height: 230,
               child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Column(

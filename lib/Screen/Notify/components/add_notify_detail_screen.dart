@@ -1,17 +1,19 @@
 //import 'dart:html';
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:fraction/fraction.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart'; // for datetime formatting
 import 'package:tanya_app_v1/Model/medicine_info_model.dart';
 import 'package:tanya_app_v1/Model/notify_info.dart';
 
+import '../../../Controller/medicine_info_controller.dart';
 import '../../../Model/user_info_model.dart';
-import '../../../Services/notify_services.dart';
 import '../../MedicineInformation/to_choose_medicine_info_list.dart';
 import '../notify_handle_screen.dart'; // for random variable
 
@@ -23,9 +25,11 @@ class AddNotifyDetailScreen extends StatefulWidget {
   const AddNotifyDetailScreen({
     super.key,
     required this.selectedDate,
+    this.medicineData,
   });
 
   final DateTime selectedDate;
+  final MedicineInfo? medicineData;
 
   @override
   State<AddNotifyDetailScreen> createState() => _AddNotifyDetailScreenState();
@@ -41,6 +45,7 @@ class MedicineInformation {
   List<bool>? periodTime;
   String? picturePath;
   int? color;
+  int? id;
 
   MedicineInfo asMedicineInfo() {
     return MedicineInfo(
@@ -53,6 +58,7 @@ class MedicineInformation {
       period_time: periodTime!,
       picture_path: picturePath,
       color: color!,
+      id: id!,
     );
   }
 
@@ -66,6 +72,7 @@ class MedicineInformation {
     this.periodTime,
     this.picturePath,
     this.color,
+    this.id,
   });
 }
 
@@ -132,7 +139,8 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
   //int numberOfNotifyTimeItem = 0;
 
   NotifyInformation notifyInformation = NotifyInformation();
-  NotifyService notifyServices = NotifyService(); // notification services
+  //NotifyService notifyServices = NotifyService(); // notification services
+  final medicineInfoState = Get.find<MedicineEditorState>();
 
   // State variable
   TextEditingController notifyNameController = TextEditingController();
@@ -250,45 +258,6 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
         }
         if (notificationResponse.actionId == "PENDING") {
           generateNewSchedule(notifyID, notifyInfo);
-          // set notify again
-          // set notification
-          // var date = notifyInfo!.date;
-          // var now = DateTime.now();
-          // var minuteDiff = now.difference(date).inMinutes;
-          // if (minuteDiff <= 60) {
-          //   var nextDateTime = now.add(const Duration(minutes: 15));
-          //   // Convert string payload
-          //   var notifyPayload = jsonEncode({
-          //     "notifyID": notifyID,
-          //     "notifyInfo": notifyInfo.toJson(),
-          //   });
-          //   notifySet(
-          //     id: notifyID,
-          //     scheduleTime: nextDateTime,
-          //     payload: notifyPayload,
-          //     numNotify: notifyInfo.status,
-          //     imagePath: notifyInfo.medicineInfo.picture_path!,
-          //   );
-          // } else {
-          //   Get.dialog(
-          //     AlertDialog(
-          //       title: const Text(
-          //         "คำเตือน!",
-          //         style: TextStyle(color: Colors.red),
-          //       ),
-          //       content: const Text(
-          //           "ไม่สามารถเลื่อนการแจ้งเตือนได้ เนื่องจากล่วงเลยกินยามามากกว่า 1 ชั่วโมงแล้ว"),
-          //       actions: [
-          //         TextButton(
-          //           onPressed: () {
-          //             Get.back();
-          //           },
-          //           child: const Text("OK"),
-          //         )
-          //       ],
-          //     ),
-          //   );
-
           //   // แจ้งเตือนไปยังผู้ดูแล
           //   await notifyToCarePerson();
           // }
@@ -330,20 +299,18 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
     super.initState();
 
     // intial notification service
-    notifyServices.inintializeNotification(
+    medicineInfoState.notifyServices.value.inintializeNotification(
       onDidReceiveNotificationAndroid: onDidReceiveNotificationAndroid,
       onDidReceiveNotificationIOS: onDidReceiveLocalNotificationIOS,
     );
-    notifyServices.requestPermission();
-
-    // selectedStartNotifyDate = widget.selectedDate;
-    // selectedEndNotifyDate = widget.selectedDate;
+    medicineInfoState.notifyServices.value.requestPermission();
     selectedStartNotifyDateController.text = DateFormat.yMMMd('th_TH')
         .formatInBuddhistCalendarThai(widget.selectedDate);
     selectedEndNotifyDateController.text = DateFormat.yMMMd('th_TH')
         .formatInBuddhistCalendarThai(widget.selectedDate);
     notifyInformation.startDate = widget.selectedDate;
     notifyInformation.endDate = widget.selectedDate;
+    if (widget.medicineData != null) setMedicineState(widget.medicineData!);
   }
 
   // เริ่มการแจ้งเตือน
@@ -395,61 +362,114 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
     }
   }
 
+  setMedicineState(MedicineInfo medicineData) {
+    notifyInformation.selectedMedicine = MedicineInformation(
+        name: medicineData.name,
+        description: medicineData.description,
+        type: medicineData.type,
+        unit: medicineData.unit,
+        order: medicineData.order,
+        nTake: medicineData.nTake,
+        periodTime: medicineData.period_time,
+        picturePath: medicineData.picture_path,
+        color: medicineData.color,
+        id: medicineData.id);
+
+    if (medicineData.period_time[0]) {
+      notifyInformation.morningTime = const TimeOfDay(hour: 8, minute: 0);
+      notifyMorningTimeController.text = "8:00 AM";
+      //notifyInformation.morningTime!.hourOfPeriod;
+    } else {
+      notifyInformation.morningTime = null;
+      notifyMorningTimeController.text = "";
+    }
+    if (medicineData.period_time[1]) {
+      notifyInformation.lunchTime = const TimeOfDay(hour: 12, minute: 0);
+      notifyLunchTimeController.text = "12:00 AM";
+      //notifyInformation.lunchTime!.format(context);
+    } else {
+      notifyInformation.lunchTime = null;
+      notifyLunchTimeController.text = "";
+    }
+
+    if (medicineData.period_time[2]) {
+      notifyInformation.eveningTime = const TimeOfDay(hour: 17, minute: 0);
+      notifyEveningTimeController.text = "5:00 PM";
+      //notifyInformation.eveningTime!.format(context);
+    } else {
+      notifyInformation.eveningTime = null;
+      notifyEveningTimeController.text = "";
+    }
+
+    if (medicineData.period_time[3]) {
+      notifyInformation.beforeToBedTime = const TimeOfDay(hour: 21, minute: 0);
+      notifyBeforetoBedTimeController.text = "9:00 PM";
+      //notifyInformation.beforeToBedTime!.format(context);
+    } else {
+      notifyInformation.beforeToBedTime = null;
+      notifyBeforetoBedTimeController.text = "";
+    }
+
+    // update text controller
+    selectedMedicineController.text = medicineData.name;
+  }
+
   //เลือกรายการยา
   selectMedicineItem() async {
     var result = await Get.to(() => const ToChooseMedicine());
     // update field after choose
     if (result != null) {
       setState(() {
-        notifyInformation.selectedMedicine = MedicineInformation(
-            name: result.name,
-            description: result.description,
-            type: result.type,
-            unit: result.unit,
-            order: result.order,
-            nTake: result.nTake,
-            periodTime: result.period_time,
-            picturePath: result.picture_path,
-            color: result.color);
+        setMedicineState(result);
+        // notifyInformation.selectedMedicine = MedicineInformation(
+        //     name: result.name,
+        //     description: result.description,
+        //     type: result.type,
+        //     unit: result.unit,
+        //     order: result.order,
+        //     nTake: result.nTake,
+        //     periodTime: result.period_time,
+        //     picturePath: result.picture_path,
+        //     color: result.color);
 
-        if (result.period_time[0]) {
-          notifyInformation.morningTime = const TimeOfDay(hour: 8, minute: 0);
-          notifyMorningTimeController.text =
-              notifyInformation.morningTime!.format(context);
-        } else {
-          notifyInformation.morningTime = null;
-          notifyMorningTimeController.text = "";
-        }
-        if (result.period_time[1]) {
-          notifyInformation.lunchTime = const TimeOfDay(hour: 12, minute: 0);
-          notifyLunchTimeController.text =
-              notifyInformation.lunchTime!.format(context);
-        } else {
-          notifyInformation.lunchTime = null;
-          notifyLunchTimeController.text = "";
-        }
+        // if (result.period_time[0]) {
+        //   notifyInformation.morningTime = const TimeOfDay(hour: 8, minute: 0);
+        //   notifyMorningTimeController.text =
+        //       notifyInformation.morningTime!.format(context);
+        // } else {
+        //   notifyInformation.morningTime = null;
+        //   notifyMorningTimeController.text = "";
+        // }
+        // if (result.period_time[1]) {
+        //   notifyInformation.lunchTime = const TimeOfDay(hour: 12, minute: 0);
+        //   notifyLunchTimeController.text =
+        //       notifyInformation.lunchTime!.format(context);
+        // } else {
+        //   notifyInformation.lunchTime = null;
+        //   notifyLunchTimeController.text = "";
+        // }
 
-        if (result.period_time[2]) {
-          notifyInformation.eveningTime = const TimeOfDay(hour: 17, minute: 0);
-          notifyEveningTimeController.text =
-              notifyInformation.eveningTime!.format(context);
-        } else {
-          notifyInformation.eveningTime = null;
-          notifyEveningTimeController.text = "";
-        }
+        // if (result.period_time[2]) {
+        //   notifyInformation.eveningTime = const TimeOfDay(hour: 17, minute: 0);
+        //   notifyEveningTimeController.text =
+        //       notifyInformation.eveningTime!.format(context);
+        // } else {
+        //   notifyInformation.eveningTime = null;
+        //   notifyEveningTimeController.text = "";
+        // }
 
-        if (result.period_time[3]) {
-          notifyInformation.beforeToBedTime =
-              const TimeOfDay(hour: 21, minute: 0);
-          notifyBeforetoBedTimeController.text =
-              notifyInformation.beforeToBedTime!.format(context);
-        } else {
-          notifyInformation.beforeToBedTime = null;
-          notifyBeforetoBedTimeController.text = "";
-        }
+        // if (result.period_time[3]) {
+        //   notifyInformation.beforeToBedTime =
+        //       const TimeOfDay(hour: 21, minute: 0);
+        //   notifyBeforetoBedTimeController.text =
+        //       notifyInformation.beforeToBedTime!.format(context);
+        // } else {
+        //   notifyInformation.beforeToBedTime = null;
+        //   notifyBeforetoBedTimeController.text = "";
+        // }
 
-        // update text controller
-        selectedMedicineController.text = result.name;
+        // // update text controller
+        // selectedMedicineController.text = result.name;
       });
     }
   }
@@ -596,7 +616,7 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
         ],
       );
     }
-    Get.back();
+    Get.back(result: true);
   }
 
   // generate notify schedule
@@ -748,7 +768,7 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
       String? payload,
       required String imagePath,
       required int numNotify}) {
-    notifyServices.scheduleNotify(
+    medicineInfoState.notifyServices.value.scheduleNotify(
       channelID: "Medicine Notify",
       channelName: "Medicine",
       channelDescription: "Medicine Notification for user",
@@ -781,6 +801,8 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    //if (widget.medicineData != null) setMedicineState(widget.medicineData!);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('เพิ่มรายการแจ้งเตือน'),
@@ -795,52 +817,65 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              TextFieldEditor(
-                title: "รายการ",
-                hintText: "รายการแจ้งเตือน",
+              MedicineSelectedCard(
+                medicineSelected:
+                    notifyInformation.selectedMedicine!.asMedicineInfo(),
+              ),
+              TextInputEditor(
                 controller: notifyNameController,
+                labelText: 'รายการแจ้งเตือน',
               ),
-              TextFieldEditor(
-                title: "รายละเอียด",
-                hintText: "รายละเอียดการแจ้งเตือน",
+              TextInputEditor(
                 controller: notifyDetailController,
+                labelText: 'รายละเอียดการแจ้งเตือน',
               ),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFieldEditor(
-                      title: "เริ่มการแจ้งเตือน",
-                      hintText: DateFormat.yMd('th_TH').format(
-                        notifyInformation.startDate!,
-                      ),
-                      controller: selectedStartNotifyDateController,
-                      widget: IconButton(
-                        onPressed: selectStartDateNotify,
-                        icon: const Icon(
-                          Icons.calendar_month_outlined,
-                          color: Colors.blue,
+              // TextFieldEditor(
+              //   hintText: "รายการแจ้งเตือน",
+              //   controller: notifyNameController,
+              // ),
+              // TextFieldEditor(
+              //   hintText: "รายละเอียดการแจ้งเตือน",
+              //   controller: notifyDetailController,
+              // ),
+              Padding(
+                padding: const EdgeInsets.only(top: 8, bottom: 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextFieldEditor(
+                        title: "เริ่มการแจ้งเตือน",
+                        hintText: DateFormat.yMd('th_TH').format(
+                          notifyInformation.startDate!,
+                        ),
+                        controller: selectedStartNotifyDateController,
+                        widget: IconButton(
+                          onPressed: selectStartDateNotify,
+                          icon: const Icon(
+                            Icons.calendar_month_outlined,
+                            color: Colors.blue,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: TextFieldEditor(
-                      title: "สิ้นสุดการแจ้งเตือน",
-                      hintText: DateFormat.yMMMd('th_TH')
-                          .formatInBuddhistCalendarThai(
-                        notifyInformation.endDate!,
-                      ),
-                      controller: selectedEndNotifyDateController,
-                      widget: IconButton(
-                        onPressed: selectEndDateNotify,
-                        icon: const Icon(
-                          Icons.calendar_month_outlined,
-                          color: Colors.blue,
+                    Expanded(
+                      child: TextFieldEditor(
+                        title: "สิ้นสุดการแจ้งเตือน",
+                        hintText: DateFormat.yMMMd('th_TH')
+                            .formatInBuddhistCalendarThai(
+                          notifyInformation.endDate!,
+                        ),
+                        controller: selectedEndNotifyDateController,
+                        widget: IconButton(
+                          onPressed: selectEndDateNotify,
+                          icon: const Icon(
+                            Icons.calendar_month_outlined,
+                            color: Colors.blue,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               Row(
                 children: [
@@ -909,97 +944,103 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
                   ),
                 ],
               ),
-              TextFieldEditor(
-                controller: selectedMedicineController,
-                title: "รายการยา",
-                hintText: "เลือกรายการยา",
-                widget: IconButton(
-                  onPressed: selectMedicineItem,
-                  icon: const Icon(
-                    Icons.list_alt_outlined,
-                    color: Colors.blue,
-                  ),
+              // TextFieldEditor(
+              //   controller: selectedMedicineController,
+              //   title: "รายการยา",
+              //   hintText: "เลือกรายการยา",
+              //   widget: IconButton(
+              //     onPressed: selectMedicineItem,
+              //     icon: const Icon(
+              //       Icons.list_alt_outlined,
+              //       color: Colors.blue,
+              //     ),
+              //   ),
+              // ),
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextFieldEditor(
+                        title: "เช้า",
+                        hintText: "",
+                        controller: notifyMorningTimeController,
+                        widget: IconButton(
+                          onPressed: notifyInformation.morningTime != null
+                              ? selectNotifyMorningTime
+                              : null,
+                          icon: Icon(
+                            Icons.access_alarm_outlined,
+                            color: notifyInformation.morningTime != null
+                                ? Colors.blue
+                                : Colors.grey,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: TextFieldEditor(
+                        title: "กลางวัน",
+                        hintText: "",
+                        controller: notifyLunchTimeController,
+                        widget: IconButton(
+                          onPressed: notifyInformation.lunchTime != null
+                              ? selectNotifyLunchTime
+                              : null,
+                          icon: Icon(
+                            Icons.access_alarm_outlined,
+                            color: notifyInformation.lunchTime != null
+                                ? Colors.blue
+                                : Colors.grey,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFieldEditor(
-                      title: "เช้า",
-                      hintText: "",
-                      controller: notifyMorningTimeController,
-                      widget: IconButton(
-                        onPressed: notifyInformation.morningTime != null
-                            ? selectNotifyMorningTime
-                            : null,
-                        icon: Icon(
-                          Icons.access_alarm_outlined,
-                          color: notifyInformation.morningTime != null
-                              ? Colors.blue
-                              : Colors.grey,
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextFieldEditor(
+                        title: "เย็น",
+                        hintText: "",
+                        controller: notifyEveningTimeController,
+                        widget: IconButton(
+                          onPressed: notifyInformation.eveningTime != null
+                              ? selectNotifyEveningTime
+                              : null,
+                          icon: Icon(
+                            Icons.access_alarm_outlined,
+                            color: notifyInformation.eveningTime != null
+                                ? Colors.blue
+                                : Colors.grey,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: TextFieldEditor(
-                      title: "กลางวัน",
-                      hintText: "",
-                      controller: notifyLunchTimeController,
-                      widget: IconButton(
-                        onPressed: notifyInformation.lunchTime != null
-                            ? selectNotifyLunchTime
-                            : null,
-                        icon: Icon(
-                          Icons.access_alarm_outlined,
-                          color: notifyInformation.lunchTime != null
-                              ? Colors.blue
-                              : Colors.grey,
+                    Expanded(
+                      child: TextFieldEditor(
+                        title: "ก่อนนอน",
+                        hintText: "",
+                        controller: notifyBeforetoBedTimeController,
+                        widget: IconButton(
+                          onPressed: notifyInformation.beforeToBedTime != null
+                              ? selectNotifyBeforetoBedTime
+                              : null,
+                          icon: Icon(
+                            Icons.access_alarm_outlined,
+                            color: notifyInformation.beforeToBedTime != null
+                                ? Colors.blue
+                                : Colors.grey,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFieldEditor(
-                      title: "เย็น",
-                      hintText: "",
-                      controller: notifyEveningTimeController,
-                      widget: IconButton(
-                        onPressed: notifyInformation.eveningTime != null
-                            ? selectNotifyEveningTime
-                            : null,
-                        icon: Icon(
-                          Icons.access_alarm_outlined,
-                          color: notifyInformation.eveningTime != null
-                              ? Colors.blue
-                              : Colors.grey,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: TextFieldEditor(
-                      title: "ก่อนนอน",
-                      hintText: "",
-                      controller: notifyBeforetoBedTimeController,
-                      widget: IconButton(
-                        onPressed: notifyInformation.beforeToBedTime != null
-                            ? selectNotifyBeforetoBedTime
-                            : null,
-                        icon: Icon(
-                          Icons.access_alarm_outlined,
-                          color: notifyInformation.beforeToBedTime != null
-                              ? Colors.blue
-                              : Colors.grey,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               const SizedBox(
                 height: 20,
@@ -1038,7 +1079,7 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12))),
                           onPressed: () {
-                            Get.back();
+                            Get.back(result: false);
                           },
                           child: const Text(
                             'ยกเลิก',
@@ -1063,6 +1104,149 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
     return const TextStyle(
       fontSize: 20,
       fontWeight: FontWeight.bold,
+    );
+  }
+}
+
+class TextInputEditor extends StatelessWidget {
+  const TextInputEditor({
+    super.key,
+    required this.controller,
+    required this.labelText,
+  });
+
+  final TextEditingController controller;
+  final String labelText;
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: TextFormField(
+        controller: controller,
+        decoration: InputDecoration(
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          labelText: labelText,
+        ),
+      ),
+    );
+  }
+}
+
+class MedicineSelectedCard extends StatelessWidget {
+  const MedicineSelectedCard({
+    super.key,
+    required this.medicineSelected,
+  });
+  final MedicineInfo medicineSelected;
+
+  final String emptyPicture = "assets/images/dummy_picture.jpg";
+
+  _displayPrefixType(String type) {
+    if (type == "pills" || type == "water") {
+      return "รับประทาน";
+    } else if (type == "arrow") {
+      return "ใช้ฉีด";
+    } else if (type == "drop") {
+      return "ใช้หยด";
+    }
+  }
+
+  _displayEatOrder(String order) {
+    if (order == "before") {
+      return "ก่อนอาหาร";
+    } else if (order == "after") {
+      return "หลังอาหาร";
+    }
+  }
+
+  _displayPeriodTime(List<bool> periodTime) {
+    List<String> display = [];
+    if (periodTime[0]) {
+      display.add("เช้า");
+    }
+    if (periodTime[1]) {
+      display.add("กลางวัน");
+    }
+    if (periodTime[2]) {
+      display.add("เย็น");
+    }
+    if (periodTime[3]) {
+      display.add("ก่อนนอน");
+    }
+    if (display.isNotEmpty) {
+      return display.join(", ");
+    } else {
+      return "";
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(
+        top: 5,
+        bottom: 5,
+        left: 3,
+        right: 3,
+      ),
+      child: SizedBox(
+        child: Card(
+          color: Color(medicineSelected.color),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: medicineSelected.picture_path != '' ||
+                          medicineSelected.picture_path != null
+                      ? Image.file(
+                          File(medicineSelected.picture_path!),
+                          fit: BoxFit.cover,
+                          width: 100,
+                          height: 100,
+                        )
+                      : Image.asset(
+                          "assets/images/dummy_picture.jpg",
+                          fit: BoxFit.cover,
+                          width: 100,
+                          height: 100,
+                        ),
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      medicineSelected.name,
+                      style: const TextStyle(
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(medicineSelected.description),
+                    Row(
+                      children: [
+                        Text(
+                            "${_displayPrefixType(medicineSelected.type)}   ${medicineSelected.nTake.toFraction()}"),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        Text(medicineSelected.unit)
+                      ],
+                    ),
+                    Text(_displayEatOrder(medicineSelected.order)),
+                    Text(_displayPeriodTime(medicineSelected.period_time)),
+                  ],
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -1118,13 +1302,13 @@ class PeriodDateSeletedCard extends StatelessWidget {
 class TextFieldEditor extends StatelessWidget {
   const TextFieldEditor({
     super.key,
-    required this.title,
+    this.title,
     required this.hintText,
     this.controller,
     this.widget,
   });
 
-  final String title;
+  final String? title;
   final String hintText;
   final TextEditingController? controller;
   final Widget? widget;
@@ -1133,6 +1317,7 @@ class TextFieldEditor extends StatelessWidget {
   TextStyle get titleStyle {
     return const TextStyle(
       fontWeight: FontWeight.bold,
+      fontSize: 16,
     );
   }
 
@@ -1149,10 +1334,12 @@ class TextFieldEditor extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: titleStyle,
-          ),
+          title != null
+              ? Text(
+                  title!,
+                  style: titleStyle,
+                )
+              : Container(),
           Container(
             margin: const EdgeInsets.only(top: 8.0),
             padding: const EdgeInsets.only(left: 8.0, right: 8.0),

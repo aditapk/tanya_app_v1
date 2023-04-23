@@ -9,7 +9,7 @@
    <application
         android:label="เตือนกินยา"
         android:name="${applicationName}"
-        android:icon="@mipmap/med_icon">
+        android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
             android:exported="true"

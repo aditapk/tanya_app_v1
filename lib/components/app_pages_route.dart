@@ -12,7 +12,7 @@ class AppPageRoute {
     ),
     GetPage(
       name: '/editMedicineInfo',
-      page: () => MedicineInfoEditorScreen(),
+      page: () => const MedicineInfoEditorScreen(),
       binding: MedicineInfoBinding(),
     ),
     GetPage(

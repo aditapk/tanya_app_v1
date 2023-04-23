@@ -5,15 +5,21 @@ import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:tanya_app_v1/Controller/medicine_info_controller.dart';
 import 'package:tanya_app_v1/Model/medicine_info_model.dart';
+import 'package:tanya_app_v1/Model/notify_info.dart';
 import 'components/number_of_dose_selection.dart';
 import 'components/picture_medicine_card.dart';
 import 'components/take_medicine_and_time_selection.dart';
 import 'components/type_medicine_selection.dart';
 
 class MedicineInfoEditorScreen extends StatefulWidget {
-  MedicineInfoEditorScreen({this.medicineData, super.key});
+  const MedicineInfoEditorScreen({
+    this.medicineData,
+    super.key,
+    this.mode,
+  });
 
-  MedicineInfo? medicineData;
+  final MedicineInfo? medicineData;
+  final String? mode; // can be "edit", "create"
 
   @override
   State<MedicineInfoEditorScreen> createState() =>
@@ -73,7 +79,10 @@ class _MedicineInfoEditorScreenState extends State<MedicineInfoEditorScreen> {
   @override
   Widget build(BuildContext context) {
     // add data to state
-    if (widget.medicineData != null) _updateCurrenState(widget.medicineData!);
+    if (widget.medicineData != null) {
+      _updateCurrenState(widget.medicineData!);
+      //print(widget.medicineData!.id);
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -215,7 +224,29 @@ class _MedicineInfoEditorScreenState extends State<MedicineInfoEditorScreen> {
     widget.medicineData!.picture_path = medicineInfoState.picture_path.value;
     widget.medicineData!.color = medicineInfoState.color.value.value;
 
-    await widget.medicineData?.save();
+    await widget.medicineData!.save();
+
+    // update on notify Box
+    var notifyBox = Hive.box<NotifyInfoModel>('user_notify_info');
+    var medicineBox = Hive.box<MedicineInfo>('user_medicine_info');
+    var medicine = medicineBox.get(widget.medicineData!.id);
+    if (notifyBox.isNotEmpty) {
+      var notifyList = notifyBox.values;
+      for (var notify in notifyList) {
+        if (notify.medicineInfo.id == widget.medicineData!.id) {
+          notify.medicineInfo.name = medicine!.name;
+          notify.medicineInfo.description = medicine.description;
+          notify.medicineInfo.type = medicine.type;
+          notify.medicineInfo.unit = medicine.unit;
+          notify.medicineInfo.nTake = medicine.nTake;
+          notify.medicineInfo.order = medicine.order;
+          notify.medicineInfo.period_time = medicine.period_time;
+          notify.medicineInfo.picture_path = medicine.picture_path;
+          notify.medicineInfo.color = medicine.color;
+          await notify.save();
+        }
+      }
+    }
   }
 
   Future<void> _createMedicineInfoBox() async {
@@ -239,6 +270,10 @@ class _MedicineInfoEditorScreenState extends State<MedicineInfoEditorScreen> {
           : medicineInfoState.picture_path.value,
       color: medicineInfoState.color.value.value,
     );
-    await medicineInfoBox.add(newMedicineData);
+    int key = await medicineInfoBox.add(newMedicineData);
+    // update key
+    var medicineInfo = medicineInfoBox.get(key);
+    medicineInfo!.id = key;
+    await medicineInfo.save();
   }
 }

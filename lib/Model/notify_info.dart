@@ -23,7 +23,8 @@ class NotifyInfoModel extends HiveObject {
   @HiveField(5)
   int status; // 0 : complete, other : not complete
 
-  //@HiveField(6)
+  // @HiveField(6)
+  // int medId;
   //NotifyModel notify;
 
   Map<String, dynamic> toJson() {
@@ -38,7 +39,8 @@ class NotifyInfoModel extends HiveObject {
         "nTake": medicineInfo.nTake,
         "order": medicineInfo.order,
         "period_time": [medicineInfo.period_time],
-        "picture_path": medicineInfo.picture_path
+        "picture_path": medicineInfo.picture_path,
+        "id": medicineInfo.id,
       },
       "date": {
         "year": date.year,

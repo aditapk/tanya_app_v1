@@ -1,9 +1,19 @@
 import 'dart:io';
 
+import 'package:buddhist_datetime_dateformat_sns/buddhist_datetime_dateformat_sns.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
+import 'package:open_file/open_file.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:pdf/pdf.dart';
+import 'package:printing/printing.dart';
+//import 'package:open_file/open_file.dart';
+//import 'package:open_file/open_file.dart';
+import 'package:tanya_app_v1/Controller/medicine_info_controller.dart';
 import 'package:tanya_app_v1/Model/user_login_model.dart';
 //import 'package:intl/intl.dart';
 import 'package:tanya_app_v1/Screen/AddMedicalInformation/medicine_editor_screen/medicine_info_editor_screen.dart';
@@ -14,9 +24,12 @@ import 'package:tanya_app_v1/Screen/UserInfo/user_info_screen.dart';
 //import 'package:tanya_app_v1/utils/style.dart';
 import '../../GetXBinding/medicine_state_binding.dart';
 //import 'body_notify_list.dart';
+import 'Model/notify_info.dart';
 import 'Model/user_info_model.dart';
 import 'Screen/Notify/notify_screen.dart';
 //import 'forTest/local_notify/body_notify_list.dart';
+// for pdf
+import 'package:pdf/widgets.dart' as pw;
 
 class HomeAppScreen extends StatefulWidget {
   const HomeAppScreen({super.key, this.selectedPage});
@@ -97,15 +110,15 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
   }
 
   final List<String> titlePageList = <String>[
-    "รายการแจ้งเตือน",
     "รายการยา",
+    "รายการแจ้งเตือน",
     "ข้อมูลสรุป",
     "ข้อมูลผู้ใช้",
   ];
 
   final List<Widget> bodyPageList = <Widget>[
-    const NotifyScreen(), // หน้า รายการแจ้งเตือน
     const DisplayMedicineInfoList(), //หน้า รายการยา
+    const NotifyScreen(), // หน้า รายการแจ้งเตือน
     const MedicineReportScreen(),
     const UserInfoScreen(),
   ];
@@ -129,12 +142,12 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
         },
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.alarm_outlined),
-            label: "แจ้งเตือน",
-          ),
-          BottomNavigationBarItem(
             icon: Icon(Icons.list),
             label: "รายการยา",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.alarm_outlined),
+            label: "แจ้งเตือน",
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.insert_chart_outlined),
@@ -146,25 +159,168 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
           )
         ],
       ),
-      floatingActionButton: _selectedIndex == 1
+      floatingActionButton: _selectedIndex == 0
           ? FloatingActionButton(
               onPressed: _createMedicineInfo,
               child: const Icon(Icons.add),
             )
-          : null,
+          : _selectedIndex == 2
+              ? FloatingActionButton(
+                  onPressed: generatePDFReport,
+                  child: const Icon(Icons.picture_as_pdf),
+                )
+              : null,
     );
   }
 
   void _createMedicineInfo() {
-    if (_selectedIndex == 1) {
-      // ไปยังหน้า เพิ่มรายการยา
-      Get.to(
-        () => MedicineInfoEditorScreen(),
-        binding: MedicineInfoBinding(),
-      );
+    // ไปยังหน้า เพิ่มรายการยา
+    Get.to(
+      () => const MedicineInfoEditorScreen(),
+      binding: MedicineInfoBinding(),
+    );
+  }
+
+  void generatePDFReport() async {
+    // start-end date
+    final appState = Get.find<MedicineEditorState>();
+    final startDateString = DateFormat.yMMMMd('th_TH')
+        .formatInBuddhistCalendarThai(appState.filterStartDate.value);
+    final endDateString = DateFormat.yMMMMd('th_TH')
+        .formatInBuddhistCalendarThai(appState.filterEndDate.value);
+
+    // Header
+    final font =
+        await rootBundle.load("assets/fonts/TH Sarabun New Regular.ttf");
+    final ttf = pw.Font.ttf(font);
+    final currentDate = DateTime.now();
+    final thDateString =
+        DateFormat.yMMMMd('th_TH').formatInBuddhistCalendarThai(currentDate);
+    final netImage = await networkImage('https://www.nfet.net/nfet.jpg');
+    final currentTime = TimeOfDay.now();
+    var hour = currentTime.hour;
+    hour = hour != 24 ? hour : 0;
+    // user data
+    var userInfoBox = Hive.box<UserInfo>('user_info');
+    var userInfo = userInfoBox.get(0);
+
+    // medicine info
+    var notifyInfoBox = Hive.box<NotifyInfoModel>('user_notify_info');
+    var notifyInfo = notifyInfoBox.values.toList();
+    List<NotifyInfoModel> notifyInfoInRange = [];
+    notifyInfoInRange = notifyInfo.where((notify) {
+      if (notify.date.isAfter(appState.filterStartDate.value) &&
+          notify.date.isBefore(appState.filterEndDate.value)) {
+        return true;
+      }
+      return false;
+    }).toList();
+
+    var medicineSet = <String>{};
+    var notifySet = <String>{};
+    var colorSet = <int>{};
+    for (var notify in notifyInfoInRange) {
+      medicineSet.add(notify.medicineInfo.name);
+      notifySet.add(notify.name);
+      colorSet.add(notify.medicineInfo.color);
     }
-    if (_selectedIndex == 0) {
-      debugPrint('test notification');
+    var notifyList = notifySet.toList();
+
+    // find number of notify each medicine
+    Map<String, int> nNotifyEachMedicine = {};
+    Map<String, int> nNotifyCompleteEachMedicine = {};
+    Map<String, String> medicineNameEachNotify = {};
+
+    for (var notify in notifyList) {
+      nNotifyCompleteEachMedicine[notify] = 0;
+      nNotifyEachMedicine[notify] = 0;
+      medicineNameEachNotify[notify] = '';
+    }
+
+    for (var notify in notifyInfoInRange) {
+      var notifyName = notify.name;
+      if (notify.status == 0) {
+        nNotifyCompleteEachMedicine.update(notifyName, (value) => value + 1);
+      }
+      nNotifyEachMedicine.update(notifyName, (value) => value + 1);
+      medicineNameEachNotify.update(
+          notifyName, (value) => notify.medicineInfo.name);
+    }
+    final List<List<dynamic>> notifyReport = [
+      [
+        'ชื่อยา',
+        'จำนวนครั้งที่กินยา',
+        'จำนวนครั้งที่ต้องกิน',
+        'เปอร์เซนต์การกินยา'
+      ]
+    ];
+    for (var notify in notifyList) {
+      notifyReport.add([
+        medicineNameEachNotify[notify],
+        nNotifyCompleteEachMedicine[notify].toString(),
+        nNotifyEachMedicine[notify].toString(),
+        '${(nNotifyCompleteEachMedicine[notify]! / nNotifyEachMedicine[notify]! * 100).toStringAsFixed(0)} %',
+      ]);
+    }
+    // create pdf document
+    final pdf = pw.Document();
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        build: (pw.Context context) {
+          return pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Header(
+                  level: 0,
+                  child: pw.Row(
+                    children: [
+                      pw.Text(
+                          'รายงานสรุปการกินยา วันที่ $thDateString เวลา ${hour == 0 ? '00' : hour}.${currentTime.minute < 10 ? '0${currentTime.minute}' : currentTime.minute} น.',
+                          style: pw.TextStyle(
+                              font: ttf,
+                              fontWeight: pw.FontWeight.bold,
+                              fontSize: 18)),
+                    ],
+                  ),
+                ),
+                pw.Text(
+                  'ชื่อ ${userInfo?.name ?? 'ไม่ระบุ'}',
+                  style: pw.TextStyle(font: ttf),
+                ),
+                pw.Text(
+                  'สรุปการกินยาตั้งแต่ วันที่ $startDateString ถึง วันที่ $endDateString',
+                  style: pw.TextStyle(font: ttf),
+                ),
+                pw.Table.fromTextArray(
+                  headerStyle: pw.TextStyle(font: ttf),
+                  cellStyle: pw.TextStyle(font: ttf),
+                  cellAlignments: {
+                    1: pw.Alignment.center,
+                    2: pw.Alignment.center,
+                    3: pw.Alignment.center
+                  },
+                  context: context,
+                  data: notifyReport,
+                ),
+              ]);
+        },
+      ),
+    );
+
+    final tempDir = await getTemporaryDirectory();
+    final dateString = DateFormat.MMMd('th_TH').format(DateTime.now());
+    final file = File('${tempDir.path}/Report_$dateString.pdf');
+    await file.writeAsBytes(await pdf.save());
+    OpenFile.open(file.path);
+  }
+
+  void floatingAction() {
+    if (_selectedIndex == 1) {
+      _createMedicineInfo();
+    }
+    if (_selectedIndex == 2) {
+      // print pdf
     }
   }
 }

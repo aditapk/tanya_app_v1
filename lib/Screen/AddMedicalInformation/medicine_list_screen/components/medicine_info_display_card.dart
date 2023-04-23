@@ -8,16 +8,6 @@ class MedicineInfoDisplayCard extends StatelessWidget {
   MedicineInfoDisplayCard({this.medicineData, super.key});
   MedicineInfo? medicineData;
 
-  // _displayMedicineType(String type) {
-  //   if (type == "pills") {
-  //     return "เม็ด";
-  //   } else if (type == "water") {
-  //     return "ช้อน";
-  //   } else if (type == "arrow") {
-  //     return "เข็ม";
-  //   }
-  // }
-
   _displayPrefixType(String type) {
     if (type == "pills" || type == "water") {
       return "รับประทาน";
