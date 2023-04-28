@@ -57,9 +57,10 @@ class NotifyService {
       notificationCategories: iosNotificationCategories,
     );
 
+    // const AndroidInitializationSettings androidInitializationSettings =
+    //     AndroidInitializationSettings('@mipmap/ic_launcher');
     const AndroidInitializationSettings androidInitializationSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
-
+        AndroidInitializationSettings('app_icon');
     final InitializationSettings initializationSettings =
         InitializationSettings(
             iOS: iOSInitializationSettings,

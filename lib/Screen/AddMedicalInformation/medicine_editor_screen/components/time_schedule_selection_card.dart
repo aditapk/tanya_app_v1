@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 
 class TimeScheduleSelectionCard extends StatelessWidget {
@@ -42,12 +43,13 @@ class TimeScheduleSelectionCard extends StatelessWidget {
           child: SizedBox(
             height: height,
             child: Center(
-              child: Text(
+              child: AutoSizeText(
                 title,
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
+                maxLines: 1,
               ),
             ),
           ),

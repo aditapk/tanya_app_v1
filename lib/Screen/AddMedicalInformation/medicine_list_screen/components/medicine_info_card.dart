@@ -32,8 +32,6 @@ class MedicineInfoCard extends StatelessWidget {
   MedicineInfo? medicineData;
   int index;
 
-  //final medicineState = Get.lazyPut(() => MedicineEditorState());
-
   updateImageMedicineBox(String imagePath) async {
     // update medicine box
     var medicineBox = Hive.box<MedicineInfo>('user_medicine_info');
@@ -102,66 +100,64 @@ class MedicineInfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8),
-      child: SizedBox(
-        child: Stack(
-          children: [
-            GestureDetector(
-              onLongPress: toMedicineNotifyPage,
-              child: Card(
-                elevation: 3.0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                color: medicineData?.color == null
-                    ? Colors.blue.shade200
-                    : Color(medicineData!.color),
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 5, bottom: 5),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          left: 5,
-                          right: 5,
-                        ),
-                        child: GestureDetector(
-                          child: ImageCard(
-                            image: medicineData?.picture_path,
-                          ),
-                          onTap: () {
-                            Get.bottomSheet(
-                              PictureEditBottomSheet(
-                                onChoose: () async =>
-                                    await _choosePhotoFromGallery(),
-                                onTakephoto: () async =>
-                                    await _takePhotoToGallerry(),
-                              ),
-                            );
-                          },
-                        ),
+      child: Stack(
+        children: [
+          GestureDetector(
+            onLongPress: toMedicineNotifyPage,
+            child: Card(
+              elevation: 3.0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              color: medicineData?.color == null
+                  ? Colors.blue.shade200
+                  : Color(medicineData!.color),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 5, bottom: 5),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        left: 5,
+                        right: 5,
                       ),
-                      Expanded(
-                        child: MedicineInfoDisplayCard(
-                          medicineData: medicineData,
+                      child: GestureDetector(
+                        child: ImageCard(
+                          image: medicineData?.picture_path,
                         ),
+                        onTap: () {
+                          Get.bottomSheet(
+                            PictureEditBottomSheet(
+                              onChoose: () async =>
+                                  await _choosePhotoFromGallery(),
+                              onTakephoto: () async =>
+                                  await _takePhotoToGallerry(),
+                            ),
+                          );
+                        },
                       ),
-                    ],
-                  ),
+                    ),
+                    Expanded(
+                      child: MedicineInfoDisplayCard(
+                        medicineData: medicineData,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-            // MedicineNotifyButton(
-            //   onPressed: toMedicineNotifyPage,
-            // ),
-            EditMedicineInfoButton(
-              onPressed: _editMedicineInfo,
-            ),
-            DeleteMedicineInfoButton(
-              onPressed: _deleteMedicineInfo,
-            ),
-          ],
-        ),
+          ),
+          // MedicineNotifyButton(
+          //   onPressed: toMedicineNotifyPage,
+          // ),
+          EditMedicineInfoButton(
+            onPressed: _editMedicineInfo,
+          ),
+          DeleteMedicineInfoButton(
+            onPressed: _deleteMedicineInfo,
+          ),
+        ],
       ),
     );
   }
@@ -209,7 +205,13 @@ class MedicineInfoCard extends StatelessWidget {
   _deleteMedicineInfo() async {
     Get.defaultDialog(
       title: 'ลบรายการยา',
-      middleText: 'รายการยาและการแจ้งเตือนของยานี้จะถูกลบออกอย่างถาวร',
+      content: GetBuilder<MedicineEditorState>(
+        init: MedicineEditorState(),
+        builder: (controller) => const Text(
+          'รายการยาและการแจ้งเตือนที่เกี่ยวข้องกับยานี้\nจะถูกลบออกอย่างถาวร',
+          textAlign: TextAlign.center,
+        ),
+      ),
       actions: <Widget>[
         TextButton(
           child: const Text(
@@ -217,9 +219,9 @@ class MedicineInfoCard extends StatelessWidget {
             style: TextStyle(fontSize: 16),
           ),
           onPressed: () async {
+            Get.back();
             await deleteNotify(medicineData!);
             await medicineData!.delete();
-            Get.back();
           },
         ),
         TextButton(
@@ -233,6 +235,32 @@ class MedicineInfoCard extends StatelessWidget {
         ),
       ],
     );
+    // Get.defaultDialog(
+    //   title: 'ลบรายการยา',
+    //   middleText: 'รายการยาและการแจ้งเตือนของยานี้จะถูกลบออกอย่างถาวร',
+    //   actions: <Widget>[
+    //     TextButton(
+    //       child: const Text(
+    //         'ตกลง',
+    //         style: TextStyle(fontSize: 16),
+    //       ),
+    //       onPressed: () async {
+    //         Get.back();
+    //         await deleteNotify(medicineData!);
+    //         await medicineData!.delete();
+    //       },
+    //     ),
+    //     TextButton(
+    //       child: const Text(
+    //         'ยกเลิก',
+    //         style: TextStyle(fontSize: 16),
+    //       ),
+    //       onPressed: () {
+    //         Get.back();
+    //       },
+    //     ),
+    //   ],
+    // );
   }
 }
 

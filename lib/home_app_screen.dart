@@ -7,10 +7,10 @@ import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
-import 'package:open_file/open_file.dart';
+import 'package:open_file_plus/open_file_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
-import 'package:printing/printing.dart';
+// import 'package:printing/printing.dart';
 //import 'package:open_file/open_file.dart';
 //import 'package:open_file/open_file.dart';
 import 'package:tanya_app_v1/Controller/medicine_info_controller.dart';
@@ -196,7 +196,6 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
     final currentDate = DateTime.now();
     final thDateString =
         DateFormat.yMMMMd('th_TH').formatInBuddhistCalendarThai(currentDate);
-    final netImage = await networkImage('https://www.nfet.net/nfet.jpg');
     final currentTime = TimeOfDay.now();
     var hour = currentTime.hour;
     hour = hour != 24 ? hour : 0;
@@ -312,7 +311,7 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
     final dateString = DateFormat.MMMd('th_TH').format(DateTime.now());
     final file = File('${tempDir.path}/Report_$dateString.pdf');
     await file.writeAsBytes(await pdf.save());
-    OpenFile.open(file.path);
+    await OpenFile.open(file.path);
   }
 
   void floatingAction() {

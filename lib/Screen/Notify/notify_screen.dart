@@ -661,6 +661,8 @@ class NotifyCard extends StatelessWidget {
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.fade,
                             ),
                             Text(
                               notifyInfo.description,
@@ -683,6 +685,7 @@ class NotifyCard extends StatelessWidget {
                               child: Padding(
                                 padding: const EdgeInsets.all(8),
                                 child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Expanded(
                                       flex: 2,
@@ -819,20 +822,30 @@ class MedicineInfoOnCard extends StatelessWidget {
           ),
         ),
         Text(
-          '${notifyInfo.medicineInfo.description.replaceAll('\n', ' ').substring(0, notifyInfo.medicineInfo.description.length >= 40 ? 40 : notifyInfo.medicineInfo.description.length)}...',
+          notifyInfo.medicineInfo.description,
+          //'${notifyInfo.medicineInfo.description.replaceAll('\n', ' ').substring(0, notifyInfo.medicineInfo.description.length >= 40 ? 40 : notifyInfo.medicineInfo.description.length)}',
+          maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
         Text(
           getHowtoEat(notifyInfo),
           style: const TextStyle(fontSize: 16),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
-        Text(
-          getOrderInThai(notifyInfo),
-          style: const TextStyle(fontSize: 16),
-        ),
+        notifyInfo.medicineInfo.order != ""
+            ? Text(
+                getOrderInThai(notifyInfo),
+                style: const TextStyle(fontSize: 16),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              )
+            : Container(),
         Text(
           getPeroidInThai(notifyInfo),
           style: const TextStyle(fontSize: 16),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         )
       ],
     );

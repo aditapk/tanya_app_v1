@@ -60,15 +60,24 @@ class _MedicineReportScreenState extends State<MedicineReportScreen> {
 
       var medicineSet = <String>{};
       var notifySet = <String>{};
-      var colorSet = <int>{};
+      var colorList = [];
       for (var notify in notifyInfoInRange) {
         medicineSet.add(notify.medicineInfo.name);
         notifySet.add(notify.name);
-        colorSet.add(notify.medicineInfo.color);
+        //colorSet.add(notify.medicineInfo.color);
       }
       //var medicineList = medicineSet.toList();
       var notifyList = notifySet.toList();
-      var colorList = colorSet.toList();
+
+      for (var notifyName in notifyList) {
+        for (var notiInfo in notifyInfoInRange) {
+          if (notiInfo.name == notifyName) {
+            colorList.add(notiInfo.medicineInfo.color);
+            break;
+          }
+        }
+      }
+      //var colorList = colorSet.toList();
 
       // find number of notify each medicine
       Map<String, int> nNotifyEachMedicine = {};
@@ -106,6 +115,9 @@ class _MedicineReportScreenState extends State<MedicineReportScreen> {
           color: colorList[idx],
         ));
       }
+      // set time interval text
+      timeIntervalTextController.text =
+          '${DateFormat.yMMMMd('th').formatInBuddhistCalendarThai(appState.filterStartDate.value)} - ${DateFormat.yMMMMd('th').formatInBuddhistCalendarThai(appState.filterEndDate.value)}';
       return SizedBox(
         width: MediaQuery.of(context).size.width,
         child: Column(
@@ -173,7 +185,7 @@ class _MedicineReportScreenState extends State<MedicineReportScreen> {
                             child: Card(
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12)),
-                              elevation: 1,
+                              elevation: 3,
                               color: Color(notifyReport![index].color),
                               child: Column(
                                 children: [
@@ -190,11 +202,21 @@ class _MedicineReportScreenState extends State<MedicineReportScreen> {
                                                         Radius.circular(12),
                                                     bottomLeft:
                                                         Radius.circular(12)),
-                                            child: Image.file(
-                                              File(notifyReport![index]
-                                                  .picturePath!),
-                                              fit: BoxFit.cover,
-                                            ),
+                                            child: notifyReport![index]
+                                                            .picturePath !=
+                                                        "" &&
+                                                    notifyReport![index]
+                                                            .picturePath !=
+                                                        null
+                                                ? Image.file(
+                                                    File(notifyReport![index]
+                                                        .picturePath!),
+                                                    fit: BoxFit.cover,
+                                                  )
+                                                : Image.asset(
+                                                    "assets/images/dummy_picture.jpg",
+                                                    fit: BoxFit.cover,
+                                                  ),
                                           ),
                                         ),
                                         Expanded(
@@ -213,7 +235,8 @@ class _MedicineReportScreenState extends State<MedicineReportScreen> {
                                                     left: 8,
                                                   ),
                                                   child: Text(
-                                                    'แจ้งเตือน ${notifyReport![index].notifyName}',
+                                                    notifyReport![index]
+                                                        .notifyName,
                                                     style: const TextStyle(
                                                       fontSize: 16,
                                                       fontWeight:
@@ -226,7 +249,8 @@ class _MedicineReportScreenState extends State<MedicineReportScreen> {
                                                       const EdgeInsets.only(
                                                           top: 8, left: 8),
                                                   child: Text(
-                                                    'ยา ${notifyReport![index].medicineName}',
+                                                    notifyReport![index]
+                                                        .medicineName,
                                                     style: const TextStyle(
                                                       fontSize: 16,
                                                     ),
@@ -237,7 +261,7 @@ class _MedicineReportScreenState extends State<MedicineReportScreen> {
                                                       const EdgeInsets.only(
                                                           top: 8, left: 8),
                                                   child: Text(
-                                                    'รับประทานแล้ว ${notifyReport![index].nComplete}/${notifyReport![index].nNotify} ครั้ง',
+                                                    'รับประทานแล้ว ${notifyReport![index].nComplete} / ${notifyReport![index].nNotify} ครั้ง',
                                                     style: const TextStyle(
                                                       fontSize: 16,
                                                     ),
@@ -251,7 +275,7 @@ class _MedicineReportScreenState extends State<MedicineReportScreen> {
                                                     bottom: 8,
                                                   ),
                                                   child: Text(
-                                                    'เปอร์เซนต์การรับประทาน ${(notifyReport![index].nComplete / notifyReport![index].nNotify * 100).toStringAsFixed(0)} %',
+                                                    'ร้อยละการรับประทาน ${(notifyReport![index].nComplete / notifyReport![index].nNotify * 100).toStringAsFixed(0)} %',
                                                     style: const TextStyle(
                                                         fontSize: 16),
                                                   ),

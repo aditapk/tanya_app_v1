@@ -61,7 +61,11 @@ class MedicineInfoDisplayCard extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          Text(medicineData!.description),
+          Text(
+            medicineData!.description,
+            maxLines: 1,
+            overflow: TextOverflow.visible,
+          ),
           Row(
             children: [
               Text(
@@ -72,7 +76,9 @@ class MedicineInfoDisplayCard extends StatelessWidget {
               Text(medicineData!.unit)
             ],
           ),
-          Text(_displayEatOrder(medicineData!.order)),
+          medicineData!.order != ""
+              ? Text(_displayEatOrder(medicineData!.order))
+              : Container(),
           Text(_displayPeriodTime(medicineData!.period_time)),
         ],
       ),

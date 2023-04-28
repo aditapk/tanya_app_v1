@@ -71,8 +71,10 @@ dependencies:
   flutter_launcher_icons: ^0.13.0
   pdf: ^3.10.1
   printing: ^5.10.3
-  open_file: ^3.2.1
-  flutter_local_notifications: ^12.0.4
+  # open_file: ^3.3.1 # not support any more
+  flutter_local_notifications: ^13.0.0
+  auto_size_text: ^3.0.0
+  open_file_plus: ^3.4.1
   
 dev_dependencies:
   flutter_test:
@@ -107,6 +109,7 @@ flutter:
     - assets/lotties/
     - assets/fonts/
     - assets/app_icons/
+    - assets/app_icons/app_icon.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

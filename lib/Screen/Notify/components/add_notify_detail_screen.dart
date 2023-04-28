@@ -3,6 +3,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fraction/fraction.dart';
@@ -232,13 +233,23 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
               notifyID: notifyID,
             ));
 
-        if (status == "OK") {
-          notifyInfo!.status = 0;
-          notifyInfo.save();
+        switch (status) {
+          case "OK":
+            notifyInfo!.status = 0;
+            notifyInfo.save();
+            break;
+          case "PENDING":
+            generateNewSchedule(notifyID, notifyInfo);
+            break;
         }
-        if (status == "PENDING") {
-          generateNewSchedule(notifyID, notifyInfo);
-        }
+
+        // if (status == "OK") {
+        //   notifyInfo!.status = 0;
+        //   notifyInfo.save();
+        // }
+        // if (status == "PENDING") {
+        //   generateNewSchedule(notifyID, notifyInfo);
+        // }
 
         break;
       case NotificationResponseType.selectedNotificationAction:
@@ -251,17 +262,28 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
         var notifyBox = Hive.box<NotifyInfoModel>('user_notify_info');
         var notifyInfo = notifyBox.getAt(notifyID);
 
-        if (notificationResponse.actionId == "OK") {
-          // notify status -> complete
-          notifyInfo!.status = 0;
-          notifyInfo.save();
+        switch (notificationResponse.actionId) {
+          case "OK":
+            // notify status -> complete
+            notifyInfo!.status = 0;
+            notifyInfo.save();
+            break;
+          case "PENDING":
+            generateNewSchedule(notifyID, notifyInfo);
+            break;
         }
-        if (notificationResponse.actionId == "PENDING") {
-          generateNewSchedule(notifyID, notifyInfo);
-          //   // แจ้งเตือนไปยังผู้ดูแล
-          //   await notifyToCarePerson();
-          // }
-        }
+
+        // if (notificationResponse.actionId == "OK") {
+        //   // notify status -> complete
+        //   notifyInfo!.status = 0;
+        //   notifyInfo.save();
+        // }
+        // if (notificationResponse.actionId == "PENDING") {
+        //   generateNewSchedule(notifyID, notifyInfo);
+        //   //   // แจ้งเตือนไปยังผู้ดูแล
+        //   //   await notifyToCarePerson();
+        //   // }
+        // }
         break;
     }
   }
@@ -1194,13 +1216,14 @@ class MedicineSelectedCard extends StatelessWidget {
           color: Color(medicineSelected.color),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          child: Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ClipRRect(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: medicineSelected.picture_path != '' ||
+                  child: medicineSelected.picture_path != '' &&
                           medicineSelected.picture_path != null
                       ? Image.file(
                           File(medicineSelected.picture_path!),
@@ -1215,35 +1238,44 @@ class MedicineSelectedCard extends StatelessWidget {
                           height: 100,
                         ),
                 ),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      medicineSelected.name,
-                      style: const TextStyle(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(medicineSelected.description),
-                    Row(
-                      children: [
-                        Text(
-                            "${_displayPrefixType(medicineSelected.type)}   ${medicineSelected.nTake.toFraction()}"),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        Text(medicineSelected.unit)
-                      ],
-                    ),
-                    Text(_displayEatOrder(medicineSelected.order)),
-                    Text(_displayPeriodTime(medicineSelected.period_time)),
-                  ],
+                const SizedBox(
+                  width: 8,
                 ),
-              )
-            ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        medicineSelected.name,
+                        style: const TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        medicineSelected.description,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                              "${_displayPrefixType(medicineSelected.type)}   ${medicineSelected.nTake.toFraction()}"),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Text(medicineSelected.unit)
+                        ],
+                      ),
+                      medicineSelected.order != ""
+                          ? Text(_displayEatOrder(medicineSelected.order))
+                          : Container(),
+                      Text(_displayPeriodTime(medicineSelected.period_time)),
+                    ],
+                  ),
+                )
+              ],
+            ),
           ),
         ),
       ),
@@ -1287,9 +1319,10 @@ class PeriodDateSeletedCard extends StatelessWidget {
           child: SizedBox(
             height: 50,
             child: Center(
-              child: Text(
+              child: AutoSizeText(
                 text,
                 style: periodDayTextStyly(isSelected),
+                maxLines: 1,
               ),
             ),
           ),
@@ -1335,9 +1368,10 @@ class TextFieldEditor extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           title != null
-              ? Text(
+              ? AutoSizeText(
                   title!,
                   style: titleStyle,
+                  maxLines: 1,
                 )
               : Container(),
           Container(
