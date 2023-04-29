@@ -13,7 +13,6 @@ class LoginScreenSelection extends StatelessWidget {
     var userLoginBox = Hive.box<UserLogin>('user_login');
     var userLogin = userLoginBox.get(0);
     if (userLogin == null) {
-      //return const LoginScreen();
       return const SignUpScreen();
     } else {
       if (userLogin.logOut!) {

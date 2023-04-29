@@ -57,10 +57,10 @@ class NotifyService {
       notificationCategories: iosNotificationCategories,
     );
 
-    // const AndroidInitializationSettings androidInitializationSettings =
-    //     AndroidInitializationSettings('@mipmap/ic_launcher');
     const AndroidInitializationSettings androidInitializationSettings =
-        AndroidInitializationSettings('app_icon');
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    // const AndroidInitializationSettings androidInitializationSettings =
+    //     AndroidInitializationSettings('launch_background');
     final InitializationSettings initializationSettings =
         InitializationSettings(
             iOS: iOSInitializationSettings,
@@ -122,7 +122,14 @@ class NotifyService {
     var howToEat = "<type> $nTakeStr $unit";
     switch (type) {
       case "pills":
+      case "water":
         howToEat = howToEat.replaceAll('<type>', "รับประทาน");
+        break;
+      case "arrow":
+        howToEat = howToEat.replaceAll("<type>", "ฉีดปริมาณ");
+        break;
+      case "drop":
+        howToEat = howToEat.replaceAll("<type>", "หยดจำนวน");
         break;
     }
     var orderInThai = "";
@@ -133,6 +140,9 @@ class NotifyService {
       case "after":
         orderInThai = "หลังอาหาร";
         break;
+      case "":
+        orderInThai = "ก่อนนอน";
+        break;
     }
     final contentTitle = "<b>$name<b>";
     final summaryText = "$howToEat<br>$orderInThai";
@@ -141,7 +151,6 @@ class NotifyService {
     BigPictureStyleInformation bigPictureStyleInformation =
         BigPictureStyleInformation(
       FilePathAndroidBitmap(imagePath),
-      largeIcon: FilePathAndroidBitmap(imagePath),
       contentTitle: contentTitle,
       htmlFormatContentTitle: true,
       summaryText: summaryText,
@@ -150,13 +159,17 @@ class NotifyService {
     );
 
     AndroidNotificationDetails androidNotificationDetails =
-        AndroidNotificationDetails(channelID, channelName,
-            channelDescription: channelDescription,
-            importance: Importance.max,
-            priority: Priority.high,
-            ticker: notifyTicker,
-            actions: notifyAction,
-            styleInformation: bigPictureStyleInformation);
+        AndroidNotificationDetails(
+      channelID,
+      channelName,
+      channelDescription: channelDescription,
+      importance: Importance.max,
+      priority: Priority.high,
+      ticker: notifyTicker,
+      actions: notifyAction,
+      styleInformation: bigPictureStyleInformation,
+      largeIcon: FilePathAndroidBitmap(imagePath),
+    );
 
     // check file is exist
     DarwinNotificationDetails? iosNotificationDetails =

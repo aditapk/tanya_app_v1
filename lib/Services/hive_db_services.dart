@@ -49,6 +49,7 @@ class HiveDatabaseService {
     await Hive.openBox<DoctorAppointMent>('doctor_appointment');
   }
 
+  // for test
   static Future<void> deleteBox() async {
     await Hive.deleteBoxFromDisk('user_notify_info');
     await Hive.deleteBoxFromDisk('doctor_appointment');
@@ -56,4 +57,25 @@ class HiveDatabaseService {
     await Hive.deleteBoxFromDisk('user_notify_info');
     await Hive.deleteBoxFromDisk('user_medicine_info');
   }
+
+  // static Future<void> clearBox() async {
+  //   await clearUserMedicineInfo();
+  //   await clearDotorAppointment();
+  // }
+
+  // static Future<void> clearUserMedicineInfo() async {
+  //   var userMedicineInfoBox =
+  //       await Hive.openBox<MedicineInfo>('user_medicine_info');
+  //   await userMedicineInfoBox.clear();
+  // }
+
+  // static Future<void> clearDotorAppointment() async {
+  //   var doctorAppointMentBox =
+  //       await Hive.openBox<DoctorAppointMent>('doctor_appointment');
+  //   await doctorAppointMentBox.clear();
+  // }
+
+  // static Future<void> clearUserInfo() async {
+  //   var userInfoBox = await Hive.openBox<UserInfo>('user_info');
+  // }
 }

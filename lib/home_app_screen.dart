@@ -45,21 +45,32 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
     return AppBar(
       elevation: 2,
       automaticallyImplyLeading: false,
-      leading: IconButton(
-        icon: const Icon(
-          Icons.logout,
-        ),
-        onPressed: () async {
-          var userLoginBox = Hive.box<UserLogin>('user_login');
-          var userLogin = userLoginBox.get(0);
-          userLogin!.logOut = true;
-          await userLogin.save();
-          Get.to(const LoginScreenSelection());
-        },
-      ),
+      leading: PopupMenuButton(
+          offset: const Offset(10, 40),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          itemBuilder: (context) => const [
+                PopupMenuItem(
+                    value: 0,
+                    child: ListTile(
+                      leading: Icon(Icons.logout),
+                      title: Text('ออกจากระบบ'),
+                    ))
+              ],
+          onSelected: (value) async {
+            switch (value) {
+              case 0:
+                var userLoginBox = Hive.box<UserLogin>('user_login');
+                var userLogin = userLoginBox.get(0);
+                userLogin!.logOut = true;
+                await userLogin.save();
+                Get.to(const LoginScreenSelection());
+                break;
+            }
+          }),
       title: Text(titlePageList[_selectedIndex]),
       centerTitle: true,
-      actions: <Widget>[
+      actions: [
         Padding(
           padding: const EdgeInsets.only(right: 8),
           child: GestureDetector(
@@ -98,6 +109,59 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
         ),
       ],
     );
+    // IconButton(
+    //   icon: const Icon(
+    //     Icons.logout,
+    //   ),
+    //   onPressed: () async {
+    //     var userLoginBox = Hive.box<UserLogin>('user_login');
+    //     var userLogin = userLoginBox.get(0);
+    //     userLogin!.logOut = true;
+    //     await userLogin.save();
+    //     Get.to(const LoginScreenSelection());
+    //   },
+    // ),
+    //   title: Text(titlePageList[_selectedIndex]),
+    //   centerTitle: true,
+    //   actions: <Widget>[
+    //     Padding(
+    //       padding: const EdgeInsets.only(right: 8),
+    //       child: GestureDetector(
+    //         onTap: () {
+    //           setState(() {
+    //             _selectedIndex = 3;
+    //           });
+    //         },
+    //         child: ValueListenableBuilder(
+    //           valueListenable: Hive.box<UserInfo>('user_info').listenable(),
+    //           builder: (_, userInfoBox, __) {
+    //             var userInfo = userInfoBox.get(0);
+    //             if (userInfo != null) {
+    //               if (userInfo.picturePath != null) {
+    //                 return CircleAvatar(
+    //                   child: ClipOval(
+    //                     child: Image.file(
+    //                       File(userInfo.picturePath!),
+    //                       fit: BoxFit.cover,
+    //                       width: 40,
+    //                       height: 40,
+    //                     ),
+    //                   ),
+    //                 );
+    //               }
+    //               return const CircleAvatar(
+    //                 child: Icon(Icons.person),
+    //               );
+    //             }
+    //             return const CircleAvatar(
+    //               child: Icon(Icons.person),
+    //             );
+    //           },
+    //         ),
+    //       ),
+    //     ),
+    //   ],
+    // );
   }
 
   @override

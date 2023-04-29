@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:tanya_app_v1/Controller/medicine_info_controller.dart';
 
 import 'time_schedule_selection_card.dart';
