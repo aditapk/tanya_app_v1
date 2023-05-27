@@ -1,6 +1,8 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
+import 'package:tanya_app_v1/utils/constans.dart';
 
 import '../../../Model/user_info_model.dart';
 
@@ -173,7 +175,10 @@ class _TextFieldUserInfoState extends State<TextFieldUserInfo> {
                             middleText: 'ทดสอบการแจ้งเตือนไม่สำเร็จ');
                       }
                     },
-                    child: const Text('Test'),
+                    child: const AutoSizeText(
+                      'ลอง',
+                      maxLines: 1,
+                    ),
                   ),
                 ),
               ))
@@ -196,7 +201,8 @@ class _TextFieldUserInfoState extends State<TextFieldUserInfo> {
                 ),
                 onPressed: () async {
                   if (widget.userInfo == null) {
-                    var userInfoBox = Hive.box<UserInfo>('user_info');
+                    var userInfoBox =
+                        Hive.box<UserInfo>(HiveDatabaseName.USER_INFO);
                     var userInfo = userInfoBox.get(0);
                     if (userInfo != null) {
                       // case add picture before personal info
@@ -232,6 +238,9 @@ class _TextFieldUserInfoState extends State<TextFieldUserInfo> {
                     }
                     if (doctorTextController.text.isNotEmpty) {
                       widget.userInfo!.doctorName = doctorTextController.text;
+                    }
+                    if (lineTokenTextController.text.isNotEmpty) {
+                      widget.userInfo!.lineToken = lineTokenTextController.text;
                     }
                     await widget.userInfo!.save();
                   }

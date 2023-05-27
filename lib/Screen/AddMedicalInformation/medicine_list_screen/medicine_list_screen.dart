@@ -28,7 +28,7 @@ class MedicineListScreen extends StatelessWidget {
       () => const MedicineInfoEditorScreen(
         mode: 'create',
       ),
-      binding: MedicineInfoBinding(),
+      binding: AppInfoBinding(),
     );
   }
 }

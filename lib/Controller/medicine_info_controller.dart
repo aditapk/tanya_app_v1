@@ -18,8 +18,14 @@ class MedicineEditorState extends GetxController {
   final bed_time = false.obs;
   final picture_path = "".obs;
   final color = Colors.blue.shade200.obs;
-  final notifyServices = NotifyService().obs;
-  final appointmentService = NotifyService().obs;
+}
+
+class ReportFilterState extends GetxController {
   final filterStartDate = DateTime.now().obs;
   final filterEndDate = DateTime.now().add(const Duration(days: 7)).obs;
+}
+
+class NotificationState extends GetxController {
+  final medicineNotification = NotifyService().obs;
+  final appointmentNotification = NotifyService().obs;
 }

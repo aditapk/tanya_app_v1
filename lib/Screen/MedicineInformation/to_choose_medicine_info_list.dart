@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:tanya_app_v1/home_app_screen.dart';
+import 'package:tanya_app_v1/utils/constans.dart';
 
 import '../../Model/medicine_info_model.dart';
 import '../AddMedicalInformation/medicine_list_screen/components/empty_medicine_list.dart';
@@ -25,7 +26,7 @@ class _ToChooseMedicineState extends State<ToChooseMedicine> {
       ),
       body: ValueListenableBuilder(
         valueListenable:
-            Hive.box<MedicineInfo>('user_medicine_info').listenable(),
+            Hive.box<MedicineInfo>(HiveDatabaseName.MEDICINE_INFO).listenable(),
         builder: (_, box, __) {
           if (box.values.isNotEmpty) {
             var medicineboxInfo = box.values;

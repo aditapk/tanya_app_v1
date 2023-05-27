@@ -6,6 +6,7 @@ import 'package:hive/hive.dart';
 import 'package:tanya_app_v1/Controller/medicine_info_controller.dart';
 import 'package:tanya_app_v1/Model/medicine_info_model.dart';
 import 'package:tanya_app_v1/Model/notify_info.dart';
+import 'package:tanya_app_v1/utils/constans.dart';
 import 'components/number_of_dose_selection.dart';
 import 'components/picture_medicine_card.dart';
 import 'components/take_medicine_and_time_selection.dart';
@@ -227,8 +228,8 @@ class _MedicineInfoEditorScreenState extends State<MedicineInfoEditorScreen> {
     await widget.medicineData!.save();
 
     // update on notify Box
-    var notifyBox = Hive.box<NotifyInfoModel>('user_notify_info');
-    var medicineBox = Hive.box<MedicineInfo>('user_medicine_info');
+    var notifyBox = Hive.box<NotifyInfoModel>(HiveDatabaseName.NOTIFY_INFO);
+    var medicineBox = Hive.box<MedicineInfo>(HiveDatabaseName.MEDICINE_INFO);
     var medicine = medicineBox.get(widget.medicineData!.id);
     if (notifyBox.isNotEmpty) {
       var notifyList = notifyBox.values;
@@ -250,7 +251,8 @@ class _MedicineInfoEditorScreenState extends State<MedicineInfoEditorScreen> {
   }
 
   Future<void> _createMedicineInfoBox() async {
-    var medicineInfoBox = Hive.box<MedicineInfo>("user_medicine_info");
+    var medicineInfoBox =
+        Hive.box<MedicineInfo>(HiveDatabaseName.MEDICINE_INFO);
 
     var newMedicineData = MedicineInfo(
       name: _nameTextController.text,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:tanya_app_v1/utils/constans.dart';
 
 import '../../../Model/user_info_model.dart';
 
@@ -18,7 +19,8 @@ class UserInfoWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ValueListenableBuilder(
-              valueListenable: Hive.box<UserInfo>('user_info').listenable(),
+              valueListenable:
+                  Hive.box<UserInfo>(HiveDatabaseName.USER_INFO).listenable(),
               builder: (_, userInfoBox, __) {
                 if (userInfoBox.values.isEmpty) {
                   return const Center(

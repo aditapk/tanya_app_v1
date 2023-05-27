@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:tanya_app_v1/Model/medicine_info_model.dart';
+import 'package:tanya_app_v1/utils/constans.dart';
 
 import 'empty_medicine_list.dart';
 import 'medicine_info_card.dart';
@@ -14,7 +15,7 @@ class DisplayMedicineInfoList extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable:
-          Hive.box<MedicineInfo>('user_medicine_info').listenable(),
+          Hive.box<MedicineInfo>(HiveDatabaseName.MEDICINE_INFO).listenable(),
       builder: (_, box, __) {
         if (box.values.isNotEmpty) {
           var medicineboxInfo = box.values;

@@ -20,7 +20,6 @@ class PictureMedicineCard extends StatefulWidget {
 class _PictureMedicineCardState extends State<PictureMedicineCard> {
   final String _emptyPicture = "assets/images/dummy_picture.jpg";
 
-  //final medicineInfoState = Get.put(MedicineEditorState());
   final medicineInfoState = Get.find<MedicineEditorState>();
 
   Future<void> _takePhotoToGallerry() async {

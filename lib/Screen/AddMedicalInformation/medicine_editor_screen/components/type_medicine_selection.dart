@@ -7,7 +7,6 @@ import 'medicine_type_card.dart';
 class TypeMedicineSeletion extends StatelessWidget {
   TypeMedicineSeletion({super.key});
 
-  //final medicineInfoState = Get.put(MedicineEditorState());
   final medicineInfoState = Get.find<MedicineEditorState>();
 
   @override
@@ -40,7 +39,7 @@ class TypeMedicineSeletion extends StatelessWidget {
             selection: medicineInfoState.selected_type.value == "arrow",
             onTap: () {
               medicineInfoState.selected_type("arrow");
-              medicineInfoState.selected_type_unit("Unit");
+              medicineInfoState.selected_type_unit("ยูนิต");
             },
           ),
         ),

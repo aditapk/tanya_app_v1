@@ -10,17 +10,18 @@ import 'package:fraction/fraction.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart'; // for datetime formatting
+import 'package:tanya_app_v1/GetXBinding/medicine_state_binding.dart';
 import 'package:tanya_app_v1/Model/medicine_info_model.dart';
 import 'package:tanya_app_v1/Model/notify_info.dart';
+import 'package:tanya_app_v1/Services/notification_handling.dart';
+import 'package:tanya_app_v1/utils/constans.dart';
 
 import '../../../Controller/medicine_info_controller.dart';
-import '../../../Model/user_info_model.dart';
+import '../../../Services/notify_services.dart';
 import '../../MedicineInformation/to_choose_medicine_info_list.dart';
-import '../notify_handle_screen.dart'; // for random variable
+// for random variable
 
 import 'package:buddhist_datetime_dateformat_sns/buddhist_datetime_dateformat_sns.dart';
-
-import 'package:http/http.dart' as http;
 
 class AddNotifyDetailScreen extends StatefulWidget {
   const AddNotifyDetailScreen({
@@ -140,8 +141,8 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
   //int numberOfNotifyTimeItem = 0;
 
   NotifyInformation notifyInformation = NotifyInformation();
-  //NotifyService notifyServices = NotifyService(); // notification services
-  final medicineInfoState = Get.find<MedicineEditorState>();
+  NotifyService notifyService = NotifyService(); // notification services
+  //final medicineInfoState = Get.find<MedicineEditorState>();
 
   // State variable
   TextEditingController notifyNameController = TextEditingController();
@@ -159,153 +160,146 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
   TextEditingController notifyBeforetoBedTimeController =
       TextEditingController();
 
-  // ---
-  getNotifyID(String payload) {
-    var notifyInfoObject = jsonDecode(payload);
-    return notifyInfoObject["notifyID"];
-  }
+  // // ---
+  // getNotifyID(String payload) {
+  //   var notifyInfoObject = jsonDecode(payload);
+  //   return notifyInfoObject["notifyID"];
+  // }
 
-  void onDidReceiveLocalNotificationIOS(
-      int id, String? title, String? body, String? payload) async {
-    //print("$id, $title");
-  }
+  // void onDidReceiveLocalNotificationIOS(
+  //     int id, String? title, String? body, String? payload) async {
+  //   //print("$id, $title");
+  // }
 
-  generateNewSchedule(int notifyID, NotifyInfoModel? notifyInfo) async {
-    var date = notifyInfo!.date;
-    var now = DateTime.now();
-    var minuteDiff = now.difference(date).inMinutes;
-    if (minuteDiff <= 60) {
-      var nextDateTime = now.add(const Duration(minutes: 15));
-      // Convert string payload
-      var notifyPayload = jsonEncode({
-        "notifyID": notifyID,
-        "notifyInfo": notifyInfo.toJson(),
-      });
-      notifySet(
-        id: notifyID,
-        scheduleTime: nextDateTime,
-        payload: notifyPayload,
-        numNotify: notifyInfo.status,
-        imagePath: notifyInfo.medicineInfo.picture_path!,
-      );
-    } else {
-      Get.dialog(
-        AlertDialog(
-          title: const Text(
-            "คำเตือน!",
-            style: TextStyle(color: Colors.red),
-          ),
-          content: const Text(
-              "ไม่สามารถเลื่อนการแจ้งเตือนได้ เนื่องจากล่วงเลยกินยามามากกว่า 1 ชั่วโมงแล้ว"),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Get.back();
-              },
-              child: const Text("OK"),
-            )
-          ],
-        ),
-      );
+  // generateNewSchedule(int notifyID, NotifyInfoModel? notifyInfo,
+  //     {required NotifyService notifyService}) async {
+  //   var date = notifyInfo!.date;
+  //   var now = DateTime.now();
+  //   var minuteDiff = now.difference(date).inMinutes;
+  //   if (minuteDiff <= 1) {
+  //     var nextDateTime = now.add(const Duration(seconds: 10));
+  //     // Convert string payload
+  //     var notifyPayload = jsonEncode({
+  //       "notifyID": notifyID,
+  //       "notifyInfo": notifyInfo.toJson(),
+  //     });
+  //     notifySet(
+  //       notifyService: notifyService,
+  //       id: notifyID,
+  //       scheduleTime: nextDateTime,
+  //       payload: notifyPayload,
+  //       numNotify: notifyInfo.status,
+  //       imagePath: notifyInfo.medicineInfo.picture_path!,
+  //     );
+  //   } else {
+  //     Get.dialog(
+  //       AlertDialog(
+  //         title: const Text(
+  //           "คำเตือน!",
+  //           style: TextStyle(color: Colors.red),
+  //         ),
+  //         content: const Text(
+  //             "ไม่สามารถเลื่อนการแจ้งเตือนได้ เนื่องจากล่วงเลยกินยามามากกว่า 1 ชั่วโมงแล้ว"),
+  //         actions: [
+  //           TextButton(
+  //             onPressed: () {
+  //               Get.back();
+  //             },
+  //             child: const Text("OK"),
+  //           )
+  //         ],
+  //       ),
+  //     );
 
-      // แจ้งเตือนไปยังผู้ดูแล
-      await notifyToCarePerson();
-    }
-  }
+  //     // แจ้งเตือนไปยังผู้ดูแล
+  //     await notifyToCarePerson();
+  //   }
+  // }
 
-  void onDidReceiveNotificationAndroid(
-      NotificationResponse notificationResponse) async {
-    switch (notificationResponse.notificationResponseType) {
-      case NotificationResponseType.selectedNotification:
-        // ignore: todo
-        // TODO: Handle this case. for Android, IOS
-        // When click on notification
-        // .notificationResponseType
-        // .id
-        // .actonId
-        // .input
-        // .payload
-        //print(notificationResponse.payload);
-        var notifyID = getNotifyID(notificationResponse.payload!);
-        var notifyBox = Hive.box<NotifyInfoModel>('user_notify_info');
-        var notifyInfo = notifyBox.getAt(notifyID);
-        var status = await Get.to(() => NotifyHandleScreen(
-              notifyID: notifyID,
-            ));
+  // Future<void> onDidReceiveNotificationAndroid(
+  //     NotificationResponse notificationResponse) async {
+  //   switch (notificationResponse.notificationResponseType) {
+  //     case NotificationResponseType.selectedNotification:
+  //       // ignore: todo
+  //       // When click on notification
+  //       // .notificationResponseType
+  //       // .id
+  //       // .actonId
+  //       // .input
+  //       // .payload
+  //       //print(notificationResponse.payload);
+  //       var notifyID = getNotifyID(notificationResponse.payload!);
+  //       var notifyBox = Hive.box<NotifyInfoModel>('user_notify_info');
+  //       var notifyInfo = notifyBox.getAt(notifyID);
+  //       var status = await Get.to(
+  //           () => NotifyHandleScreen(
+  //                 notifyID: notifyID,
+  //               ),
+  //           binding: appInfoBinding());
 
-        switch (status) {
-          case "OK":
-            notifyInfo!.status = 0;
-            notifyInfo.save();
-            break;
-          case "PENDING":
-            generateNewSchedule(notifyID, notifyInfo);
-            break;
-        }
+  //       switch (status) {
+  //         case "OK":
+  //           notifyInfo!.status = 0;
+  //           notifyInfo.save();
+  //           break;
+  //         case "PENDING":
+  //           await notifyService.inintializeNotification(
+  //             onDidReceiveNotificationAndroid: onDidReceiveNotificationAndroid,
+  //             onDidReceiveNotificationIOS: onDidReceiveLocalNotificationIOS,
+  //           );
+  //           generateNewSchedule(notifyID, notifyInfo,
+  //               notifyService: notifyService);
+  //           break;
+  //       }
 
-        // if (status == "OK") {
-        //   notifyInfo!.status = 0;
-        //   notifyInfo.save();
-        // }
-        // if (status == "PENDING") {
-        //   generateNewSchedule(notifyID, notifyInfo);
-        // }
+  //       break;
+  //     case NotificationResponseType.selectedNotificationAction:
+  //       // ignore: todo
+  //       // When action on notification is clicked
+  //       //print(notificationResponse.actionId);
+  //       //print(notificationResponse.payload);
+  //       var notifyID = getNotifyID(notificationResponse.payload!);
+  //       var notifyBox = Hive.box<NotifyInfoModel>('user_notify_info');
+  //       var notifyInfo = notifyBox.getAt(notifyID);
 
-        break;
-      case NotificationResponseType.selectedNotificationAction:
-        // ignore: todo
-        // TODO: Handle this case. for Android
-        // When action on notification is clicked
-        //print(notificationResponse.actionId);
-        //print(notificationResponse.payload);
-        var notifyID = getNotifyID(notificationResponse.payload!);
-        var notifyBox = Hive.box<NotifyInfoModel>('user_notify_info');
-        var notifyInfo = notifyBox.getAt(notifyID);
+  //       switch (notificationResponse.actionId) {
+  //         case "OK":
+  //           // notify status -> complete
+  //           notifyInfo!.status = 0;
+  //           notifyInfo.save();
+  //           break;
+  //         case "PENDING":
+  //           // create notify service
+  //           await notifyService.inintializeNotification(
+  //             onDidReceiveNotificationAndroid: onDidReceiveNotificationAndroid,
+  //             onDidReceiveNotificationIOS: onDidReceiveLocalNotificationIOS,
+  //           );
+  //           generateNewSchedule(notifyID, notifyInfo,
+  //               notifyService: notifyService);
+  //           break;
+  //       }
+  //       break;
+  //   }
+  // }
 
-        switch (notificationResponse.actionId) {
-          case "OK":
-            // notify status -> complete
-            notifyInfo!.status = 0;
-            notifyInfo.save();
-            break;
-          case "PENDING":
-            generateNewSchedule(notifyID, notifyInfo);
-            break;
-        }
+  // notifyToCarePerson() async {
+  //   // LINE notify
+  //   var userInfoBox = Hive.box<UserInfo>('user_info');
+  //   var userInfo = userInfoBox.get(0);
 
-        // if (notificationResponse.actionId == "OK") {
-        //   // notify status -> complete
-        //   notifyInfo!.status = 0;
-        //   notifyInfo.save();
-        // }
-        // if (notificationResponse.actionId == "PENDING") {
-        //   generateNewSchedule(notifyID, notifyInfo);
-        //   //   // แจ้งเตือนไปยังผู้ดูแล
-        //   //   await notifyToCarePerson();
-        //   // }
-        // }
-        break;
-    }
-  }
-
-  notifyToCarePerson() async {
-    // LINE notify
-    var userInfoBox = Hive.box<UserInfo>('user_info');
-    var userInfo = userInfoBox.get(0);
-
-    if (userInfo?.lineToken != null) {
-      Uri lineNotifyUrl = Uri.https('notify-api.line.me', 'api/notify');
-      await http.post(
-        lineNotifyUrl,
-        headers: {
-          "Authorization": "Bearer ${userInfo?.lineToken}",
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body:
-            "message=\nญาติของท่านยังไม่กินยาตามเวลา กรุณาเตือนญาติของท่านกินยาด้วยค่ะ",
-      );
-    }
-  }
+  //   if (userInfo?.lineToken != null) {
+  //     Uri lineNotifyUrl = Uri.https('notify-api.line.me', 'api/notify');
+  //     await http.post(
+  //       lineNotifyUrl,
+  //       headers: {
+  //         "Authorization": "Bearer ${userInfo?.lineToken}",
+  //         "Content-Type": "application/x-www-form-urlencoded",
+  //       },
+  //       body:
+  //           "message=\nญาติของท่านยังไม่กินยาตามเวลา กรุณาเตือนญาติของท่านกินยาด้วยค่ะ",
+  //     );
+  //   }
+  // }
 
   //List<bool> peroidDateSelected = [false, true, true, true, true, true, true];
   bool periodMondaySelected = false;
@@ -321,11 +315,11 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
     super.initState();
 
     // intial notification service
-    medicineInfoState.notifyServices.value.inintializeNotification(
-      onDidReceiveNotificationAndroid: onDidReceiveNotificationAndroid,
-      onDidReceiveNotificationIOS: onDidReceiveLocalNotificationIOS,
-    );
-    medicineInfoState.notifyServices.value.requestPermission();
+    // medicineInfoState.notifyServices.value.inintializeNotification(
+    //   onDidReceiveNotificationAndroid: onDidReceiveNotificationAndroid,
+    //   onDidReceiveNotificationIOS: onDidReceiveLocalNotificationIOS,
+    // );
+    // medicineInfoState.notifyServices.value.requestPermission();
     selectedStartNotifyDateController.text = DateFormat.yMMMd('th_TH')
         .formatInBuddhistCalendarThai(widget.selectedDate);
     selectedEndNotifyDateController.text = DateFormat.yMMMd('th_TH')
@@ -407,7 +401,7 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
     }
     if (medicineData.period_time[1]) {
       notifyInformation.lunchTime = const TimeOfDay(hour: 12, minute: 0);
-      notifyLunchTimeController.text = "12:00 AM";
+      notifyLunchTimeController.text = "12:00 PM";
       //notifyInformation.lunchTime!.format(context);
     } else {
       notifyInformation.lunchTime = null;
@@ -438,60 +432,14 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
 
   //เลือกรายการยา
   selectMedicineItem() async {
-    var result = await Get.to(() => const ToChooseMedicine());
+    var result = await Get.to(
+      () => const ToChooseMedicine(),
+      binding: AppInfoBinding(),
+    );
     // update field after choose
     if (result != null) {
       setState(() {
         setMedicineState(result);
-        // notifyInformation.selectedMedicine = MedicineInformation(
-        //     name: result.name,
-        //     description: result.description,
-        //     type: result.type,
-        //     unit: result.unit,
-        //     order: result.order,
-        //     nTake: result.nTake,
-        //     periodTime: result.period_time,
-        //     picturePath: result.picture_path,
-        //     color: result.color);
-
-        // if (result.period_time[0]) {
-        //   notifyInformation.morningTime = const TimeOfDay(hour: 8, minute: 0);
-        //   notifyMorningTimeController.text =
-        //       notifyInformation.morningTime!.format(context);
-        // } else {
-        //   notifyInformation.morningTime = null;
-        //   notifyMorningTimeController.text = "";
-        // }
-        // if (result.period_time[1]) {
-        //   notifyInformation.lunchTime = const TimeOfDay(hour: 12, minute: 0);
-        //   notifyLunchTimeController.text =
-        //       notifyInformation.lunchTime!.format(context);
-        // } else {
-        //   notifyInformation.lunchTime = null;
-        //   notifyLunchTimeController.text = "";
-        // }
-
-        // if (result.period_time[2]) {
-        //   notifyInformation.eveningTime = const TimeOfDay(hour: 17, minute: 0);
-        //   notifyEveningTimeController.text =
-        //       notifyInformation.eveningTime!.format(context);
-        // } else {
-        //   notifyInformation.eveningTime = null;
-        //   notifyEveningTimeController.text = "";
-        // }
-
-        // if (result.period_time[3]) {
-        //   notifyInformation.beforeToBedTime =
-        //       const TimeOfDay(hour: 21, minute: 0);
-        //   notifyBeforetoBedTimeController.text =
-        //       notifyInformation.beforeToBedTime!.format(context);
-        // } else {
-        //   notifyInformation.beforeToBedTime = null;
-        //   notifyBeforetoBedTimeController.text = "";
-        // }
-
-        // // update text controller
-        // selectedMedicineController.text = result.name;
       });
     }
   }
@@ -567,15 +515,46 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
     return dateCleanTime;
   }
 
+  autofillName(NotifyInformation notifyInfo) {
+    String autoName = "<type>ยา";
+    switch (notifyInfo.selectedMedicine!.type) {
+      case "pills":
+      case "water":
+        autoName = autoName.replaceAll("<type>", "กิน");
+        break;
+      case "arrow":
+        autoName = autoName.replaceAll("<type>", "ฉีด");
+        break;
+      case "drop":
+        autoName = autoName.replaceAll("<type>", "หยอด");
+        break;
+    }
+    return "$autoName ${notifyInfo.selectedMedicine!.name}";
+  }
+
+  autofillDetail(NotifyInformation notifyInfo) {
+    String autoDetail = notifyInfo.selectedMedicine!.description == null ||
+            notifyInfo.selectedMedicine!.description!.isEmpty
+        ? "ไม่ระบุรายละเอียดยา"
+        : notifyInfo.selectedMedicine!.description!;
+    return autoDetail;
+  }
+
   // ตกลง
-  makeNotify() {
+  makeNotify() async {
+    // notify Init
+    await notifyInit();
+
     // notification List
     var startDate = cleanTimeOfDay(notifyInformation.startDate!);
     var endDate = cleanTimeOfDay(notifyInformation.endDate!);
     var days = endDate.difference(startDate).inDays + 1;
 
+    var notifyState = Get.find<NotificationState>();
+
     if (notifyInformation.enableMorningTime) {
       generateNotifySchedule(
+        notifyService: notifyState.medicineNotification.value,
         startDate: startDate,
         nDate: days,
         scheduleTime: notifyInformation.morningTime!,
@@ -592,6 +571,7 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
     }
     if (notifyInformation.enableLunchTime) {
       generateNotifySchedule(
+        notifyService: notifyState.medicineNotification.value,
         startDate: startDate,
         nDate: days,
         scheduleTime: notifyInformation.lunchTime!,
@@ -608,6 +588,7 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
     }
     if (notifyInformation.enableEveningTime) {
       generateNotifySchedule(
+        notifyService: notifyState.medicineNotification.value,
         startDate: startDate,
         nDate: days,
         scheduleTime: notifyInformation.eveningTime!,
@@ -624,6 +605,7 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
     }
     if (notifyInformation.enableBeforeToBedTime) {
       generateNotifySchedule(
+        notifyService: notifyState.medicineNotification.value,
         startDate: startDate,
         nDate: days,
         scheduleTime: notifyInformation.beforeToBedTime!,
@@ -647,6 +629,7 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
     required int nDate,
     required List<bool> periodDays,
     required TimeOfDay scheduleTime,
+    required NotifyService notifyService,
   }) async {
     var date = DateTime(
       startDate.year,
@@ -658,7 +641,7 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
 
     var now = DateTime.now();
 
-    var boxNotify = Hive.box<NotifyInfoModel>('user_notify_info');
+    var boxNotify = Hive.box<NotifyInfoModel>(HiveDatabaseName.NOTIFY_INFO);
     for (int day = 0; day < nDate; day++) {
       DateTime nextDate = date.add(Duration(days: day));
 
@@ -671,6 +654,7 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
             boxNotify: boxNotify,
             date: date,
             day: day,
+            notifyService: notifyService,
           );
         } else {
           if (periodDays[0] && (nextDate.weekday == DateTime.monday)) {
@@ -681,6 +665,7 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
               boxNotify: boxNotify,
               date: date,
               day: day,
+              notifyService: notifyService,
             );
           }
           if (periodDays[1] && (nextDate.weekday == DateTime.tuesday)) {
@@ -691,6 +676,7 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
               boxNotify: boxNotify,
               date: date,
               day: day,
+              notifyService: notifyService,
             );
           }
           if (periodDays[2] && (nextDate.weekday == DateTime.wednesday)) {
@@ -701,6 +687,7 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
               boxNotify: boxNotify,
               date: date,
               day: day,
+              notifyService: notifyService,
             );
           }
           if (periodDays[3] && (nextDate.weekday == DateTime.thursday)) {
@@ -711,6 +698,7 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
               boxNotify: boxNotify,
               date: date,
               day: day,
+              notifyService: notifyService,
             );
           }
           if (periodDays[4] && (nextDate.weekday == DateTime.friday)) {
@@ -721,6 +709,7 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
               boxNotify: boxNotify,
               date: date,
               day: day,
+              notifyService: notifyService,
             );
           }
           if (periodDays[5] && (nextDate.weekday == DateTime.saturday)) {
@@ -731,6 +720,7 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
               boxNotify: boxNotify,
               date: date,
               day: day,
+              notifyService: notifyService,
             );
           }
           if (periodDays[6] && (nextDate.weekday == DateTime.sunday)) {
@@ -741,6 +731,7 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
               boxNotify: boxNotify,
               date: date,
               day: day,
+              notifyService: notifyService,
             );
           }
         }
@@ -754,10 +745,15 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
     required Box<NotifyInfoModel> boxNotify,
     required DateTime date,
     required int day,
+    required NotifyService notifyService,
   }) async {
     var notifyData = NotifyInfoModel(
-      name: notifyNameController.text,
-      description: notifyDetailController.text,
+      name: notifyNameController.text.isNotEmpty
+          ? notifyNameController.text
+          : autofillName(notifyInformation),
+      description: notifyDetailController.text.isNotEmpty
+          ? notifyDetailController.text
+          : autofillDetail(notifyInformation),
       medicineInfo: notifyInformation.selectedMedicine!.asMedicineInfo(),
       date: specificDate,
       time: TimeOfDayModel(
@@ -774,6 +770,7 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
     });
     // set notification
     notifySet(
+      notifyService: notifyService,
       id: dataId,
       scheduleTime: date.add(
         Duration(days: day),
@@ -789,8 +786,9 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
       required DateTime scheduleTime,
       String? payload,
       required String imagePath,
-      required int numNotify}) {
-    medicineInfoState.notifyServices.value.scheduleNotify(
+      required int numNotify,
+      required NotifyService notifyService}) async {
+    await notifyService.scheduleNotify(
       channelID: "Medicine Notify",
       channelName: "Medicine",
       channelDescription: "Medicine Notification for user",
@@ -798,7 +796,6 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
       notifyTitle: notifyNameController.text,
       notifyDetail: notifyDetailController.text,
       notifyPayload: payload,
-      notifyTicker: "Notify Ticker",
       scheduleTime: scheduleTime,
       notifyId: id,
       imagePath: imagePath,
@@ -821,10 +818,22 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
     return const TextStyle(fontSize: 13, fontWeight: FontWeight.bold);
   }
 
+  Future<void> notifyInit() async {
+    var notifyState = Get.find<NotificationState>();
+    // await notifyState.medicineNotification.value.inintializeNotification(
+    //     onDidReceiveNotificationIOS: onDidReceiveLocalNotificationIOS,
+    //     onDidReceiveNotificationAndroid: onDidReceiveNotificationAndroid);
+    await notifyState.medicineNotification.value.inintializeNotification(
+        onDidReceiveNotificationIOS: null,
+        onDidReceiveNotificationAndroid:
+            NotificationHandeling.medicineOnDidReceiveNotificationAndroid);
+    await notifyState.medicineNotification.value.requestPermission();
+  }
+
   @override
   Widget build(BuildContext context) {
     //if (widget.medicineData != null) setMedicineState(widget.medicineData!);
-
+    // initial notify
     return Scaffold(
       appBar: AppBar(
         title: const Text('เพิ่มรายการแจ้งเตือน'),
@@ -851,14 +860,6 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
                 controller: notifyDetailController,
                 labelText: 'รายละเอียดการแจ้งเตือน',
               ),
-              // TextFieldEditor(
-              //   hintText: "รายการแจ้งเตือน",
-              //   controller: notifyNameController,
-              // ),
-              // TextFieldEditor(
-              //   hintText: "รายละเอียดการแจ้งเตือน",
-              //   controller: notifyDetailController,
-              // ),
               Padding(
                 padding: const EdgeInsets.only(top: 8, bottom: 8),
                 child: Row(
@@ -966,18 +967,6 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
                   ),
                 ],
               ),
-              // TextFieldEditor(
-              //   controller: selectedMedicineController,
-              //   title: "รายการยา",
-              //   hintText: "เลือกรายการยา",
-              //   widget: IconButton(
-              //     onPressed: selectMedicineItem,
-              //     icon: const Icon(
-              //       Icons.list_alt_outlined,
-              //       color: Colors.blue,
-              //     ),
-              //   ),
-              // ),
               Padding(
                 padding: const EdgeInsets.only(top: 8),
                 child: Row(

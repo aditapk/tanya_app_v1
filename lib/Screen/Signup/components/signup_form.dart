@@ -6,6 +6,7 @@ import 'package:tanya_app_v1/Model/user_login_model.dart';
 import 'package:tanya_app_v1/Screen/Login/login_screen.dart';
 import 'package:tanya_app_v1/components/already_have_an_account_acheck.dart';
 import 'package:tanya_app_v1/constants.dart';
+import 'package:tanya_app_v1/utils/constans.dart';
 
 class SignUpForm extends StatefulWidget {
   const SignUpForm({
@@ -18,7 +19,7 @@ class SignUpForm extends StatefulWidget {
 
 class _SignUpFormState extends State<SignUpForm> {
   void toLogInScreen() async {
-    var userLoginBox = Hive.box<UserLogin>('user_login');
+    var userLoginBox = Hive.box<UserLogin>(HiveDatabaseName.USER_LOGIN);
     var userLogin = userLoginBox.get(0);
     if (userTextController.text.isNotEmpty &&
         passTextController.text.isNotEmpty) {

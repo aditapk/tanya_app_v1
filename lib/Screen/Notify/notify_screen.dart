@@ -9,6 +9,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 //import 'package:path/path.dart';
 import 'package:tanya_app_v1/Model/notify_info.dart';
+import 'package:tanya_app_v1/utils/constans.dart';
 import 'package:tanya_app_v1/utils/style.dart';
 
 import 'package:buddhist_datetime_dateformat_sns/buddhist_datetime_dateformat_sns.dart';
@@ -100,7 +101,8 @@ class _NotifyScreenState extends State<NotifyScreen> {
           child: SingleChildScrollView(
             child: ValueListenableBuilder(
               valueListenable:
-                  Hive.box<NotifyInfoModel>('user_notify_info').listenable(),
+                  Hive.box<NotifyInfoModel>(HiveDatabaseName.NOTIFY_INFO)
+                      .listenable(),
               builder: (_, boxNotify, __) {
                 if (boxNotify.values.isNotEmpty) {
                   var notifyInfoList = boxNotify.values;
@@ -905,6 +907,28 @@ class NotifyStatus extends StatelessWidget {
 
   final NotifyInfoModel notifyInfo;
 
+  String displayStatus() {
+    String statusDisplay;
+    if (notifyInfo.status == 0) {
+      statusDisplay = "<type>ยาแล้ว";
+    } else {
+      statusDisplay = "ยังไม่<type>ยา";
+    }
+    switch (notifyInfo.medicineInfo.type) {
+      case "pills":
+      case "water":
+        statusDisplay = statusDisplay.replaceAll("<type>", "กิน");
+        break;
+      case "arrow":
+        statusDisplay = statusDisplay.replaceAll("<type>", "ฉีด");
+        break;
+      case "drop":
+        statusDisplay = statusDisplay.replaceAll("<type>", "หยอด");
+        break;
+    }
+    return statusDisplay;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -926,14 +950,14 @@ class NotifyStatus extends StatelessWidget {
                   topRight: Radius.circular(12),
                   bottomLeft: Radius.circular(12))),
       child: notifyInfo.status == 0
-          ? const Text(
-              "กินยาแล้ว",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ? Text(
+              displayStatus(),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             )
-          : const Text(
-              "ยังไม่กินยา",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          : Text(
+              displayStatus(),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
+import 'package:tanya_app_v1/utils/constans.dart';
 
 import '../../../Model/user_info_model.dart';
 import 'texteditor_user_info.dart';
@@ -363,7 +364,8 @@ class _TextFieldUserMedicalInfoState extends State<TextFieldUserMedicalInfo> {
                     await widget.userInfo!.save();
                   } else {
                     // not have init info
-                    var userInfoBox = Hive.box<UserInfo>('user_info');
+                    var userInfoBox =
+                        Hive.box<UserInfo>(HiveDatabaseName.USER_INFO);
                     var userInfo = userInfoBox.get(0);
                     if (userInfo != null) {
                       if (weightTextController.text.isNotEmpty) {

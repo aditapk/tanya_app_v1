@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:tanya_app_v1/Model/doctor_appointment.dart';
+import 'package:tanya_app_v1/utils/constans.dart';
 
 class AppointmentWithDoctorInfo extends StatelessWidget {
   const AppointmentWithDoctorInfo({
@@ -22,7 +23,8 @@ class AppointmentWithDoctorInfo extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ValueListenableBuilder(
-              valueListenable: Hive.box<DoctorAppointMent>('doctor_appointment')
+              valueListenable: Hive.box<DoctorAppointMent>(
+                      HiveDatabaseName.DOCTOR_APPOINMENT_INFO)
                   .listenable(),
               builder: (_, doctorAppointmentBox, __) {
                 if (doctorAppointmentBox.values.isNotEmpty) {

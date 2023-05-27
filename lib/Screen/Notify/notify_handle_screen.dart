@@ -5,6 +5,7 @@ import 'package:fraction/fraction.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:tanya_app_v1/Model/notify_info.dart';
+import 'package:tanya_app_v1/utils/constans.dart';
 
 class NotifyHandleScreen extends StatelessWidget {
   const NotifyHandleScreen({
@@ -14,7 +15,7 @@ class NotifyHandleScreen extends StatelessWidget {
   final int notifyID;
 
   NotifyInfoModel? getNotifyInfo(int notifyID) {
-    var notifyBox = Hive.box<NotifyInfoModel>('user_notify_info');
+    var notifyBox = Hive.box<NotifyInfoModel>(HiveDatabaseName.NOTIFY_INFO);
     var notifyInfo = notifyBox.getAt(notifyID);
     return notifyInfo;
   }

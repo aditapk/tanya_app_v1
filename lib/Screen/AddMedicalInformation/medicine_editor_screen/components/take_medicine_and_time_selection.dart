@@ -9,7 +9,6 @@ class TakeMedicineAndTimeSelection extends StatelessWidget {
 
   final double _height = 50;
 
-  //final medicineInfoState = Get.put(MedicineEditorState());
   final medicineInfoState = Get.find<MedicineEditorState>();
 
   get bedTimeFlag =>

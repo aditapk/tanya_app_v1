@@ -7,6 +7,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:tanya_app_v1/utils/constans.dart';
 
 import '../../../Model/user_info_model.dart';
 
@@ -33,7 +34,7 @@ class UserAvatarPicture extends StatelessWidget {
       var localImage = await File(image.path).copy("${directory.path}/$name");
       await GallerySaver.saveImage(localImage.path);
 
-      var userInfoBox = Hive.box<UserInfo>('user_info');
+      var userInfoBox = Hive.box<UserInfo>(HiveDatabaseName.USER_INFO);
       var userInfo = userInfoBox.get(0);
       if (userInfo != null) {
         userInfo.picturePath = localImage.path;
@@ -54,7 +55,7 @@ class UserAvatarPicture extends StatelessWidget {
       final image = await ImagePicker().pickImage(source: ImageSource.gallery);
       if (image == null) return;
 
-      var userInfoBox = Hive.box<UserInfo>('user_info');
+      var userInfoBox = Hive.box<UserInfo>(HiveDatabaseName.USER_INFO);
       var userInfo = userInfoBox.get(0);
       if (userInfo != null) {
         userInfo.picturePath = image.path;
@@ -98,7 +99,8 @@ class UserAvatarPicture extends StatelessWidget {
     //var userInfoBox = Hive.box<UserInfo>('user_info');
 
     return ValueListenableBuilder(
-      valueListenable: Hive.box<UserInfo>('user_info').listenable(),
+      valueListenable:
+          Hive.box<UserInfo>(HiveDatabaseName.USER_INFO).listenable(),
       builder: (_, userInfoBox, __) {
         var userInfo = userInfoBox.get(0);
         return Padding(

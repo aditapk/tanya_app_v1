@@ -96,7 +96,6 @@ class NotifyService {
     String? notifyTitle,
     String? notifyDetail,
     String? notifyPayload,
-    String? notifyTicker,
     required DateTime scheduleTime,
     required int notifyId,
     List<AndroidNotificationAction>? notifyAction,
@@ -165,7 +164,8 @@ class NotifyService {
       channelDescription: channelDescription,
       importance: Importance.max,
       priority: Priority.high,
-      ticker: notifyTicker,
+      playSound: true,
+      ticker: 'medicine notification ticker',
       actions: notifyAction,
       styleInformation: bigPictureStyleInformation,
       largeIcon: FilePathAndroidBitmap(imagePath),
@@ -215,7 +215,8 @@ class NotifyService {
       channelDescription: 'Notify channel for Doctor Appointment',
       importance: Importance.max,
       priority: Priority.high,
-      ticker: 'notifyTicker',
+      playSound: true,
+      ticker: 'doctor appoinment ticker',
       actions: actions,
     );
 

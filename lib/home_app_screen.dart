@@ -10,20 +10,15 @@ import 'package:intl/intl.dart';
 import 'package:open_file_plus/open_file_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
-// import 'package:printing/printing.dart';
-//import 'package:open_file/open_file.dart';
-//import 'package:open_file/open_file.dart';
 import 'package:tanya_app_v1/Controller/medicine_info_controller.dart';
 import 'package:tanya_app_v1/Model/user_login_model.dart';
-//import 'package:intl/intl.dart';
 import 'package:tanya_app_v1/Screen/AddMedicalInformation/medicine_editor_screen/medicine_info_editor_screen.dart';
 import 'package:tanya_app_v1/Screen/AddMedicalInformation/medicine_list_screen/components/display_medicine_info_list.dart';
 import 'package:tanya_app_v1/Screen/Login/login_screen_selection.dart';
 import 'package:tanya_app_v1/Screen/Report/medical_report_screen.dart';
 import 'package:tanya_app_v1/Screen/UserInfo/user_info_screen.dart';
-//import 'package:tanya_app_v1/utils/style.dart';
+import 'package:tanya_app_v1/utils/constans.dart';
 import '../../GetXBinding/medicine_state_binding.dart';
-//import 'body_notify_list.dart';
 import 'Model/notify_info.dart';
 import 'Model/user_info_model.dart';
 import 'Screen/Notify/notify_screen.dart';
@@ -43,7 +38,7 @@ class HomeAppScreen extends StatefulWidget {
 class _HomeAppScreenState extends State<HomeAppScreen> {
   AppBar get myAppBar {
     return AppBar(
-      elevation: 2,
+      elevation: 0,
       automaticallyImplyLeading: false,
       leading: PopupMenuButton(
           offset: const Offset(10, 40),
@@ -60,11 +55,12 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
           onSelected: (value) async {
             switch (value) {
               case 0:
-                var userLoginBox = Hive.box<UserLogin>('user_login');
+                var userLoginBox =
+                    Hive.box<UserLogin>(HiveDatabaseName.USER_LOGIN);
                 var userLogin = userLoginBox.get(0);
                 userLogin!.logOut = true;
                 await userLogin.save();
-                Get.to(const LoginScreenSelection());
+                Get.offAll(() => const LoginScreenSelection());
                 break;
             }
           }),
@@ -75,12 +71,11 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
           padding: const EdgeInsets.only(right: 8),
           child: GestureDetector(
             onTap: () {
-              setState(() {
-                _selectedIndex = 3;
-              });
+              _onItemTapped(3);
             },
             child: ValueListenableBuilder(
-              valueListenable: Hive.box<UserInfo>('user_info').listenable(),
+              valueListenable:
+                  Hive.box<UserInfo>(HiveDatabaseName.USER_INFO).listenable(),
               builder: (_, userInfoBox, __) {
                 var userInfo = userInfoBox.get(0);
                 if (userInfo != null) {
@@ -96,81 +91,42 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
                       ),
                     );
                   }
-                  return const CircleAvatar(
-                    child: Icon(Icons.person),
-                  );
+                  return const DummyAvatarWidget();
                 }
-                return const CircleAvatar(
-                  child: Icon(Icons.person),
-                );
+                return const DummyAvatarWidget();
               },
             ),
           ),
         ),
       ],
     );
-    // IconButton(
-    //   icon: const Icon(
-    //     Icons.logout,
-    //   ),
-    //   onPressed: () async {
-    //     var userLoginBox = Hive.box<UserLogin>('user_login');
-    //     var userLogin = userLoginBox.get(0);
-    //     userLogin!.logOut = true;
-    //     await userLogin.save();
-    //     Get.to(const LoginScreenSelection());
-    //   },
-    // ),
-    //   title: Text(titlePageList[_selectedIndex]),
-    //   centerTitle: true,
-    //   actions: <Widget>[
-    //     Padding(
-    //       padding: const EdgeInsets.only(right: 8),
-    //       child: GestureDetector(
-    //         onTap: () {
-    //           setState(() {
-    //             _selectedIndex = 3;
-    //           });
-    //         },
-    //         child: ValueListenableBuilder(
-    //           valueListenable: Hive.box<UserInfo>('user_info').listenable(),
-    //           builder: (_, userInfoBox, __) {
-    //             var userInfo = userInfoBox.get(0);
-    //             if (userInfo != null) {
-    //               if (userInfo.picturePath != null) {
-    //                 return CircleAvatar(
-    //                   child: ClipOval(
-    //                     child: Image.file(
-    //                       File(userInfo.picturePath!),
-    //                       fit: BoxFit.cover,
-    //                       width: 40,
-    //                       height: 40,
-    //                     ),
-    //                   ),
-    //                 );
-    //               }
-    //               return const CircleAvatar(
-    //                 child: Icon(Icons.person),
-    //               );
-    //             }
-    //             return const CircleAvatar(
-    //               child: Icon(Icons.person),
-    //             );
-    //           },
-    //         ),
-    //       ),
-    //     ),
-    //   ],
-    // );
   }
 
   @override
   void initState() {
+    _pageController = PageController(initialPage: _selectedIndex);
     super.initState();
     initializeDateFormatting('th_TH');
     if (widget.selectedPage != null) {
       _selectedIndex = widget.selectedPage!;
     }
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _onPageChanged(int newIndex) {
+    setState(() {
+      _selectedIndex = newIndex;
+    });
+  }
+
+  void _onItemTapped(int newIndex) {
+    _pageController.animateToPage(newIndex,
+        duration: const Duration(microseconds: 300), curve: Curves.easeInOut);
   }
 
   final List<String> titlePageList = <String>[
@@ -187,71 +143,80 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
     const UserInfoScreen(),
   ];
 
+  late PageController _pageController;
+
   int _selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: myAppBar,
-      body: bodyPageList[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.list),
-            label: "รายการยา",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.alarm_outlined),
-            label: "แจ้งเตือน",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.insert_chart_outlined),
-            label: "สรุป",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: "ผู้ใช้",
-          )
-        ],
-      ),
-      floatingActionButton: _selectedIndex == 0
-          ? FloatingActionButton(
-              onPressed: _createMedicineInfo,
-              child: const Icon(Icons.add),
+        resizeToAvoidBottomInset: false,
+        appBar: myAppBar,
+        body: PageView(
+          controller: _pageController,
+          onPageChanged: _onPageChanged,
+          children: bodyPageList,
+        ),
+        //bodyPageList[_selectedIndex],
+        bottomNavigationBar: BottomNavigationBar(
+          elevation: 0,
+          currentIndex: _selectedIndex,
+          selectedItemColor: Colors.blueAccent,
+          unselectedItemColor: Colors.black54,
+          onTap: _onItemTapped,
+          // (index) {
+          //   setState(() {
+          //     _selectedIndex = index;
+          //   });
+          // },
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.list),
+              label: "รายการยา",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.alarm_outlined),
+              label: "แจ้งเตือน",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.insert_chart_outlined),
+              label: "สรุป",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: "ผู้ใช้",
             )
-          : _selectedIndex == 2
-              ? FloatingActionButton(
-                  onPressed: generatePDFReport,
-                  child: const Icon(Icons.picture_as_pdf),
-                )
-              : null,
-    );
+          ],
+        ),
+        floatingActionButton: _selectedIndex == 0
+            ? FloatingActionButton(
+                onPressed: _createMedicineInfo,
+                child: const Icon(Icons.add),
+              )
+            : _selectedIndex == 2
+                ? FloatingActionButton(
+                    onPressed: generatePDFReport,
+                    child: const Icon(Icons.picture_as_pdf),
+                  )
+                : null,
+        floatingActionButtonLocation: FloatingActionButtonLocation.startFloat);
   }
 
   void _createMedicineInfo() {
     // ไปยังหน้า เพิ่มรายการยา
     Get.to(
       () => const MedicineInfoEditorScreen(),
-      binding: MedicineInfoBinding(),
+      binding: AppInfoBinding(),
     );
   }
 
   void generatePDFReport() async {
     // start-end date
-    final appState = Get.find<MedicineEditorState>();
+    final reportState = Get.find<ReportFilterState>();
     final startDateString = DateFormat.yMMMMd('th_TH')
-        .formatInBuddhistCalendarThai(appState.filterStartDate.value);
+        .formatInBuddhistCalendarThai(reportState.filterStartDate.value);
     final endDateString = DateFormat.yMMMMd('th_TH')
-        .formatInBuddhistCalendarThai(appState.filterEndDate.value);
+        .formatInBuddhistCalendarThai(reportState.filterEndDate.value);
 
     // Header
     final font =
@@ -264,16 +229,16 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
     var hour = currentTime.hour;
     hour = hour != 24 ? hour : 0;
     // user data
-    var userInfoBox = Hive.box<UserInfo>('user_info');
+    var userInfoBox = Hive.box<UserInfo>(HiveDatabaseName.USER_INFO);
     var userInfo = userInfoBox.get(0);
 
     // medicine info
-    var notifyInfoBox = Hive.box<NotifyInfoModel>('user_notify_info');
+    var notifyInfoBox = Hive.box<NotifyInfoModel>(HiveDatabaseName.NOTIFY_INFO);
     var notifyInfo = notifyInfoBox.values.toList();
     List<NotifyInfoModel> notifyInfoInRange = [];
     notifyInfoInRange = notifyInfo.where((notify) {
-      if (notify.date.isAfter(appState.filterStartDate.value) &&
-          notify.date.isBefore(appState.filterEndDate.value)) {
+      if (notify.date.isAfter(reportState.filterStartDate.value) &&
+          notify.date.isBefore(reportState.filterEndDate.value)) {
         return true;
       }
       return false;
@@ -385,5 +350,19 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
     if (_selectedIndex == 2) {
       // print pdf
     }
+  }
+}
+
+class DummyAvatarWidget extends StatelessWidget {
+  const DummyAvatarWidget({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CircleAvatar(
+      backgroundColor: Colors.blue.shade100,
+      child: const Icon(Icons.person),
+    );
   }
 }

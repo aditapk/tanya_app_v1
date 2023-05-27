@@ -13,7 +13,6 @@ import 'package:intl/intl.dart';
 //import 'package:intl/date_symbol_data_local.dart';
 
 import 'package:tanya_app_v1/Services/hive_db_services.dart';
-import 'package:tanya_app_v1/components/app_pages_route.dart';
 
 import 'GetXBinding/medicine_state_binding.dart';
 
@@ -72,9 +71,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      initialBinding: MedicineInfoBinding(),
-      initialRoute: "/",
-      getPages: AppPageRoute.appPageRoute,
+      initialBinding: AppInfoBinding(),
       debugShowCheckedModeBanner: false,
       title: 'Medical Reminder',
       theme: ThemeData(

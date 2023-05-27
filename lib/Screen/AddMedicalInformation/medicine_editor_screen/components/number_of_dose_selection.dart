@@ -13,23 +13,17 @@ class NumberOfDoseSelection extends StatefulWidget {
 }
 
 class _NumberOfDoseSelectionState extends State<NumberOfDoseSelection> {
-  //final medicineInfoState = Get.put(MedicineEditorState());
   final medicineInfoState = Get.find<MedicineEditorState>();
 
   final List<String> items = ['One', 'Two', 'Three', 'Four'];
 
   final List<String> pillsType = ['เม็ด'];
 
-  final List<String> waterType = ['ช้อนชา', 'ช้อนโต๊ะ', 'cc', 'ml'];
+  final List<String> waterType = ['ช้อนชา', 'ช้อนโต๊ะ', 'ซีซี', 'มิลลิลิตร'];
 
-  final List<String> arrowType = [
-    'Unit',
-    'g (gram)',
-    'mg (miligram)',
-    '\u00B5g (microgram)'
-  ];
+  final List<String> arrowType = ['ยูนิต', 'กรัม', 'มิลลิกรัม', 'ไมโครกรัม'];
 
-  final List<String> dropType = ['หยด'];
+  final List<String> dropType = ['หยด', 'ซีซี', 'มิลลิลิตร'];
 
   List<String>? selectedListType(String type) {
     if (type == "pills") {
@@ -84,15 +78,15 @@ class _NumberOfDoseSelectionState extends State<NumberOfDoseSelection> {
         }
       }
       // check over for cc
-      if (medicineInfoState.selected_type_unit.value == "cc") {
+      if (medicineInfoState.selected_type_unit.value == "ซีซี") {
         if (textNumber > 120) {
-          return "คำเตือน : ระบุขนาดเกิน 120 cc";
+          return "คำเตือน : ระบุขนาดเกิน 120 ซีซี";
         }
       }
       // check over for ml
-      if (medicineInfoState.selected_type_unit.value == "ml") {
+      if (medicineInfoState.selected_type_unit.value == "มิลลิลิตร") {
         if (textNumber > 45) {
-          return "คำเตือน : ระบุขนาดเกิน 45 ml";
+          return "คำเตือน : ระบุขนาดเกิน 45 มิลลิลิตร";
         }
       }
     }

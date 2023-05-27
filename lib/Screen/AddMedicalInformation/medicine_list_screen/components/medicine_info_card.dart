@@ -14,6 +14,7 @@ import 'package:tanya_app_v1/GetXBinding/medicine_state_binding.dart';
 import 'package:tanya_app_v1/Model/medicine_info_model.dart';
 import 'package:tanya_app_v1/Model/notify_info.dart';
 import 'package:tanya_app_v1/Screen/AddMedicalInformation/medicine_editor_screen/medicine_info_editor_screen.dart';
+import 'package:tanya_app_v1/utils/constans.dart';
 
 import '../../../../Controller/medicine_info_controller.dart';
 import '../../../Notify/components/add_notify_detail_screen.dart';
@@ -34,7 +35,7 @@ class MedicineInfoCard extends StatelessWidget {
 
   updateImageMedicineBox(String imagePath) async {
     // update medicine box
-    var medicineBox = Hive.box<MedicineInfo>('user_medicine_info');
+    var medicineBox = Hive.box<MedicineInfo>(HiveDatabaseName.MEDICINE_INFO);
     var medicineList = medicineBox.values;
     for (var medicine in medicineList) {
       if (medicine.id == medicineData!.id) {
@@ -46,7 +47,7 @@ class MedicineInfoCard extends StatelessWidget {
 
   updateImageNotifyBox(String imagePath) async {
     // update notify box
-    var notifyBox = Hive.box<NotifyInfoModel>('user_notify_info');
+    var notifyBox = Hive.box<NotifyInfoModel>(HiveDatabaseName.NOTIFY_INFO);
     var notifyList = notifyBox.values;
     for (var notify in notifyList) {
       if (notify.medicineInfo.id == medicineData!.id) {
@@ -168,7 +169,7 @@ class MedicineInfoCard extends StatelessWidget {
         selectedDate: DateTime.now(),
         medicineData: medicineData,
       ),
-      binding: MedicineInfoBinding(),
+      binding: AppInfoBinding(),
     );
     if (notified != null) {
       if (notified) {
@@ -183,18 +184,18 @@ class MedicineInfoCard extends StatelessWidget {
         medicineData: medicineData,
         mode: 'edit',
       ),
-      binding: MedicineInfoBinding(),
+      binding: AppInfoBinding(),
     );
   }
 
   deleteNotify(MedicineInfo medicineData) async {
     // get controller
-    var medicineState = Get.find<MedicineEditorState>();
-    var notifyBox = Hive.box<NotifyInfoModel>('user_notify_info');
+    var notifyState = Get.find<NotificationState>();
+    var notifyBox = Hive.box<NotifyInfoModel>(HiveDatabaseName.NOTIFY_INFO);
     var notifyList = notifyBox.values;
     for (var notify in notifyList) {
       if (notify.medicineInfo.id == medicineData.id) {
-        await medicineState.notifyServices.value.localNotificationsPlugin
+        await notifyState.medicineNotification.value.localNotificationsPlugin
             .cancel(notify.key);
         await notify.delete();
         // delete local notification
@@ -219,9 +220,9 @@ class MedicineInfoCard extends StatelessWidget {
             style: TextStyle(fontSize: 16),
           ),
           onPressed: () async {
-            Get.back();
             await deleteNotify(medicineData!);
             await medicineData!.delete();
+            Get.back();
           },
         ),
         TextButton(

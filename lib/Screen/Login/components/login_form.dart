@@ -7,6 +7,7 @@ import 'package:tanya_app_v1/Screen/Signup/signup_screen.dart';
 import 'package:tanya_app_v1/components/already_have_an_account_acheck.dart';
 import 'package:tanya_app_v1/constants.dart';
 import 'package:tanya_app_v1/home_app_screen.dart';
+import 'package:tanya_app_v1/utils/constans.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({
@@ -19,7 +20,7 @@ class LoginForm extends StatefulWidget {
 
 class _LoginFormState extends State<LoginForm> {
   void loginAction() async {
-    var userLoginBox = Hive.box<UserLogin>('user_login');
+    var userLoginBox = Hive.box<UserLogin>(HiveDatabaseName.USER_LOGIN);
     var userLogin = userLoginBox.get(0);
     if (userLogin == null) {
       Get.defaultDialog(
@@ -40,16 +41,14 @@ class _LoginFormState extends State<LoginForm> {
         await userLogin.save();
         Get.to(
           () => const HomeAppScreen(),
-          binding: MedicineInfoBinding(),
+          binding: AppInfoBinding(),
         );
       } else {
         Get.defaultDialog(
           title: 'เข้าสู่ระบบผิดพลาด',
           middleText: 'ข้อมูลผู้ใช้ หรือ รหัสผ่านไม่ผู้ต้อง',
           confirm: TextButton(
-            onPressed: () {
-              Get.to(const SignUpScreen());
-            },
+            onPressed: toSignUpScreen,
             child: const Text(
               'สมัครสมาชิกใหม่',
               style: TextStyle(fontSize: 18),
