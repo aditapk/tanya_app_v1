@@ -9,10 +9,12 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 //import 'package:path/path.dart';
 import 'package:tanya_app_v1/Model/notify_info.dart';
+import 'package:tanya_app_v1/Screen/Notify/components/notify_medicine_card.dart';
 import 'package:tanya_app_v1/utils/constans.dart';
-import 'package:tanya_app_v1/utils/style.dart';
 
 import 'package:buddhist_datetime_dateformat_sns/buddhist_datetime_dateformat_sns.dart';
+
+import '../../constants.dart';
 
 class NotifyScreen extends StatefulWidget {
   const NotifyScreen({
@@ -41,6 +43,116 @@ class _NotifyScreenState extends State<NotifyScreen> {
     return const TextStyle(fontSize: 20);
   }
 
+  Color dayColor(DateTime selectedDate) {
+    if (selectedDate.weekday == 7) {
+      return Colors.red.shade100;
+    } else if (selectedDate.weekday == 1) {
+      return Colors.yellow.shade100;
+    } else if (selectedDate.weekday == 2) {
+      return Colors.pink.shade100;
+    } else if (selectedDate.weekday == 3) {
+      return Colors.green.shade100;
+    } else if (selectedDate.weekday == 4) {
+      return Colors.orange.shade100;
+    } else if (selectedDate.weekday == 5) {
+      return Colors.blue.shade100;
+    } else if (selectedDate.weekday == 6) {
+      return Colors.purple.shade100;
+    } else {
+      return Colors.white;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(20),
+                bottomRight: Radius.circular(20)),
+            color: Theme.of(context).primaryColor,
+          ),
+          padding:
+              const EdgeInsets.only(left: 15, right: 15, top: 10, bottom: 10),
+          child: GestureDetector(
+            onTap: () async {
+              // Select Current Date to show notify list
+              DateTime? selectedDate = await showDatePicker(
+                context: context,
+                initialDate: currentDate,
+                firstDate: DateTime(2022),
+                lastDate: DateTime(2032),
+              );
+              setState(() {
+                currentDate = selectedDate ?? currentDate;
+              });
+            },
+            child: Container(
+              height: 50,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: Colors.white,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.calendar_month_outlined,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Text(
+                    DateFormat.yMMMMEEEEd('th').formatInBuddhistCalendarThai(
+                      currentDate,
+                    ),
+                    style: const TextStyle(
+                      fontSize: 18,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        ValueListenableBuilder(
+          valueListenable:
+              Hive.box<NotifyInfoModel>(HiveDatabaseName.NOTIFY_INFO)
+                  .listenable(),
+          builder: (_, boxNotify, __) {
+            if (boxNotify.values.isNotEmpty) {
+              var notifyInfoList = boxNotify.values;
+              var notifyInfoListWithCurrentDate = inCurrentDate(notifyInfoList);
+              if (notifyInfoListWithCurrentDate.isEmpty) {
+                return const EmptyNotifyList();
+              } else {
+                notifyInfoListWithCurrentDate
+                    .sort((a, b) => a.date.compareTo(b.date));
+                return Expanded(
+                  child: ListView.builder(
+                    scrollDirection: Axis.vertical,
+                    itemCount: notifyInfoListWithCurrentDate.length,
+                    shrinkWrap: true,
+                    itemBuilder: (context, index) {
+                      return NotifyMedicineCard(
+                        notifyInfo: notifyInfoListWithCurrentDate[index],
+                      );
+                    },
+                  ),
+                );
+              }
+            } else {
+              return const EmptyNotifyList();
+            }
+          },
+        )
+      ],
+    );
+  }
+
   Color? getExpansionPanelColor(int index) {
     final List<Color> panelColor = [
       Colors.greenAccent.shade200,
@@ -51,434 +163,17 @@ class _NotifyScreenState extends State<NotifyScreen> {
     return panelColor[index];
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: GestureDetector(
-                  onTap: () async {
-                    // Select Current Date to show notify list
-                    DateTime? selectedDate = await showDatePicker(
-                      context: context,
-                      initialDate: currentDate,
-                      firstDate: DateTime(2022),
-                      lastDate: DateTime(2032),
-                    );
-                    setState(() {
-                      currentDate = selectedDate ?? DateTime.now();
-                    });
-                  },
-                  child: Center(
-                    child: Text(
-                      DateFormat.yMMMMEEEEd('th').formatInBuddhistCalendarThai(
-                        currentDate,
-                      ),
-                      style: subHeadingStyle,
-                    ),
-                  ),
-                ),
-              ),
-              // AddNotifyButton(
-              //   onTap: () {
-              //     // ไปยังหน้า เพิ่มรายการแจ้งเตือน
-              //     Get.to(
-              //       () => AddNotifyDetailScreen(
-              //         selectedDate: currentDate,
-              //       ),
-              //     );
-              //   },
-              // )
-            ],
-          ),
-        ),
-        Expanded(
-          child: SingleChildScrollView(
-            child: ValueListenableBuilder(
-              valueListenable:
-                  Hive.box<NotifyInfoModel>(HiveDatabaseName.NOTIFY_INFO)
-                      .listenable(),
-              builder: (_, boxNotify, __) {
-                if (boxNotify.values.isNotEmpty) {
-                  var notifyInfoList = boxNotify.values;
-                  var notifyInfoListWithCurrentDate =
-                      notifyInfoList.map((e) => e).where((element) {
-                    var start = currentDate;
-                    var end = currentDate.add(const Duration(days: 1));
-                    return element.date.isAfter(start) &&
-                        element.date.isBefore(end);
-                  }).toList();
-                  if (notifyInfoListWithCurrentDate.isEmpty) {
-                    return const EmptyNotifyList();
-                  } else {
-                    // medicine in morning
-                    var notifyInfoListCurrentDateMorningTime =
-                        notifyInfoListWithCurrentDate
-                            .map((e) => e)
-                            .where((element) {
-                      TimeOfDay notifyTime = TimeOfDay(
-                        hour: element.time.hour,
-                        minute: element.time.minute,
-                      );
-                      if ((notifyTime.hour == 5 && notifyTime.minute >= 0) ||
-                          (notifyTime.hour > 5 && notifyTime.hour <= 9)) {
-                        // 5:00 -> 9:59
-                        return true;
-                      }
-                      return false;
-                    });
+  List<NotifyInfoModel> inCurrentDate(
+      Iterable<NotifyInfoModel> notifyInfoList) {
+    return notifyInfoList.map((e) => e).where((element) {
+      var start = currentDate;
+      var end = currentDate.add(const Duration(days: 1));
+      return element.date.isAfter(start) && element.date.isBefore(end);
+    }).toList();
+  }
 
-                    // medicine in lunch
-                    var notifyInfoListCurrentDateLunchTime =
-                        notifyInfoListWithCurrentDate
-                            .map((e) => e)
-                            .where((element) {
-                      TimeOfDay notifyTime = TimeOfDay(
-                        hour: element.time.hour,
-                        minute: element.time.minute,
-                      );
-                      if ((notifyTime.hour == 10 && notifyTime.minute >= 0) ||
-                          (notifyTime.hour > 10 && notifyTime.hour <= 13)) {
-                        // 10:00 -> 13:59
-                        return true;
-                      }
-                      return false;
-                    });
-
-                    // medicine in evening
-                    var notifyInfoListCurrentDateEveningTime =
-                        notifyInfoListWithCurrentDate
-                            .map((e) => e)
-                            .where((element) {
-                      TimeOfDay notifyTime = TimeOfDay(
-                          hour: element.time.hour, minute: element.time.minute);
-                      if ((notifyTime.hour == 14 && notifyTime.minute >= 0) ||
-                          (notifyTime.hour > 14 && notifyTime.hour <= 19)) {
-                        // 14:00 - 19:59
-                        return true;
-                      }
-                      return false;
-                    });
-
-                    // medicine in before to bed
-                    var notifyInfoListCurrentDateBeforeBedTime =
-                        notifyInfoListWithCurrentDate
-                            .map((e) => e)
-                            .where((element) {
-                      TimeOfDay notifyTime = TimeOfDay(
-                          hour: element.time.hour, minute: element.time.minute);
-                      if ((notifyTime.hour == 20 && notifyTime.minute >= 0) ||
-                          (notifyTime.hour > 20 && notifyTime.hour <= 23) ||
-                          (notifyTime.hour >= 0 && notifyTime.hour <= 4)) {
-                        // 20:00 -> 4:59
-                        return true;
-                      }
-                      return false;
-                    });
-
-                    return SingleChildScrollView(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: ExpansionPanelList(
-                            animationDuration:
-                                const Duration(milliseconds: 1000),
-                            expansionCallback: (panelIndex, isExpanded) {
-                              if (isExpanded) {
-                                // set to close
-                                switch (panelIndex) {
-                                  case 0:
-                                    setState(() {
-                                      morningStatPanel = !isExpanded;
-                                    });
-                                    break;
-                                  case 1:
-                                    setState(() {
-                                      lunchStatPanel = !isExpanded;
-                                    });
-                                    break;
-                                  case 2:
-                                    setState(() {
-                                      eveningStatPanel = !isExpanded;
-                                    });
-                                    break;
-                                  case 3:
-                                    setState(() {
-                                      beforeBedStatPanel = !isExpanded;
-                                    });
-                                    break;
-                                }
-                              } else {
-                                // set to open
-                                switch (panelIndex) {
-                                  case 0:
-                                    setState(() {
-                                      morningStatPanel = !isExpanded;
-                                      lunchStatPanel = isExpanded;
-                                      eveningStatPanel = isExpanded;
-                                      beforeBedStatPanel = isExpanded;
-                                    });
-                                    break;
-                                  case 1:
-                                    setState(() {
-                                      morningStatPanel = isExpanded;
-                                      lunchStatPanel = !isExpanded;
-                                      eveningStatPanel = isExpanded;
-                                      beforeBedStatPanel = isExpanded;
-                                    });
-                                    break;
-                                  case 2:
-                                    setState(() {
-                                      morningStatPanel = isExpanded;
-                                      lunchStatPanel = isExpanded;
-                                      eveningStatPanel = !isExpanded;
-                                      beforeBedStatPanel = isExpanded;
-                                    });
-                                    break;
-                                  case 3:
-                                    setState(() {
-                                      morningStatPanel = isExpanded;
-                                      lunchStatPanel = isExpanded;
-                                      eveningStatPanel = isExpanded;
-                                      beforeBedStatPanel = !isExpanded;
-                                    });
-                                    break;
-                                }
-                              }
-                              // if (panelIndex == 0) {
-                              //   // selected on panel morning
-                              //   setState(() {
-                              //     morningStatPanel = !morningStatPanel;
-                              //   });
-                              // }
-                              // if (panelIndex == 1) {
-                              //   // selected on panel lunch
-                              //   setState(() {
-                              //     lunchStatPanel = !lunchStatPanel;
-                              //   });
-                              // }
-                              // if (panelIndex == 2) {
-                              //   // selected on panel evening
-                              //   setState(() {
-                              //     eveningStatPanel = !eveningStatPanel;
-                              //   });
-                              // }
-                              // if (panelIndex == 3) {
-                              //   // selected on panel before bed
-                              //   setState(() {
-                              //     beforeBedStatPanel = !beforeBedStatPanel;
-                              //   });
-                              // }
-                            },
-                            children: [
-                              ExpansionPanel(
-                                  backgroundColor: getExpansionPanelColor(0),
-                                  canTapOnHeader: true,
-                                  isExpanded: morningStatPanel,
-                                  headerBuilder: (context, isExpanded) =>
-                                      Padding(
-                                        padding: const EdgeInsets.all(8),
-                                        child: Container(
-                                          alignment: Alignment.centerLeft,
-                                          child: Text(
-                                            "เช้า (${notifyInfoListCurrentDateMorningTime.length} รายการ)",
-                                            style: panelHaderTextStyel,
-                                          ),
-                                        ),
-                                      ),
-                                  body: notifyInfoListCurrentDateMorningTime
-                                          .isNotEmpty
-                                      ? Padding(
-                                          padding: const EdgeInsets.all(8),
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                                color: Colors.white70,
-                                                borderRadius:
-                                                    BorderRadius.circular(12)),
-                                            height:
-                                                notifyInfoListCurrentDateMorningTime
-                                                            .length <=
-                                                        1
-                                                    ? null
-                                                    : MediaQuery.of(context)
-                                                            .size
-                                                            .height *
-                                                        0.5,
-                                            child: MedicineCardList(
-                                              notifyInfoListCurrentDate:
-                                                  notifyInfoListCurrentDateMorningTime,
-                                            ),
-                                          ),
-                                        )
-                                      : Container()),
-                              ExpansionPanel(
-                                  backgroundColor: getExpansionPanelColor(1),
-                                  canTapOnHeader: true,
-                                  isExpanded: lunchStatPanel,
-                                  headerBuilder: (context, isExpanded) =>
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Container(
-                                          alignment: Alignment.centerLeft,
-                                          child: Text(
-                                            "กลางวัน (${notifyInfoListCurrentDateLunchTime.length} รายการ)",
-                                            style: panelHaderTextStyel,
-                                          ),
-                                        ),
-                                      ),
-                                  body: notifyInfoListCurrentDateLunchTime
-                                          .isNotEmpty
-                                      ? Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                                color: Colors.white70,
-                                                borderRadius:
-                                                    BorderRadius.circular(12)),
-                                            height:
-                                                notifyInfoListCurrentDateLunchTime
-                                                            .length <=
-                                                        1
-                                                    ? null
-                                                    : MediaQuery.of(context)
-                                                            .size
-                                                            .height *
-                                                        0.5,
-                                            child: MedicineCardList(
-                                              notifyInfoListCurrentDate:
-                                                  notifyInfoListCurrentDateLunchTime,
-                                            ),
-                                          ),
-                                        )
-                                      : Container()),
-                              ExpansionPanel(
-                                  backgroundColor: getExpansionPanelColor(2),
-                                  canTapOnHeader: true,
-                                  isExpanded: eveningStatPanel,
-                                  headerBuilder: (context, isExpanded) =>
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Container(
-                                          alignment: Alignment.centerLeft,
-                                          child: Text(
-                                            "เย็น (${notifyInfoListCurrentDateEveningTime.length} รายการ)",
-                                            style: panelHaderTextStyel,
-                                          ),
-                                        ),
-                                      ),
-                                  body: notifyInfoListCurrentDateEveningTime
-                                          .isNotEmpty
-                                      ? Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                                color: Colors.white70,
-                                                borderRadius:
-                                                    BorderRadius.circular(12)),
-                                            height:
-                                                notifyInfoListCurrentDateEveningTime
-                                                            .length <=
-                                                        1
-                                                    ? null
-                                                    : MediaQuery.of(context)
-                                                            .size
-                                                            .height *
-                                                        0.5,
-                                            child: MedicineCardList(
-                                              notifyInfoListCurrentDate:
-                                                  notifyInfoListCurrentDateEveningTime,
-                                            ),
-                                          ),
-                                        )
-                                      : Container()),
-                              ExpansionPanel(
-                                  backgroundColor: getExpansionPanelColor(3),
-                                  canTapOnHeader: true,
-                                  isExpanded: beforeBedStatPanel,
-                                  headerBuilder: (context, isExpanded) =>
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Container(
-                                          alignment: Alignment.centerLeft,
-                                          child: Text(
-                                            "ก่อนนอน (${notifyInfoListCurrentDateBeforeBedTime.length} รายการ)",
-                                            style: panelHaderTextStyel,
-                                          ),
-                                        ),
-                                      ),
-                                  body: notifyInfoListCurrentDateBeforeBedTime
-                                          .isNotEmpty
-                                      ? Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                                color: Colors.white70,
-                                                borderRadius:
-                                                    BorderRadius.circular(12)),
-                                            height:
-                                                notifyInfoListCurrentDateBeforeBedTime
-                                                            .length <=
-                                                        1
-                                                    ? null
-                                                    : MediaQuery.of(context)
-                                                            .size
-                                                            .height *
-                                                        0.5,
-                                            child: MedicineCardList(
-                                              notifyInfoListCurrentDate:
-                                                  notifyInfoListCurrentDateBeforeBedTime,
-                                            ),
-                                          ),
-                                        )
-                                      : Container()),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                    // SingleChildScrollView(
-                    //   child: Column(
-                    //     children: [
-                    //       notifyInfoListCurrentDateMorningTime.isNotEmpty
-                    //           ? MedicineListInMorning(
-                    //               notifyInfoListCurrentDateMorningTime:
-                    //                   notifyInfoListCurrentDateMorningTime,
-                    //             )
-                    //           : Container(),
-                    //       notifyInfoListCurrentDateLunchTime.isNotEmpty
-                    //           ? MedicineInLunch(
-                    //               notifyInfoListCurrentDateLunchTime:
-                    //                   notifyInfoListCurrentDateLunchTime)
-                    //           : Container(),
-                    //       notifyInfoListCurrentDateEveningTime.isNotEmpty
-                    //           ? MedicineInEvening(
-                    //               notifyInfoListCurrentDateEveningTime:
-                    //                   notifyInfoListCurrentDateEveningTime)
-                    //           : Container(),
-                    //       notifyInfoListCurrentDateBeforeBedTime.isNotEmpty
-                    //           ? MedicineInBeforeBed(
-                    //               notifyInfoListCurrentDateBeforeBedTime:
-                    //                   notifyInfoListCurrentDateBeforeBedTime)
-                    //           : Container(),
-                    //     ],
-                    //   ),
-                    // );
-                  }
-                } else {
-                  return const EmptyNotifyList();
-                }
-              },
-            ),
-          ),
-        )
-      ],
-    );
+  TimeOfDay toTimeOfDay(TimeOfDayModel timeOfDayModel) {
+    return TimeOfDay(hour: timeOfDayModel.hour, minute: timeOfDayModel.minute);
   }
 }
 
@@ -502,98 +197,6 @@ class MedicineCardList extends StatelessWidget {
     );
   }
 }
-
-// class MedicineListInBeforeBed extends StatelessWidget {
-//   const MedicineListInBeforeBed({
-//     super.key,
-//     required this.notifyInfoListCurrentDateBeforeBedTime,
-//   });
-
-//   final Iterable<NotifyInfoModel> notifyInfoListCurrentDateBeforeBedTime;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Column(
-//       children: [
-//         ListView(
-//           shrinkWrap: true,
-//           children: notifyInfoListCurrentDateBeforeBedTime.map((notifyInfo) {
-//             return NotifyCard(
-//               notifyInfo: notifyInfo,
-//             );
-//           }).toList(),
-//         ),
-//       ],
-//     );
-//   }
-// }
-
-// class MedicineListInEvening extends StatelessWidget {
-//   const MedicineListInEvening({
-//     super.key,
-//     required this.notifyInfoListCurrentDateEveningTime,
-//   });
-
-//   final Iterable<NotifyInfoModel> notifyInfoListCurrentDateEveningTime;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Column(
-//       children: [
-//         ListView(
-//           shrinkWrap: true,
-//           children: notifyInfoListCurrentDateEveningTime.map((notifyInfo) {
-//             return NotifyCard(
-//               notifyInfo: notifyInfo,
-//             );
-//           }).toList(),
-//         ),
-//       ],
-//     );
-//   }
-// }
-
-// class MedicineListInLunch extends StatelessWidget {
-//   const MedicineListInLunch({
-//     super.key,
-//     required this.notifyInfoListCurrentDateLunchTime,
-//   });
-
-//   final Iterable<NotifyInfoModel> notifyInfoListCurrentDateLunchTime;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return ListView(
-//       shrinkWrap: true,
-//       children: notifyInfoListCurrentDateLunchTime.map((notifyInfo) {
-//         return NotifyCard(
-//           notifyInfo: notifyInfo,
-//         );
-//       }).toList(),
-//     );
-//   }
-// }
-
-// class MedicineListInMorning extends StatelessWidget {
-//   const MedicineListInMorning({
-//     super.key,
-//     required this.notifyInfoListCurrentDateMorningTime,
-//   });
-
-//   final Iterable<NotifyInfoModel> notifyInfoListCurrentDateMorningTime;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return ListView(
-//       shrinkWrap: true,
-//       children: notifyInfoListCurrentDateMorningTime.map((notifyInfo) {
-//         return NotifyCard(
-//           notifyInfo: notifyInfo,
-//         );
-//       }).toList(),
-//     );
-//   }
-// }
 
 class EmptyNotifyList extends StatelessWidget {
   const EmptyNotifyList({
@@ -633,7 +236,7 @@ class NotifyCard extends StatelessWidget {
   });
   final NotifyInfoModel notifyInfo;
 
-  final String _emptyPicture = "assets/images/dummy_picture.jpg";
+  //final String _emptyPicture = "assets/images/dummy_picture.jpg";
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -708,7 +311,7 @@ class NotifyCard extends StatelessWidget {
                                                         .picture_path ==
                                                     null
                                             ? Image.asset(
-                                                _emptyPicture,
+                                                emptyPicture,
                                                 fit: BoxFit.cover,
                                                 height: 110,
                                               )
@@ -757,6 +360,48 @@ class MedicineInfoOnCard extends StatelessWidget {
   });
 
   final NotifyInfoModel notifyInfo;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          notifyInfo.medicineInfo.name,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        Text(
+          notifyInfo.medicineInfo.description,
+          //'${notifyInfo.medicineInfo.description.replaceAll('\n', ' ').substring(0, notifyInfo.medicineInfo.description.length >= 40 ? 40 : notifyInfo.medicineInfo.description.length)}',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        Text(
+          getHowtoEat(notifyInfo),
+          style: const TextStyle(fontSize: 16),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        notifyInfo.medicineInfo.order != ""
+            ? Text(
+                getOrderInThai(notifyInfo),
+                style: const TextStyle(fontSize: 16),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              )
+            : Container(),
+        Text(
+          getPeroidInThai(notifyInfo),
+          style: const TextStyle(fontSize: 16),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        )
+      ],
+    );
+  }
 
   getHowtoEat(NotifyInfoModel notifyInfo) {
     String type = notifyInfo.medicineInfo.type;
@@ -809,48 +454,6 @@ class MedicineInfoOnCard extends StatelessWidget {
       }
     }
     return periodStrList.join(', ');
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          notifyInfo.medicineInfo.name,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        ),
-        Text(
-          notifyInfo.medicineInfo.description,
-          //'${notifyInfo.medicineInfo.description.replaceAll('\n', ' ').substring(0, notifyInfo.medicineInfo.description.length >= 40 ? 40 : notifyInfo.medicineInfo.description.length)}',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        Text(
-          getHowtoEat(notifyInfo),
-          style: const TextStyle(fontSize: 16),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        notifyInfo.medicineInfo.order != ""
-            ? Text(
-                getOrderInThai(notifyInfo),
-                style: const TextStyle(fontSize: 16),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              )
-            : Container(),
-        Text(
-          getPeroidInThai(notifyInfo),
-          style: const TextStyle(fontSize: 16),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        )
-      ],
-    );
   }
 }
 
@@ -907,28 +510,6 @@ class NotifyStatus extends StatelessWidget {
 
   final NotifyInfoModel notifyInfo;
 
-  String displayStatus() {
-    String statusDisplay;
-    if (notifyInfo.status == 0) {
-      statusDisplay = "<type>ยาแล้ว";
-    } else {
-      statusDisplay = "ยังไม่<type>ยา";
-    }
-    switch (notifyInfo.medicineInfo.type) {
-      case "pills":
-      case "water":
-        statusDisplay = statusDisplay.replaceAll("<type>", "กิน");
-        break;
-      case "arrow":
-        statusDisplay = statusDisplay.replaceAll("<type>", "ฉีด");
-        break;
-      case "drop":
-        statusDisplay = statusDisplay.replaceAll("<type>", "หยอด");
-        break;
-    }
-    return statusDisplay;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -962,6 +543,28 @@ class NotifyStatus extends StatelessWidget {
             ),
     );
   }
+
+  String displayStatus() {
+    String statusDisplay;
+    if (notifyInfo.status == 0) {
+      statusDisplay = "<type>แล้ว";
+    } else {
+      statusDisplay = "ยังไม่<type>";
+    }
+    switch (notifyInfo.medicineInfo.type) {
+      case "pills":
+      case "water":
+        statusDisplay = statusDisplay.replaceAll("<type>", "กิน");
+        break;
+      case "arrow":
+        statusDisplay = statusDisplay.replaceAll("<type>", "ฉีด");
+        break;
+      case "drop":
+        statusDisplay = statusDisplay.replaceAll("<type>", "หยอด/พ่น");
+        break;
+    }
+    return statusDisplay;
+  }
 }
 
 class AddNotifyButton extends StatelessWidget {
@@ -979,31 +582,12 @@ class AddNotifyButton extends StatelessWidget {
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
             shape: const CircleBorder(), padding: const EdgeInsets.all(10)),
-
         onPressed: onTap,
         child: const Icon(
           Icons.add,
           size: 35,
         ),
-        // RoundedRectangleBorder(
-        //     borderRadius: BorderRadius.circular(25))),
       ),
     );
-    // GestureDetector(
-    //   onTap: onTap,
-    //   child: Container(
-    //     padding: const EdgeInsets.only(
-    //       left: 8,
-    //       right: 8,
-    //     ),
-    //     height: 50,
-    //     alignment: Alignment.center,
-    //     decoration: BoxDecoration(
-    //       color: Colors.blue,
-    //       borderRadius: BorderRadius.circular(10),
-    //     ),
-    //     child: const Text('+ เพิ่มรายการ'),
-    //   ),
-    // );
   }
 }

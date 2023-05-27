@@ -5,6 +5,7 @@ class NotifyReport {
   int nNotify;
   int nComplete;
   int color;
+  String type;
   NotifyReport({
     required this.medicineName,
     required this.nNotify,
@@ -12,5 +13,6 @@ class NotifyReport {
     this.picturePath,
     required this.notifyName,
     required this.color,
+    required this.type,
   });
 }

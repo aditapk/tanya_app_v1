@@ -84,13 +84,11 @@ class UserAvatarPicture extends StatelessWidget {
       return const Icon(
         Icons.person,
         size: 80 * 2 * 0.7,
-        color: Colors.white70,
       );
     }
     return const Icon(
       Icons.person,
       size: 80 * 2 * 0.7,
-      color: Colors.white70,
     );
   }
 
@@ -103,44 +101,54 @@ class UserAvatarPicture extends StatelessWidget {
           Hive.box<UserInfo>(HiveDatabaseName.USER_INFO).listenable(),
       builder: (_, userInfoBox, __) {
         var userInfo = userInfoBox.get(0);
-        return Padding(
-          padding: const EdgeInsets.only(top: 20, bottom: 20),
-          child: Stack(
-            children: [
-              CircleAvatar(
-                backgroundColor: Colors.blue.shade300,
-                radius: 80,
-                child: getAvarPictureChild(userInfo),
-              ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: GestureDetector(
-                  onTap: () {
-                    _takePhotoToGallerry();
-                  },
-                  child: const CircleAvatar(
-                    backgroundColor: Colors.white70,
-                    radius: 20,
-                    child: Icon(Icons.photo_camera),
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(20),
+                bottomRight: Radius.circular(20)),
+            color: Theme.of(context).primaryColor,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 16, top: 8),
+            child: Stack(
+              children: [
+                Center(
+                  child: CircleAvatar(
+                    backgroundColor: Colors.blue.shade100,
+                    radius: 80,
+                    child: getAvarPictureChild(userInfo),
                   ),
                 ),
-              ),
-              Positioned(
-                bottom: 0,
-                left: 0,
-                child: GestureDetector(
-                  onTap: () {
-                    _choosePhotoFromGallery();
-                  },
-                  child: const CircleAvatar(
-                    backgroundColor: Colors.white70,
-                    radius: 20,
-                    child: Icon(Icons.image),
+                Positioned(
+                  bottom: 0,
+                  right: 130,
+                  child: GestureDetector(
+                    onTap: () {
+                      _takePhotoToGallerry();
+                    },
+                    child: const CircleAvatar(
+                      backgroundColor: Colors.white70,
+                      radius: 20,
+                      child: Icon(Icons.photo_camera),
+                    ),
                   ),
                 ),
-              ),
-            ],
+                Positioned(
+                  bottom: 0,
+                  left: 130,
+                  child: GestureDetector(
+                    onTap: () {
+                      _choosePhotoFromGallery();
+                    },
+                    child: const CircleAvatar(
+                      backgroundColor: Colors.white70,
+                      radius: 20,
+                      child: Icon(Icons.image),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },

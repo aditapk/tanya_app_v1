@@ -1,4 +1,4 @@
-package com.example.tanya_app_v1
+package com.example.tanyaapp
 
 import io.flutter.embedding.android.FlutterActivity
 

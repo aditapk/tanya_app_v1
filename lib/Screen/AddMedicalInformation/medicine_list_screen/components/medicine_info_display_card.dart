@@ -2,31 +2,93 @@
 
 import 'package:flutter/material.dart';
 import 'package:tanya_app_v1/Model/medicine_info_model.dart';
-import 'package:fraction/fraction.dart';
 
 class MedicineInfoDisplayCard extends StatelessWidget {
-  MedicineInfoDisplayCard({this.medicineData, super.key});
-  MedicineInfo? medicineData;
+  const MedicineInfoDisplayCard({this.medicineData, super.key});
 
-  _displayPrefixType(String type) {
-    if (type == "pills" || type == "water") {
-      return "รับประทาน";
-    } else if (type == "arrow") {
-      return "ใช้ฉีด";
-    } else if (type == "drop") {
-      return "ใช้หยด";
+  final MedicineInfo? medicineData;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(top: 5, right: 40),
+      height: 120,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: Colors.white70,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.only(
+          top: 2,
+          left: 8,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              medicineData!.name,
+              style: const TextStyle(
+                fontSize: 18.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              medicineData!.description,
+              maxLines: 1,
+              overflow: TextOverflow.visible,
+              style: const TextStyle(fontSize: 16),
+            ),
+            Text(
+              "${_displayPrefixType(medicineData!.type)} ครั้งละ ${_displayNTake(medicineData!.nTake)} ${medicineData!.unit}",
+              style: const TextStyle(fontSize: 16),
+            ),
+            medicineData!.order != ""
+                ? Text(
+                    _displayEatOrder(medicineData!.order),
+                    style: const TextStyle(fontSize: 16),
+                  )
+                : Container(),
+            Text(
+              _displayPeriodTime(medicineData!.period_time),
+              style: const TextStyle(fontSize: 16),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  _displayNTake(double nTake) {
+    if (nTake % 1 == 0) {
+      return nTake.toInt();
+    } else {
+      return nTake;
     }
   }
 
-  _displayEatOrder(String order) {
+  String _displayPrefixType(String type) {
+    if (type == "pills" || type == "water") {
+      return "กิน";
+    } else if (type == "arrow") {
+      return "ฉีด";
+    } else if (type == "drop") {
+      return "หยอด/พ่น";
+    } else {
+      return "";
+    }
+  }
+
+  String _displayEatOrder(String order) {
     if (order == "before") {
       return "ก่อนอาหาร";
     } else if (order == "after") {
       return "หลังอาหาร";
+    } else {
+      return "";
     }
   }
 
-  _displayPeriodTime(List<bool> period_time) {
+  String _displayPeriodTime(List<bool> period_time) {
     List<String> display = [];
     if (period_time[0]) {
       display.add("เช้า");
@@ -45,43 +107,5 @@ class MedicineInfoDisplayCard extends StatelessWidget {
     } else {
       return "";
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 5, right: 40),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            medicineData!.name,
-            style: const TextStyle(
-              fontSize: 16.0,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            medicineData!.description,
-            maxLines: 1,
-            overflow: TextOverflow.visible,
-          ),
-          Row(
-            children: [
-              Text(
-                  "${_displayPrefixType(medicineData!.type)}   ${medicineData!.nTake.toFraction()}"),
-              const SizedBox(
-                width: 10,
-              ),
-              Text(medicineData!.unit)
-            ],
-          ),
-          medicineData!.order != ""
-              ? Text(_displayEatOrder(medicineData!.order))
-              : Container(),
-          Text(_displayPeriodTime(medicineData!.period_time)),
-        ],
-      ),
-    );
   }
 }

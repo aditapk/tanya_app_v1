@@ -8,7 +8,7 @@
 PRODUCT_NAME = tanya_app_v1
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.tanyaAppV1
+PRODUCT_BUNDLE_IDENTIFIER = com.indiectlab.tanya;
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2023 com.example. All rights reserved.

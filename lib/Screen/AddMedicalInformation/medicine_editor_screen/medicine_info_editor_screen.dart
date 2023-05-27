@@ -7,6 +7,7 @@ import 'package:tanya_app_v1/Controller/medicine_info_controller.dart';
 import 'package:tanya_app_v1/Model/medicine_info_model.dart';
 import 'package:tanya_app_v1/Model/notify_info.dart';
 import 'package:tanya_app_v1/utils/constans.dart';
+import '../../../constants.dart';
 import 'components/number_of_dose_selection.dart';
 import 'components/picture_medicine_card.dart';
 import 'components/take_medicine_and_time_selection.dart';
@@ -28,46 +29,11 @@ class MedicineInfoEditorScreen extends StatefulWidget {
 }
 
 class _MedicineInfoEditorScreenState extends State<MedicineInfoEditorScreen> {
-  int? index;
-
-  final _nameTextController = TextEditingController();
-
-  final _detailTextController = TextEditingController();
-
-  final _numberOfDoseController = TextEditingController();
-
-  final String _emptyPicture = "assets/images/dummy_picture.jpg";
-
   final medicineInfoState = Get.find<MedicineEditorState>();
-
-  void _updateCurrenState(MedicineInfo medicineData) {
-    // name in Textfield
-    _nameTextController.text = medicineData.name;
-    // description in Textfield
-    _detailTextController.text = medicineData.description;
-    // number of dose
-    _numberOfDoseController.text = medicineData.nTake.toString();
-
-    // update data to widget state
-    //medicineInfoState.name(medicineData.name); // update name
-    //medicineInfoState.description(medicineData.description); // update description
-    medicineInfoState.selected_type(medicineData.type); // update type
-    medicineInfoState.selected_type_unit(medicineData.unit);
-    medicineInfoState.nTake(medicineData.nTake); // update nTake
-    medicineInfoState.order(medicineData.order); // updat order
-
-    if (medicineData.picture_path != null) {
-      medicineInfoState.picture_path(medicineData.picture_path);
-    } else {
-      medicineInfoState.picture_path(_emptyPicture);
-    }
-    medicineInfoState.moning_time(medicineData.period_time[0]);
-    medicineInfoState.lunch_time(medicineData.period_time[1]);
-    medicineInfoState.evening_time(medicineData.period_time[2]);
-    medicineInfoState.bed_time(medicineData.period_time[3]);
-
-    medicineInfoState.color.value = Color(medicineData.color);
-  }
+  int? index;
+  final _nameTextController = TextEditingController();
+  final _detailTextController = TextEditingController();
+  final _numberOfDoseController = TextEditingController();
 
   @override
   void dispose() {
@@ -77,22 +43,44 @@ class _MedicineInfoEditorScreenState extends State<MedicineInfoEditorScreen> {
     super.dispose();
   }
 
+  List<Color> colors = [
+    Colors.blue.shade200,
+    Colors.pink.shade200,
+    Colors.green.shade200,
+    Colors.yellow.shade200,
+    Colors.cyan.shade200,
+    Colors.lime.shade200,
+    Colors.amber.shade200,
+    Colors.brown.shade200,
+    Colors.blue.shade400,
+    Colors.pink.shade400,
+    Colors.green.shade400,
+    Colors.yellow.shade400,
+    Colors.cyan.shade400,
+    Colors.lime.shade400,
+    Colors.amber.shade400,
+    Colors.brown.shade400,
+  ];
+
   @override
   Widget build(BuildContext context) {
     // add data to state
     if (widget.medicineData != null) {
       _updateCurrenState(widget.medicineData!);
       //print(widget.medicineData!.id);
+    } else {
+      var boxMedicineInfo =
+          Hive.box<MedicineInfo>(HiveDatabaseName.MEDICINE_INFO);
+      var nMedicine = boxMedicineInfo.length;
+      medicineInfoState.color.value = colors[nMedicine % colors.length];
     }
 
     return Scaffold(
       appBar: AppBar(
-        elevation: 0.0,
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.black,
-        title: Text(
-            widget.medicineData == null ? "เพิ่มรายการยา" : "แก้ไขรายการยา"),
         centerTitle: true,
+        title: Text(
+          (widget.medicineData == null) ? "เพิ่มรายการยา" : "แก้ไขรายการยา",
+        ),
       ),
       body: SafeArea(
         child: Padding(
@@ -106,39 +94,26 @@ class _MedicineInfoEditorScreenState extends State<MedicineInfoEditorScreen> {
                   height: 20,
                 ),
                 // Name
-                TextFormField(
-                  controller: _nameTextController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    labelText: 'ชื่อยา',
-                  ),
-                ),
+                MedicineNameWidget(nameTextController: _nameTextController),
                 const SizedBox(height: 20),
                 // Description
-                TextFormField(
-                  maxLines: null,
-                  keyboardType: TextInputType.multiline,
-                  controller: _detailTextController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    labelText: 'รายละเอียดยา',
-                  ),
-                ),
-                const SizedBox(height: 10),
-                // Type
-                const Text("ชนิดยา"),
-                const SizedBox(height: 10),
-                TypeMedicineSeletion(),
+                MedicineDescriptionWidget(
+                    detailTextController: _detailTextController),
                 const SizedBox(height: 20),
+                // Type
+                const TypeMedicineSelection(),
+                // const SizedBox(height: 5),
+                // TypeMedicineSeletion(),
+                // const SizedBox(height: 20),
                 // Number of Dose
-
                 NumberOfDoseSelection(
                   controller: _numberOfDoseController,
                 ),
-                const SizedBox(height: 10),
-                const Text("ช่วงเวลาการกิน"),
+                const SizedBox(height: 20),
+                const Text(
+                  "ช่วงเวลาการกิน",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 10),
                 // Time Schedule
                 TakeMedicineAndTimeSelection(),
@@ -158,12 +133,35 @@ class _MedicineInfoEditorScreenState extends State<MedicineInfoEditorScreen> {
                           onPressed: () async {
                             // add new data
                             if (widget.medicineData != null) {
-                              await _updateMedicineInfoBox();
+                              if (checkCompletedDataSelection() == null) {
+                                await _updateMedicineInfoBox();
+                                Get.back();
+                              } else {
+                                // pop up error
+                                await Get.defaultDialog(
+                                    title: "ข้อผิดพลาด",
+                                    titleStyle: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.red.shade400),
+                                    middleText: errorMessage[
+                                        checkCompletedDataSelection()]!);
+                              }
                             } else {
                               // create new in box database
-                              await _createMedicineInfoBox();
+                              if (checkCompletedDataSelection() == null) {
+                                await _createMedicineInfoBox();
+                                Get.back();
+                              } else {
+                                // pop up error
+                                await Get.defaultDialog(
+                                    title: "ข้อผิดพลาด",
+                                    titleStyle: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.red.shade400),
+                                    middleText: errorMessage[
+                                        checkCompletedDataSelection()]!);
+                              }
                             }
-                            Get.back();
                           },
                           child: const Text(
                             "ยืนยัน",
@@ -206,6 +204,35 @@ class _MedicineInfoEditorScreenState extends State<MedicineInfoEditorScreen> {
         ),
       ),
     );
+  }
+
+  void _updateCurrenState(MedicineInfo medicineData) {
+    // name in Textfield
+    _nameTextController.text = medicineData.name;
+    // description in Textfield
+    _detailTextController.text = medicineData.description;
+    // number of dose
+    _numberOfDoseController.text = medicineData.nTake.toString();
+
+    // update data to widget state
+    //medicineInfoState.name(medicineData.name); // update name
+    //medicineInfoState.description(medicineData.description); // update description
+    medicineInfoState.selected_type(medicineData.type); // update type
+    medicineInfoState.selected_type_unit(medicineData.unit);
+    medicineInfoState.nTake(medicineData.nTake); // update nTake
+    medicineInfoState.order(medicineData.order); // updat order
+
+    if (medicineData.picture_path != null) {
+      medicineInfoState.picture_path(medicineData.picture_path);
+    } else {
+      medicineInfoState.picture_path(emptyPicture);
+    }
+    medicineInfoState.moning_time(medicineData.period_time[0]);
+    medicineInfoState.lunch_time(medicineData.period_time[1]);
+    medicineInfoState.evening_time(medicineData.period_time[2]);
+    medicineInfoState.bed_time(medicineData.period_time[3]);
+
+    medicineInfoState.color.value = Color(medicineData.color);
   }
 
   Future<void> _updateMedicineInfoBox() async {
@@ -267,7 +294,7 @@ class _MedicineInfoEditorScreenState extends State<MedicineInfoEditorScreen> {
         medicineInfoState.evening_time.value,
         medicineInfoState.bed_time.value,
       ],
-      picture_path: medicineInfoState.picture_path.value == _emptyPicture
+      picture_path: medicineInfoState.picture_path.value == emptyPicture
           ? null
           : medicineInfoState.picture_path.value,
       color: medicineInfoState.color.value.value,
@@ -277,5 +304,95 @@ class _MedicineInfoEditorScreenState extends State<MedicineInfoEditorScreen> {
     var medicineInfo = medicineInfoBox.get(key);
     medicineInfo!.id = key;
     await medicineInfo.save();
+  }
+
+  Map<int, String> errorMessage = {
+    0: "กรุณากำหนดชื่อยา",
+    1: "กรุณากำหนดรายละเอียดยา",
+    2: "กรุณากำหนดขนาดยา",
+    3: "กรุณากำหนดช่วงเวลาการกินยา"
+  };
+
+  int? checkCompletedDataSelection() {
+    if (_nameTextController.text.isEmpty) {
+      return 0;
+    }
+    if (_detailTextController.text.isEmpty) {
+      return 1;
+    }
+    if (_numberOfDoseController.text.isEmpty) {
+      return 2;
+    }
+    if (medicineInfoState.moning_time.isFalse &&
+        medicineInfoState.lunch_time.isFalse &&
+        medicineInfoState.evening_time.isFalse &&
+        medicineInfoState.bed_time.isFalse) {
+      return 3;
+    }
+    return null;
+  }
+}
+
+class TypeMedicineSelection extends StatelessWidget {
+  const TypeMedicineSelection({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "ชนิดยา",
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 5),
+        TypeMedicineSeletion(),
+        const SizedBox(height: 20),
+      ],
+    );
+  }
+}
+
+class MedicineDescriptionWidget extends StatelessWidget {
+  const MedicineDescriptionWidget({
+    super.key,
+    required TextEditingController detailTextController,
+  }) : _detailTextController = detailTextController;
+
+  final TextEditingController _detailTextController;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      maxLines: null,
+      keyboardType: TextInputType.multiline,
+      controller: _detailTextController,
+      decoration: InputDecoration(
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        labelText: 'รายละเอียดยา',
+      ),
+    );
+  }
+}
+
+class MedicineNameWidget extends StatelessWidget {
+  const MedicineNameWidget({
+    super.key,
+    required TextEditingController nameTextController,
+  }) : _nameTextController = nameTextController;
+
+  final TextEditingController _nameTextController;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: _nameTextController,
+      decoration: InputDecoration(
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        labelText: 'ชื่อยา',
+      ),
+    );
   }
 }

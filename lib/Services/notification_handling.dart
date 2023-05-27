@@ -24,10 +24,14 @@ class NotificationHandeling {
       int notifyID, NotifyInfoModel? notifyInfo,
       {required NotifyService notifyService}) async {
     var date = notifyInfo!.date;
-    var now = DateTime.now();
-    var minuteDiff = now.difference(date).inSeconds;
+    //var now = DateTime.now();
+    var minuteDiff = DateTime.now().difference(date).inMinutes;
     if (minuteDiff <= 60) {
-      var nextDateTime = now.add(const Duration(seconds: 15));
+      var now = DateTime.now();
+      var nowZeroSecond =
+          DateTime(now.year, now.month, now.day, now.hour, now.minute, 0);
+      var nextDateTime = nowZeroSecond.add(const Duration(minutes: 15));
+
       // Convert string payload
       var notifyPayload = jsonEncode({
         "notifyID": notifyID,
@@ -112,7 +116,7 @@ class NotificationHandeling {
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body:
-            "message=\nญาติของท่านยังไม่กินยาตามเวลา กรุณาเตือนญาติของท่านกินยาด้วยค่ะ",
+            "message=\nญาติของท่านยังไม่กินยาหรือฉีดยาตามเวลาที่กำหนด กรุณาเตือนญาติของท่านด้วยค่ะ",
       );
     }
   }
@@ -152,25 +156,46 @@ class NotificationHandeling {
     );
   }
 
+  static void updateNotifyStatus(notifyPayload) async {
+    var notifyID = getNotifyID(notifyPayload);
+    var notifyBox = Hive.box<NotifyInfoModel>(HiveDatabaseName.NOTIFY_INFO);
+    if (notifyBox.isOpen) {
+      var notifyInfo = notifyBox.get(notifyID);
+      notifyInfo?.status = 0;
+      await notifyInfo?.save();
+    } else {
+      notifyBox = await Hive.openBox(HiveDatabaseName.NOTIFY_INFO);
+      var notifyInfo = notifyBox.get(notifyID);
+      notifyInfo?.status = 0;
+      await notifyInfo?.save();
+    }
+  }
+
+  static getNotifyInfo(notifyID) async {
+    var notifyBox = Hive.box<NotifyInfoModel>(HiveDatabaseName.NOTIFY_INFO);
+    if (notifyBox.isOpen) {
+      return notifyBox.get(notifyID);
+    } else {
+      notifyBox = await Hive.openBox(HiveDatabaseName.NOTIFY_INFO);
+      return notifyBox.get(notifyID);
+    }
+  }
+
   // static function
   @pragma('vm:entry-point')
-  static Future<void> medicineOnDidReceiveNotificationAndroid(
+  static void medicineOnDidReceiveNotificationAndroid(
       NotificationResponse notificationResponse) async {
     switch (notificationResponse.notificationResponseType) {
       case NotificationResponseType.selectedNotification:
         var notifyID = getNotifyID(notificationResponse.payload!);
-        var notifyBox = Hive.box<NotifyInfoModel>(HiveDatabaseName.NOTIFY_INFO);
-        var notifyInfo = notifyBox.getAt(notifyID);
         var status = await Get.to(
             () => NotifyHandleScreen(
                   notifyID: notifyID,
                 ),
             binding: AppInfoBinding());
-
         switch (status) {
           case "OK":
-            notifyInfo!.status = 0;
-            await notifyInfo.save();
+            updateNotifyStatus(notificationResponse.payload);
             break;
           case "PENDING":
             var notifyService = NotifyService();
@@ -179,6 +204,7 @@ class NotificationHandeling {
                   medicineOnDidReceiveNotificationAndroid,
               onDidReceiveNotificationIOS: null,
             );
+            var notifyInfo = await getNotifyInfo(notifyID);
             await generateNewSchedule(notifyID, notifyInfo,
                 notifyService: notifyService);
             break;
@@ -186,20 +212,17 @@ class NotificationHandeling {
 
         break;
       case NotificationResponseType.selectedNotificationAction:
+        //print('notify action response');
         // ignore: todo
         // TODO: Handle this case. for Android
         // When action on notification is clicked
         //print(notificationResponse.actionId);
         //print(notificationResponse.payload);
         var notifyID = getNotifyID(notificationResponse.payload!);
-        var notifyBox = Hive.box<NotifyInfoModel>(HiveDatabaseName.NOTIFY_INFO);
-        var notifyInfo = notifyBox.getAt(notifyID);
 
         switch (notificationResponse.actionId) {
           case "OK":
-            // notify status -> complete
-            notifyInfo!.status = 0;
-            await notifyInfo.save();
+            updateNotifyStatus(notificationResponse.payload);
             break;
           case "PENDING":
             // create notify service
@@ -209,6 +232,7 @@ class NotificationHandeling {
                   medicineOnDidReceiveNotificationAndroid,
               onDidReceiveNotificationIOS: null,
             );
+            var notifyInfo = await getNotifyInfo(notifyID);
             await generateNewSchedule(notifyID, notifyInfo,
                 notifyService: notifyService);
             break;
@@ -218,20 +242,17 @@ class NotificationHandeling {
   }
 
   @pragma('vm:entry-point')
-  static Future<void> appointmentOnDidReceiveNotificationAndroid(
+  static void appointmentOnDidReceiveNotificationAndroid(
       NotificationResponse notificationResponse) async {
     switch (notificationResponse.notificationResponseType) {
       case NotificationResponseType.selectedNotification:
-        var notifyService = NotifyService();
-        await notifyService.inintializeNotification(
-            onDidReceiveNotificationIOS: null,
-            onDidReceiveNotificationAndroid:
-                appointmentOnDidReceiveNotificationAndroid);
-
         var payload = jsonDecode(notificationResponse.payload!);
         var dateDisplay = payload['dateDisplay'];
         var timeDisplay = payload['timeDisplay'];
-        await Get.defaultDialog(
+        var delaysDay = payload['delayDays'];
+
+        if (delaysDay > 1) {
+          await Get.defaultDialog(
             title: 'แจ้งเตือนนัดหมายพบแพทย์',
             middleText: 'วันที่ $dateDisplay\nเวลา $timeDisplay',
             middleTextStyle: const TextStyle(
@@ -243,8 +264,13 @@ class NotificationHandeling {
                 children: [
                   TextButton(
                     onPressed: () async {
+                      var appointmentNotifyService = NotifyService();
+                      await appointmentNotifyService.inintializeNotification(
+                          onDidReceiveNotificationIOS: null,
+                          onDidReceiveNotificationAndroid:
+                              appointmentOnDidReceiveNotificationAndroid);
                       await createNewDoctorAppointmentNotification(payload,
-                          notifyService: notifyService);
+                          notifyService: appointmentNotifyService);
                       Get.back();
                     },
                     child: const Text(
@@ -254,6 +280,7 @@ class NotificationHandeling {
                   ),
                   TextButton(
                       onPressed: () {
+                        // do nothing
                         Get.back();
                       },
                       child: const Text(
@@ -262,22 +289,14 @@ class NotificationHandeling {
                       )),
                 ],
               ),
-            ));
+            ),
+          );
+        }
+
         break;
       case NotificationResponseType.selectedNotificationAction:
-        // ignore: todo
-        // TODO: Handle this case.
-        // When action on notification is clicked
-        //print(notificationResponse.actionId);
-        //print(notificationResponse.payload);
-        // var notifyID = getNotifyID(notificationResponse.payload!);
-        // var notifyBox = Hive.box<NotifyInfoModel>('user_notify_info');
-        // var notifyInfo = notifyBox.getAt(notifyID);
         if (notificationResponse.actionId == "OK") {
-          // // notify status -> complete
-          // notifyInfo!.status = 0;
-          // notifyInfo.save();
-          //print(notificationResponse.payload);
+          // do nothing
         }
         if (notificationResponse.actionId == "PENDING") {
           var notifyService = NotifyService();
@@ -302,20 +321,22 @@ class NotificationHandeling {
     var dateDisplay = payload['dateDisplay'];
     var timeDisplay = payload['timeDisplay'];
 
-    if (delayDays == 1) {
+    if (delayDays == 1 || delayDays == 0) {
       return;
+    } else {
+      switch (delayDays) {
+        case 7:
+          delayDays = 3; // notify before 3 day
+          break;
+        case 3:
+          delayDays = 1; // notify before 1 day
+          break;
+      }
     }
-    switch (delayDays) {
-      case 7:
-        delayDays = 3; // notify before 3 day
-        break;
-      case 3:
-        delayDays = 1; // notify before 1 day
-        break;
-    }
+
     // set notify again
     DateTime notifyTime =
-        appointmentDateTime.subtract(Duration(minutes: delayDays)); // test
+        appointmentDateTime.subtract(Duration(days: delayDays)); // test
 
     await setAppointmentNotify(
       notifyService: notifyService,
@@ -346,13 +367,13 @@ class NotificationHandeling {
         "timeDisplay": timeDisplay,
       },
     );
-    //var notifyState = Get.find<NotificationState>();
 
     await notifyService.inintializeNotification(
       onDidReceiveNotificationAndroid:
           appointmentOnDidReceiveNotificationAndroid,
       onDidReceiveNotificationIOS: null,
     );
+
     await notifyService.requestPermission();
     await notifyService.scheduleDoctorAppointmentNotify(
       notifyID: notifyID,
@@ -360,18 +381,20 @@ class NotificationHandeling {
       detail: 'วันที่ $dateDisplay \nเวลา $timeDisplay',
       notifyDate: notifyTime,
       payload: payload,
-      actions: const <AndroidNotificationAction>[
-        AndroidNotificationAction(
-          'PENDING',
-          'แจ้งเตือนอีกครั้ง',
-          showsUserInterface: true,
-        ),
-        AndroidNotificationAction(
-          'OK',
-          'ไม่ต้องแจ้งเตือน',
-          showsUserInterface: true,
-        )
-      ],
+      actions: delayDays > 1
+          ? const <AndroidNotificationAction>[
+              AndroidNotificationAction(
+                'PENDING',
+                'แจ้งเตือนอีกครั้ง',
+                showsUserInterface: true,
+              ),
+              AndroidNotificationAction(
+                'OK',
+                'ไม่ต้องแจ้งเตือน',
+                showsUserInterface: true,
+              )
+            ]
+          : null,
     );
   }
 }

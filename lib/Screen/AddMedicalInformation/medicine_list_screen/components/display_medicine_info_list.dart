@@ -20,7 +20,6 @@ class DisplayMedicineInfoList extends StatelessWidget {
         if (box.values.isNotEmpty) {
           var medicineboxInfo = box.values;
           var medicineInfoList = medicineboxInfo.toList();
-          //var medicineInfoMap = medicineInfoList.asMap();
 
           return ListView.builder(
             itemCount: medicineInfoList.length,

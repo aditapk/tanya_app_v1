@@ -31,7 +31,7 @@ class EmptyMedicineList extends StatelessWidget {
           Text(
             emptyDescription,
             style: const TextStyle(
-              fontSize: 15,
+              fontSize: 20,
             ),
           )
         ],

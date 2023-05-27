@@ -31,7 +31,7 @@ class LoginScreenTopImage extends StatelessWidget {
             Expanded(
               child: SizedBox(
                   height: MediaQuery.of(context).size.width * 0.85,
-                  child: Lottie.asset('assets/lotties/doctor.json')),
+                  child: Lottie.asset('assets/lotties/medicine-capsule.json')),
             ),
           ],
         ),

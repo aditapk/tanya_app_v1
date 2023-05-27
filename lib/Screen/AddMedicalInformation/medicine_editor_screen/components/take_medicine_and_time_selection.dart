@@ -11,11 +11,16 @@ class TakeMedicineAndTimeSelection extends StatelessWidget {
 
   final medicineInfoState = Get.find<MedicineEditorState>();
 
-  get bedTimeFlag =>
-      medicineInfoState.bed_time.value &&
-      (!medicineInfoState.moning_time.value &&
-          !medicineInfoState.lunch_time.value &&
-          !medicineInfoState.evening_time.value);
+  chooseBeforeBedTimeOnly() {
+    return (medicineInfoState.bed_time.value == true &&
+        (medicineInfoState.moning_time.value == false &&
+            medicineInfoState.lunch_time.value == false &&
+            medicineInfoState.evening_time.value == false));
+  }
+
+  selectedDropMedicineType() {
+    return medicineInfoState.selected_type.value == "drop";
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,17 +30,42 @@ class TakeMedicineAndTimeSelection extends StatelessWidget {
           children: [
             Obx(
               () => TimeScheduleSelectionCard(
-                title: "ก่อนอาหาร",
-                height: _height,
-                selection: !bedTimeFlag
-                    ? medicineInfoState.order.value == "before"
-                    : false,
-                borderColor: Colors.blue,
-                backgroundColor: Colors.blue.shade100,
-                onTap: () =>
-                    !bedTimeFlag ? medicineInfoState.order("before") : null,
-              ),
+                  title: "ก่อนอาหาร",
+                  height: _height,
+                  selection: medicineInfoState.order.value == "before",
+                  borderColor: Colors.blue,
+                  backgroundColor: Colors.blue.shade200,
+                  onTap: () {
+                    // on change before widget
+
+                    if (chooseBeforeBedTimeOnly() ||
+                        selectedDropMedicineType()) {
+                      // do nothing
+                    } else {
+                      medicineInfoState.order("before");
+                    }
+                  }),
             ),
+            Obx(
+              () => TimeScheduleSelectionCard(
+                  title: "หลังอาหาร",
+                  height: _height,
+                  selection: medicineInfoState.order.value == "after",
+                  borderColor: Colors.blue,
+                  backgroundColor: Colors.blue.shade200,
+                  onTap: () {
+                    if (chooseBeforeBedTimeOnly() ||
+                        selectedDropMedicineType()) {
+                      // do nothing
+                    } else {
+                      medicineInfoState.order("after");
+                    }
+                  }),
+            ),
+          ],
+        ),
+        Row(
+          children: [
             Obx(
               () => TimeScheduleSelectionCard(
                 title: "เช้า",
@@ -44,12 +74,18 @@ class TakeMedicineAndTimeSelection extends StatelessWidget {
                 borderColor: Colors.green,
                 backgroundColor: Colors.green.shade100,
                 onTap: () {
+                  // set morning state
                   medicineInfoState
                       .moning_time(!medicineInfoState.moning_time.value);
-                  if (bedTimeFlag) {
+
+                  if (chooseBeforeBedTimeOnly()) {
                     medicineInfoState.order("");
                   } else {
-                    medicineInfoState.order("before");
+                    if (!selectedDropMedicineType()) {
+                      if (medicineInfoState.order.isEmpty) {
+                        medicineInfoState.order("before");
+                      }
+                    }
                   }
                 },
               ),
@@ -64,30 +100,16 @@ class TakeMedicineAndTimeSelection extends StatelessWidget {
                 onTap: () {
                   medicineInfoState
                       .lunch_time(!medicineInfoState.lunch_time.value);
-                  if (bedTimeFlag) {
+                  if (chooseBeforeBedTimeOnly()) {
                     medicineInfoState.order("");
                   } else {
-                    medicineInfoState.order("before");
+                    if (!selectedDropMedicineType()) {
+                      if (medicineInfoState.order.isEmpty) {
+                        medicineInfoState.order("before");
+                      }
+                    }
                   }
                 },
-              ),
-            ),
-          ],
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Obx(
-              () => TimeScheduleSelectionCard(
-                title: "หลังอาหาร",
-                height: _height,
-                selection: !bedTimeFlag
-                    ? medicineInfoState.order.value == "after"
-                    : false,
-                borderColor: Colors.blue,
-                backgroundColor: Colors.blue.shade100,
-                onTap: () =>
-                    !bedTimeFlag ? medicineInfoState.order("after") : null,
               ),
             ),
             Obx(
@@ -100,14 +122,22 @@ class TakeMedicineAndTimeSelection extends StatelessWidget {
                 onTap: () {
                   medicineInfoState
                       .evening_time(!medicineInfoState.evening_time.value);
-                  if (bedTimeFlag) {
+                  if (chooseBeforeBedTimeOnly()) {
                     medicineInfoState.order("");
                   } else {
-                    medicineInfoState.order("before");
+                    if (!selectedDropMedicineType()) {
+                      if (medicineInfoState.order.isEmpty) {
+                        medicineInfoState.order("before");
+                      }
+                    }
                   }
                 },
               ),
             ),
+          ],
+        ),
+        Row(
+          children: [
             Obx(
               () => TimeScheduleSelectionCard(
                   title: "ก่อนนอน",
@@ -116,12 +146,18 @@ class TakeMedicineAndTimeSelection extends StatelessWidget {
                   borderColor: Colors.green,
                   backgroundColor: Colors.green.shade100,
                   onTap: () {
+                    // set before bed state
                     medicineInfoState
                         .bed_time(!medicineInfoState.bed_time.value);
-                    if (bedTimeFlag) {
+
+                    if (chooseBeforeBedTimeOnly()) {
                       medicineInfoState.order("");
                     } else {
-                      medicineInfoState.order("before");
+                      if (!selectedDropMedicineType()) {
+                        if (medicineInfoState.order.isEmpty) {
+                          medicineInfoState.order("before");
+                        }
+                      }
                     }
                   }),
             ),

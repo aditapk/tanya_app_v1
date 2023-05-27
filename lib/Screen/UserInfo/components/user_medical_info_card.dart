@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:tanya_app_v1/Screen/UserInfo/components/header_widget.dart';
 
 import '../../../Model/user_info_model.dart';
 import 'editbutton_user_medical_info.dart';
@@ -13,55 +15,91 @@ class UserMedicalInfoCard extends StatelessWidget {
 
   final UserInfo? userInfo;
 
+  editHealthCareData() {
+    showDialog(
+      context: Get.context!,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Center(
+            child: Text(
+              'ระบุข้อมูลสุขภาพ',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          content: SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: TextFieldUserMedicalInfo(
+              userInfo: userInfo,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: MediaQuery.of(context).size.width,
-      child: Card(
-        elevation: 2,
-        color: Colors.yellow.shade600,
-        child: Stack(
-          children: [
-            const UserMedicalInfo(),
-            Positioned(
-              top: 14,
-              right: 8,
-              child: EditButtonUserMedicalInfo(
-                onPressed: () async {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20)),
-                        title: const Center(
-                          child: Text(
-                            'ระบุข้อมูลสุขภาพ',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        content: SingleChildScrollView(
-                          scrollDirection: Axis.vertical,
-                          child: TextFieldUserMedicalInfo(
-                            userInfo: userInfo,
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
-                userInfo: userInfo,
-              ),
+      child: Column(
+        children: [
+          HeaderWidget(
+            text: "ข้อมูลสุขภาพ",
+            userInfo: userInfo,
+            color: Colors.pink.shade200,
+            editButton: EditButtonUserMedicalInfo(
+              userInfo: userInfo,
+              onPressed: editHealthCareData,
             ),
-            const SizedBox(
-              height: 8.0,
-            )
-          ],
-        ),
+          ),
+          const Padding(
+            padding: EdgeInsets.only(left: 8, right: 8),
+            child: UserMedicalInfo(),
+          ),
+        ],
       ),
     );
   }
 }
+// !don't delete
+// Positioned(
+            //   top: 14,
+            //   right: 8,
+            //   child: EditButtonUserMedicalInfo(
+            //     onPressed: () async {
+            //       showDialog(
+            //         context: context,
+            //         builder: (BuildContext context) {
+            //           return AlertDialog(
+            //             shape: RoundedRectangleBorder(
+            //                 borderRadius: BorderRadius.circular(20)),
+            //             title: const Center(
+            //               child: Text(
+            //                 'ระบุข้อมูลสุขภาพ',
+            //                 style: TextStyle(
+            //                   fontSize: 20,
+            //                   fontWeight: FontWeight.bold,
+            //                 ),
+            //               ),
+            //             ),
+            //             content: SingleChildScrollView(
+            //               scrollDirection: Axis.vertical,
+            //               child: TextFieldUserMedicalInfo(
+            //                 userInfo: userInfo,
+            //               ),
+            //             ),
+            //           );
+            //         },
+            //       );
+            //     },
+            //     userInfo: userInfo,
+            //   ),
+            // ),
+            // const SizedBox(
+            //   height: 8.0,
+            // )

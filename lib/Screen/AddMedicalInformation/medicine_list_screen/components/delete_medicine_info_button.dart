@@ -11,8 +11,8 @@ class DeleteMedicineInfoButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      right: 5,
-      bottom: 5,
+      right: 0,
+      bottom: 0,
       child: IconButton(
         icon: const Icon(Icons.delete),
         color: Colors.black87,

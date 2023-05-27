@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:tanya_app_v1/constants.dart';
 
 class AlreadyHaveAnAccountCheck extends StatelessWidget {
-  final bool login;
-  final Function? press;
   const AlreadyHaveAnAccountCheck({
     Key? key,
     this.login = true,
     required this.press,
   }) : super(key: key);
+
+  final bool login;
+  final Function? press;
 
   @override
   Widget build(BuildContext context) {

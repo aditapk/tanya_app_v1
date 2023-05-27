@@ -1,5 +1,3 @@
-// ignore_for_file: must_be_immutable
-
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -30,77 +28,22 @@ class MedicineInfoCard extends StatelessWidget {
     required this.medicineData,
     super.key,
   });
-  MedicineInfo? medicineData;
-  int index;
+  // notify state controller injection
+  final notifyStateController = Get.put(NotificationState());
 
-  updateImageMedicineBox(String imagePath) async {
-    // update medicine box
-    var medicineBox = Hive.box<MedicineInfo>(HiveDatabaseName.MEDICINE_INFO);
-    var medicineList = medicineBox.values;
-    for (var medicine in medicineList) {
-      if (medicine.id == medicineData!.id) {
-        medicine.picture_path = imagePath;
-        await medicine.save();
-      }
-    }
-  }
+  // input of medicine information card
+  final MedicineInfo? medicineData;
+  final int index;
 
-  updateImageNotifyBox(String imagePath) async {
-    // update notify box
-    var notifyBox = Hive.box<NotifyInfoModel>(HiveDatabaseName.NOTIFY_INFO);
-    var notifyList = notifyBox.values;
-    for (var notify in notifyList) {
-      if (notify.medicineInfo.id == medicineData!.id) {
-        notify.medicineInfo.picture_path = imagePath;
-        await notify.save();
-      }
-    }
-  }
-
-  Future<void> _takePhotoToGallerry() async {
-    try {
-      final image = await ImagePicker().pickImage(source: ImageSource.camera);
-      if (image == null) return;
-
-      var directory = await getApplicationDocumentsDirectory();
-      var name = basename(image.path);
-      var localImage = await File(image.path).copy("${directory.path}/$name");
-      await GallerySaver.saveImage(localImage.path);
-
-      medicineData!.picture_path = localImage.path;
-
-      await medicineData!.save();
-
-      await updateImageMedicineBox(localImage.path);
-      await updateImageNotifyBox(localImage.path);
-
-      Get.back();
-    } on PlatformException {
-      // print("Failed take photo : $e");
-    }
-  }
-
-  Future<void> _choosePhotoFromGallery() async {
-    try {
-      final image = await ImagePicker().pickImage(source: ImageSource.gallery);
-      if (image == null) return;
-
-      medicineData!.picture_path = image.path;
-      await medicineData!.save();
-
-      await updateImageMedicineBox(image.path);
-      await updateImageNotifyBox(image.path);
-
-      Get.back();
-    } on PlatformException {
-      // print("Failed take photo : $e");
-    }
-  }
-
+  // build widget function
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.only(
+        top: 8,
+        left: 8,
+        right: 8,
+      ),
       child: Stack(
         children: [
           GestureDetector(
@@ -163,10 +106,80 @@ class MedicineInfoCard extends StatelessWidget {
     );
   }
 
+  // updating Medicine in Hive box
+  updateImageMedicineBox(String imagePath) async {
+    // update medicine box
+    var medicineBox = Hive.box<MedicineInfo>(HiveDatabaseName.MEDICINE_INFO);
+    var medicineList = medicineBox.values;
+    for (var medicine in medicineList) {
+      if (medicine.id == medicineData!.id) {
+        medicine.picture_path = imagePath;
+        await medicine.save();
+      }
+    }
+  }
+
+  // updating notify in Hive box
+  updateImageNotifyBox(String imagePath) async {
+    // update notify box
+    var notifyBox = Hive.box<NotifyInfoModel>(HiveDatabaseName.NOTIFY_INFO);
+    var notifyList = notifyBox.values;
+    for (var notify in notifyList) {
+      if (notify.medicineInfo.id == medicineData!.id) {
+        notify.medicineInfo.picture_path = imagePath;
+        await notify.save();
+      }
+    }
+  }
+
+  // Take Photo
+  Future<void> _takePhotoToGallerry() async {
+    try {
+      final image = await ImagePicker().pickImage(source: ImageSource.camera);
+      if (image == null) return;
+
+      var directory = await getApplicationDocumentsDirectory();
+      var name = basename(image.path);
+      var localImage = await File(image.path).copy("${directory.path}/$name");
+      await GallerySaver.saveImage(localImage.path);
+
+      medicineData!.picture_path = localImage.path;
+
+      await medicineData!.save();
+
+      await updateImageMedicineBox(localImage.path);
+      await updateImageNotifyBox(localImage.path);
+
+      Get.back();
+    } on PlatformException {
+      // print("Failed take photo : $e");
+    }
+  }
+
+  // choose Photo from gallery
+  Future<void> _choosePhotoFromGallery() async {
+    try {
+      final image = await ImagePicker().pickImage(source: ImageSource.gallery);
+      if (image == null) return;
+
+      medicineData!.picture_path = image.path;
+      await medicineData!.save();
+
+      await updateImageMedicineBox(image.path);
+      await updateImageNotifyBox(image.path);
+
+      Get.back();
+    } on PlatformException {
+      // print("Failed take photo : $e");
+    }
+  }
+
+  //
   toMedicineNotifyPage() async {
     bool? notified = await Get.to(
       () => AddNotifyDetailScreen(
-        selectedDate: DateTime.now(),
+        selectedDate: DateTime(
+            DateTime.now().year, DateTime.now().month, DateTime.now().day),
         medicineData: medicineData,
       ),
       binding: AppInfoBinding(),
@@ -236,35 +249,10 @@ class MedicineInfoCard extends StatelessWidget {
         ),
       ],
     );
-    // Get.defaultDialog(
-    //   title: 'ลบรายการยา',
-    //   middleText: 'รายการยาและการแจ้งเตือนของยานี้จะถูกลบออกอย่างถาวร',
-    //   actions: <Widget>[
-    //     TextButton(
-    //       child: const Text(
-    //         'ตกลง',
-    //         style: TextStyle(fontSize: 16),
-    //       ),
-    //       onPressed: () async {
-    //         Get.back();
-    //         await deleteNotify(medicineData!);
-    //         await medicineData!.delete();
-    //       },
-    //     ),
-    //     TextButton(
-    //       child: const Text(
-    //         'ยกเลิก',
-    //         style: TextStyle(fontSize: 16),
-    //       ),
-    //       onPressed: () {
-    //         Get.back();
-    //       },
-    //     ),
-    //   ],
-    // );
   }
 }
 
+// sub widget
 class MedicineNotifyButton extends StatelessWidget {
   const MedicineNotifyButton({
     super.key,

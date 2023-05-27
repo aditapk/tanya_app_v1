@@ -11,6 +11,7 @@ class PictureEditBottomSheet extends StatelessWidget {
 
   void Function()? onChoose;
   void Function()? onTakephoto;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -27,8 +28,8 @@ class PictureEditBottomSheet extends StatelessWidget {
           const Padding(
             padding: EdgeInsets.all(10),
             child: Text(
-              "เปลี่ยนรูปภาพ",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              "เปลี่ยนแปลงรูปรายการยา",
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
           ),
           const SizedBox(
@@ -39,16 +40,27 @@ class PictureEditBottomSheet extends StatelessWidget {
             child: Row(
               children: [
                 Expanded(
-                  child: ElevatedButton(
-                    onPressed: onChoose,
-                    child: Row(
-                      children: const [
-                        Icon(Icons.photo),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        Text("เลือกจากคลังภาพ"),
-                      ],
+                  child: SizedBox(
+                    height: 60,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12))),
+                      onPressed: onChoose,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Icon(Icons.photo),
+                          SizedBox(
+                            width: 5,
+                          ),
+                          Text(
+                            "เลือกจากคลังภาพ",
+                            style: TextStyle(fontSize: 16),
+                            overflow: TextOverflow.fade,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -56,16 +68,26 @@ class PictureEditBottomSheet extends StatelessWidget {
                   width: 10,
                 ),
                 Expanded(
-                  child: ElevatedButton(
-                    onPressed: onTakephoto,
-                    child: Row(
-                      children: const [
-                        Icon(Icons.photo_camera),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        Text("ถ่ายภาพ"),
-                      ],
+                  child: SizedBox(
+                    height: 60,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12))),
+                      onPressed: onTakephoto,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Icon(Icons.photo_camera),
+                          SizedBox(
+                            width: 5,
+                          ),
+                          Text(
+                            "ถ่ายภาพใหม่",
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 )

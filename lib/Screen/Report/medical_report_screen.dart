@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:buddhist_datetime_dateformat_sns/buddhist_datetime_dateformat_sns.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -10,30 +8,14 @@ import 'package:tanya_app_v1/Model/notify_info.dart';
 import 'package:tanya_app_v1/Screen/Report/components/selected_interval_time.dart';
 import 'package:tanya_app_v1/utils/constans.dart';
 
+import '../../Model/notify_report.dart';
+import 'components/medicine_report_card.dart';
+
 class MedicineReportScreen extends StatefulWidget {
   const MedicineReportScreen({super.key});
 
   @override
   State<MedicineReportScreen> createState() => _MedicineReportScreenState();
-}
-
-class NotifyReport {
-  String notifyName;
-  String medicineName;
-  String? picturePath;
-  int nNotify;
-  int nComplete;
-  int color;
-  String type;
-  NotifyReport({
-    required this.medicineName,
-    required this.nNotify,
-    required this.nComplete,
-    this.picturePath,
-    required this.notifyName,
-    required this.color,
-    required this.type,
-  });
 }
 
 class _MedicineReportScreenState extends State<MedicineReportScreen> {
@@ -60,21 +42,8 @@ class _MedicineReportScreenState extends State<MedicineReportScreen> {
     return date.isAfter(start) && date.isBefore(end);
   }
 
-  String getMedicineTypeText(String medicineType) {
-    String typeText = "";
-    switch (medicineType) {
-      case "pills":
-      case "water":
-        typeText = "กิน";
-        break;
-      case "arrow":
-        typeText = "ฉีด";
-        break;
-      case "drop":
-        typeText = "หยอด";
-        break;
-    }
-    return typeText;
+  autofillNotifyName(String notifyName, String medicineName) {
+    return notifyName.isNotEmpty ? notifyName : "กินยา $medicineName";
   }
 
   @override
@@ -85,16 +54,15 @@ class _MedicineReportScreenState extends State<MedicineReportScreen> {
     var notifyInfo = notifyInfoBox.values.toList();
     List<NotifyInfoModel> notifyInfoInRange = [];
     //if (appState.filterStartDate.value != null && appState.filterEndDate != null) {
-    var filterStartDate = reviseStartDate(reportState.filterStartDate.value);
-    var filtterEndDate = reviseEndDate(reportState.filterEndDate.value);
+    reportState.filterStartDate.value =
+        reviseStartDate(reportState.filterStartDate.value);
+    reportState.filterEndDate.value =
+        reviseEndDate(reportState.filterEndDate.value);
+    var filterStartDate = reportState.filterStartDate.value;
+    var filtterEndDate = reportState.filterEndDate.value;
     notifyInfoInRange = notifyInfo.where((notify) {
       return checkInRangeOfTime(
           date: notify.date, start: filterStartDate, end: filtterEndDate);
-      // if (notify.date.isAfter(filterStartDate) &&
-      //     notify.date.isBefore(filtterEndDate)) {
-      //   return true;
-      // }
-      // return false;
     }).toList();
 
     var medicineSet = <String>{};
@@ -104,9 +72,7 @@ class _MedicineReportScreenState extends State<MedicineReportScreen> {
     for (var notify in notifyInfoInRange) {
       medicineSet.add(notify.medicineInfo.name);
       notifySet.add(notify.name);
-      //colorSet.add(notify.medicineInfo.color);
     }
-    //var medicineList = medicineSet.toList();
     var notifyList = notifySet.toList();
 
     for (var notifyName in notifyList) {
@@ -164,171 +130,73 @@ class _MedicineReportScreenState extends State<MedicineReportScreen> {
       width: MediaQuery.of(context).size.width,
       child: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: SizedBox(
-              height: 60,
-              width: MediaQuery.of(context).size.width,
-              child: TextFormField(
-                readOnly: true,
-                controller: timeIntervalTextController,
-                decoration: InputDecoration(
-                    hintText: 'กำหนดช่วงวันและเวลา',
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.access_time),
-                      onPressed: () async {
-                        var result = await Get.defaultDialog(
-                          title: 'กำหนดช่วงวันและเวลา',
-                          titleStyle:
-                              const TextStyle(fontWeight: FontWeight.bold),
-                          content: SelectedIntervalTime(
-                              startDateTime: reportState.filterStartDate.value,
-                              endDateTime: reportState.filterEndDate.value),
-                        );
-                        if (result != null) {
-                          setState(() {
-                            reportState.filterStartDate.value =
-                                result['startDateTime'];
-                            reportState.filterEndDate.value =
-                                result['endDateTime'];
-                            timeIntervalTextController.text =
-                                '${DateFormat.yMMMMd('th').formatInBuddhistCalendarThai(reportState.filterStartDate.value)} - ${DateFormat.yMMMMd('th').formatInBuddhistCalendarThai(reportState.filterEndDate.value)}';
-                          });
-                        }
-                      },
-                    ),
-                    suffixIconColor: Colors.blue.shade400,
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20))),
+          Container(
+            height: 70,
+            width: MediaQuery.of(context).size.width,
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20)),
+              color: Theme.of(context).primaryColor,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.only(
+                  left: 15, right: 15, top: 10, bottom: 10),
+              child: GestureDetector(
+                onTap: () async {
+                  var result = await Get.defaultDialog(
+                    title: 'กำหนดช่วงวันและเวลา',
+                    titleStyle: const TextStyle(fontWeight: FontWeight.bold),
+                    content: SelectedIntervalTime(
+                        startDateTime: reportState.filterStartDate.value,
+                        endDateTime: reportState.filterEndDate.value),
+                  );
+                  if (result != null) {
+                    setState(() {
+                      reportState.filterStartDate.value =
+                          result['startDateTime'];
+                      reportState.filterEndDate.value = result['endDateTime'];
+                      // timeIntervalTextController.text =
+                      //     '${DateFormat.yMMMd('th').formatInBuddhistCalendarThai(reportState.filterStartDate.value)}  -  ${DateFormat.yMMMd('th').formatInBuddhistCalendarThai(reportState.filterEndDate.value)}';
+                    });
+                  }
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: Colors.white,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        timeIntervalTextController.text,
+                        maxLines: 1,
+                        overflow: TextOverflow.clip,
+                        style: const TextStyle(fontSize: 15),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
+          const SizedBox(
+            height: 5,
+          ),
           Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.vertical,
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width,
-                height: Platform.isAndroid
-                    ? MediaQuery.of(context).size.height - 229
-                    : MediaQuery.of(context).size.height - 282,
-                child: ListView.builder(
-                    //shrinkWrap: true,
-                    itemCount: notifyReport?.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.only(
-                          left: 8,
-                          right: 8,
-                          bottom: 8,
-                        ),
-                        child: SizedBox(
-                          height: 150,
-                          width: MediaQuery.of(context).size.width,
-                          child: Card(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
-                            elevation: 3,
-                            color: Color(notifyReport![index].color),
-                            child: Column(
-                              children: [
-                                SizedBox(
-                                  child: Row(
-                                    children: [
-                                      SizedBox(
-                                        width: 120,
-                                        height: 142,
-                                        child: ClipRRect(
-                                          borderRadius: const BorderRadius.only(
-                                              topLeft: Radius.circular(12),
-                                              bottomLeft: Radius.circular(12)),
-                                          child: notifyReport![index]
-                                                          .picturePath !=
-                                                      "" &&
-                                                  notifyReport![index]
-                                                          .picturePath !=
-                                                      null
-                                              ? Image.file(
-                                                  File(notifyReport![index]
-                                                      .picturePath!),
-                                                  fit: BoxFit.cover,
-                                                )
-                                              : Image.asset(
-                                                  "assets/images/dummy_picture.jpg",
-                                                  fit: BoxFit.cover,
-                                                ),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: SizedBox(
-                                          height: 140,
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            children: [
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                  top: 8,
-                                                  left: 8,
-                                                ),
-                                                child: Text(
-                                                  notifyReport![index]
-                                                      .notifyName,
-                                                  style: const TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ),
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                    top: 8, left: 8),
-                                                child: Text(
-                                                  notifyReport![index]
-                                                      .medicineName,
-                                                  style: const TextStyle(
-                                                    fontSize: 16,
-                                                  ),
-                                                ),
-                                              ),
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                    top: 8, left: 8),
-                                                child: Text(
-                                                  '${getMedicineTypeText(notifyReport![index].type)}แล้ว ${notifyReport![index].nComplete} / ${notifyReport![index].nNotify} ครั้ง',
-                                                  style: const TextStyle(
-                                                    fontSize: 16,
-                                                  ),
-                                                ),
-                                              ),
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                  top: 8,
-                                                  left: 8,
-                                                  bottom: 8,
-                                                ),
-                                                child: Text(
-                                                  'ร้อยละการ${getMedicineTypeText(notifyReport![index].type)} ${(notifyReport![index].nComplete / notifyReport![index].nNotify * 100).toStringAsFixed(0)} %',
-                                                  style: const TextStyle(
-                                                      fontSize: 16),
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    }),
-              ),
-            ),
+            child: ListView.builder(
+                scrollDirection: Axis.vertical,
+                itemCount: notifyReport!.length,
+                itemBuilder: (context, index) {
+                  if (notifyReport!.isNotEmpty) {
+                    return MedicineReportCard(
+                      notifyReport: notifyReport![index],
+                    );
+                  } else {
+                    return Container();
+                  }
+                }),
           ),
         ],
       ),

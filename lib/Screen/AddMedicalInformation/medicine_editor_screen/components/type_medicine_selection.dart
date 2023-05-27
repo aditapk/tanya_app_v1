@@ -9,6 +9,19 @@ class TypeMedicineSeletion extends StatelessWidget {
 
   final medicineInfoState = Get.find<MedicineEditorState>();
 
+  final Map<String, String> defaultUnitTypeOfMedicine = {
+    "pills": "เม็ด",
+    "water": "ช้อนชา",
+    "arrow": "ยูนิต",
+    "drop": "หยด"
+  };
+  chooseBeforeBedTimeOnly() {
+    return (medicineInfoState.bed_time.value == true &&
+        (medicineInfoState.moning_time.value == false &&
+            medicineInfoState.lunch_time.value == false &&
+            medicineInfoState.evening_time.value == false));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -19,7 +32,20 @@ class TypeMedicineSeletion extends StatelessWidget {
             selection: medicineInfoState.selected_type.value == "pills",
             onTap: () {
               medicineInfoState.selected_type("pills");
-              medicineInfoState.selected_type_unit("เม็ด");
+              medicineInfoState
+                  .selected_type_unit(defaultUnitTypeOfMedicine["pills"]);
+
+              if (!chooseBeforeBedTimeOnly()) {
+                if (medicineInfoState.order.isEmpty) {
+                  medicineInfoState.order("before");
+                }
+              } else {
+                if (medicineInfoState.order.value.isNotEmpty) {
+                  medicineInfoState.order.value = "";
+                } else {
+                  // do nothing
+                }
+              }
             },
           ),
         ),
@@ -29,7 +55,19 @@ class TypeMedicineSeletion extends StatelessWidget {
             selection: medicineInfoState.selected_type.value == "water",
             onTap: () {
               medicineInfoState.selected_type("water");
-              medicineInfoState.selected_type_unit("ช้อนชา");
+              medicineInfoState
+                  .selected_type_unit(defaultUnitTypeOfMedicine["water"]);
+              if (!chooseBeforeBedTimeOnly()) {
+                if (medicineInfoState.order.isEmpty) {
+                  medicineInfoState.order("before");
+                }
+              } else {
+                if (medicineInfoState.order.value.isNotEmpty) {
+                  medicineInfoState.order.value = "";
+                } else {
+                  // do nothing
+                }
+              }
             },
           ),
         ),
@@ -39,7 +77,19 @@ class TypeMedicineSeletion extends StatelessWidget {
             selection: medicineInfoState.selected_type.value == "arrow",
             onTap: () {
               medicineInfoState.selected_type("arrow");
-              medicineInfoState.selected_type_unit("ยูนิต");
+              medicineInfoState
+                  .selected_type_unit(defaultUnitTypeOfMedicine["arrow"]);
+              if (!chooseBeforeBedTimeOnly()) {
+                if (medicineInfoState.order.isEmpty) {
+                  medicineInfoState.order("before");
+                }
+              } else {
+                if (medicineInfoState.order.value.isNotEmpty) {
+                  medicineInfoState.order.value = "";
+                } else {
+                  // do nothing
+                }
+              }
             },
           ),
         ),
@@ -49,7 +99,9 @@ class TypeMedicineSeletion extends StatelessWidget {
             selection: medicineInfoState.selected_type.value == "drop",
             onTap: () {
               medicineInfoState.selected_type("drop");
-              medicineInfoState.selected_type_unit("หยด");
+              medicineInfoState
+                  .selected_type_unit(defaultUnitTypeOfMedicine["drop"]);
+              medicineInfoState.order("");
             },
           ),
         ),

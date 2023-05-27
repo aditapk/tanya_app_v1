@@ -19,53 +19,8 @@ class LoginForm extends StatefulWidget {
 }
 
 class _LoginFormState extends State<LoginForm> {
-  void loginAction() async {
-    var userLoginBox = Hive.box<UserLogin>(HiveDatabaseName.USER_LOGIN);
-    var userLogin = userLoginBox.get(0);
-    if (userLogin == null) {
-      Get.defaultDialog(
-          title: 'เข้าสู่ระบบผิดพลาด',
-          middleText: 'ยังไม่มีข้อมุลผู้ใช้\nกรุณาสมัครสมาชิกก่อนเข้าระบบ',
-          confirm: TextButton(
-              onPressed: () {
-                Get.to(const SignUpScreen());
-              },
-              child: const Text(
-                'สมัครสมาชิก',
-                style: TextStyle(fontSize: 18),
-              )));
-    } else {
-      if (userTextController.text == userLogin.username &&
-          passwordTextController.text == userLogin.password) {
-        userLogin.logOut = false;
-        await userLogin.save();
-        Get.to(
-          () => const HomeAppScreen(),
-          binding: AppInfoBinding(),
-        );
-      } else {
-        Get.defaultDialog(
-          title: 'เข้าสู่ระบบผิดพลาด',
-          middleText: 'ข้อมูลผู้ใช้ หรือ รหัสผ่านไม่ผู้ต้อง',
-          confirm: TextButton(
-            onPressed: toSignUpScreen,
-            child: const Text(
-              'สมัครสมาชิกใหม่',
-              style: TextStyle(fontSize: 18),
-            ),
-          ),
-        );
-      }
-    }
-  }
-
-  void toSignUpScreen() {
-    Get.to(() => const SignUpScreen());
-  }
-
-  TextEditingController userTextController = TextEditingController();
-
-  TextEditingController passwordTextController = TextEditingController();
+  final TextEditingController userTextController = TextEditingController();
+  final TextEditingController passwordTextController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -133,5 +88,49 @@ class _LoginFormState extends State<LoginForm> {
         ],
       ),
     );
+  }
+
+  void loginAction() async {
+    var userLoginBox = Hive.box<UserLogin>(HiveDatabaseName.USER_LOGIN);
+    var userLogin = userLoginBox.get(0);
+    if (userLogin == null) {
+      Get.defaultDialog(
+          title: 'เข้าสู่ระบบผิดพลาด',
+          middleText: 'ยังไม่มีข้อมุลผู้ใช้\nกรุณาสมัครสมาชิกก่อนเข้าระบบ',
+          confirm: TextButton(
+              onPressed: () {
+                Get.to(const SignUpScreen());
+              },
+              child: const Text(
+                'สมัครสมาชิก',
+                style: TextStyle(fontSize: 18),
+              )));
+    } else {
+      if (userTextController.text == userLogin.username &&
+          passwordTextController.text == userLogin.password) {
+        userLogin.logOut = false;
+        await userLogin.save();
+        Get.to(
+          () => const HomeAppScreen(),
+          binding: AppInfoBinding(),
+        );
+      } else {
+        Get.defaultDialog(
+          title: 'เข้าสู่ระบบผิดพลาด',
+          middleText: 'ข้อมูลผู้ใช้ หรือ รหัสผ่านไม่ผู้ต้อง',
+          confirm: TextButton(
+            onPressed: toSignUpScreen,
+            child: const Text(
+              'สมัครสมาชิกใหม่',
+              style: TextStyle(fontSize: 18),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  void toSignUpScreen() {
+    Get.to(() => const SignUpScreen());
   }
 }

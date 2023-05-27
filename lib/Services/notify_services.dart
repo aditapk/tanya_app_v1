@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:fraction/fraction.dart';
+import 'package:intl/intl.dart';
+import 'package:tanya_app_v1/constants.dart';
 //import 'package:timezone/data/latest_all.dart' as tz;
 //import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -88,6 +89,18 @@ class NotifyService {
     }
   }
 
+  String? getWordType(String type) {
+    if (type == "pills" || type == "water") {
+      return "กิน";
+    } else if (type == "arrow") {
+      return "ฉีด";
+    } else if (type == "drop") {
+      return "หยอด/พ่น";
+    } else {
+      return "";
+    }
+  }
+
   Future<void> scheduleNotify({
     required String channelID,
     required String channelName,
@@ -106,8 +119,25 @@ class NotifyService {
     var name = medicineInfo["name"];
     var type = medicineInfo["type"];
     var unit = medicineInfo["unit"];
+    var dateJson = notifyData["notifyInfo"]["date"];
+    var timeJson = notifyData["notifyInfo"]["time"];
+    var datetime = DateTime(
+      dateJson["year"],
+      dateJson["month"],
+      dateJson["day"],
+      timeJson["hour"],
+      timeJson["minute"],
+    );
+
     double nTake = medicineInfo["nTake"];
     var order = medicineInfo["order"];
+
+    // if (notifyTitle!.isEmpty) {
+    //   notifyTitle = "ถึงเวลา${getWordType(type)}ยา $name";
+    // }
+    // if (notifyDetail!.isEmpty) {
+    //   notifyDetail = "อย่าลืม${getWordType(type)}ยานะครับ";
+    // }
 
     String nTakeStr;
 
@@ -115,20 +145,20 @@ class NotifyService {
     if (nTake % 1 == 0) {
       nTakeStr = nTake.toInt().toString();
     } else {
-      nTakeStr = Fraction.fromDouble(nTake).toString();
+      nTakeStr = nTake.toString();
     }
 
-    var howToEat = "<type> $nTakeStr $unit";
+    var howToEat = "<type> ครั้งละ $nTakeStr $unit";
     switch (type) {
       case "pills":
       case "water":
-        howToEat = howToEat.replaceAll('<type>', "รับประทาน");
+        howToEat = howToEat.replaceAll('<type>', "กิน");
         break;
       case "arrow":
-        howToEat = howToEat.replaceAll("<type>", "ฉีดปริมาณ");
+        howToEat = howToEat.replaceAll("<type>", "ฉีด");
         break;
       case "drop":
-        howToEat = howToEat.replaceAll("<type>", "หยดจำนวน");
+        howToEat = howToEat.replaceAll("<type>", "หยอด/พ่น");
         break;
     }
     var orderInThai = "";
@@ -140,16 +170,21 @@ class NotifyService {
         orderInThai = "หลังอาหาร";
         break;
       case "":
-        orderInThai = "ก่อนนอน";
+        orderInThai = "";
         break;
     }
     final contentTitle = "<b>$name<b>";
-    final summaryText = "$howToEat<br>$orderInThai";
+
+    final summaryText = orderInThai.isEmpty
+        ? "$howToEat<br>เวลา ${DateFormat('HH:mm น.').format(datetime)}"
+        : "$howToEat<br>$orderInThai, เวลา ${DateFormat('HH:mm น.').format(datetime)}";
 
     // big picture
     BigPictureStyleInformation bigPictureStyleInformation =
         BigPictureStyleInformation(
-      FilePathAndroidBitmap(imagePath),
+      imagePath.isNotEmpty
+          ? FilePathAndroidBitmap(imagePath)
+          : const FilePathAndroidBitmap(emptyPicture),
       contentTitle: contentTitle,
       htmlFormatContentTitle: true,
       summaryText: summaryText,
@@ -190,7 +225,7 @@ class NotifyService {
     await localNotificationsPlugin.zonedSchedule(
       notifyId,
       notifyTitle,
-      notifyDetail,
+      '$notifyDetail เวลา ${DateFormat('HH:mm น.').format(datetime)}',
       schedule1,
       notificationDetails,
       payload: notifyPayload,

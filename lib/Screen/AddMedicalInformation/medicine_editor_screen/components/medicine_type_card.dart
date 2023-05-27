@@ -10,24 +10,7 @@ class MedicineTypeCard extends StatelessWidget {
 
   final String image;
   final Function()? onTap;
-
   final bool selection;
-
-  _borderSelected(bool selecteState) {
-    if (selecteState) {
-      return RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(30),
-        side: const BorderSide(
-          width: 4.0,
-          color: Colors.green,
-        ),
-      );
-    } else {
-      return RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(30),
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,15 +18,25 @@ class MedicineTypeCard extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Card(
-          elevation: 3.0,
-          shape: _borderSelected(selection),
+          color: selection ? Colors.yellowAccent.shade100 : null,
+          elevation: 2.0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: selection
+                ? BorderSide(
+                    width: 5,
+                    color: Colors.green.shade200,
+                  )
+                : BorderSide.none,
+          ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(20),
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Image.asset(
                 image,
-                height: 100 * 0.8,
+                height: 75,
+                fit: BoxFit.cover,
               ),
             ),
           ),
@@ -51,4 +44,20 @@ class MedicineTypeCard extends StatelessWidget {
       ),
     );
   }
+
+  // _borderSelected(bool selecteState) {
+  //   if (selecteState) {
+  //     return RoundedRectangleBorder(
+  //       borderRadius: BorderRadius.circular(30),
+  //       side: const BorderSide(
+  //         width: 4.0,
+  //         color: Colors.green,
+  //       ),
+  //     );
+  //   } else {
+  //     return RoundedRectangleBorder(
+  //       borderRadius: BorderRadius.circular(30),
+  //     );
+  //   }
+  // }
 }

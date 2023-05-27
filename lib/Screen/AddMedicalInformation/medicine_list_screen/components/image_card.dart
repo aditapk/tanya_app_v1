@@ -4,11 +4,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
-class ImageCard extends StatelessWidget {
-  ImageCard({this.image, super.key});
-  String? image;
+import '../../../../constants.dart';
 
-  final String _emptyPicture = "assets/images/dummy_picture.jpg";
+class ImageCard extends StatelessWidget {
+  const ImageCard({this.image, super.key});
+  final String? image;
 
   @override
   Widget build(BuildContext context) {
@@ -18,16 +18,16 @@ class ImageCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         child: image == '' || image == null
             ? Image.asset(
-                _emptyPicture,
+                emptyPicture,
                 fit: BoxFit.cover,
                 width: 100,
-                height: 100,
+                height: 120,
               )
             : Image.file(
                 File(image!),
                 fit: BoxFit.cover,
                 width: 100,
-                height: 100,
+                height: 120,
               ),
       ),
     );

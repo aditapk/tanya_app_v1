@@ -1,31 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:tanya_app_v1/Screen/UserInfo/components/header_widget.dart';
 
+import '../../../Model/user_info_model.dart';
 import 'appointment_with_doctor_info.dart';
 import 'doctor_appointment_editor.dart';
 
 class UserAppointmentWithDoctorCard extends StatelessWidget {
   const UserAppointmentWithDoctorCard({
     super.key,
+    required this.userInfo,
   });
+  final UserInfo? userInfo;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: MediaQuery.of(context).size.width,
-      child: Card(
-        elevation: 2,
-        color: Colors.green.shade100,
-        child: Stack(
-          children: const [
-            AppointmentWithDoctorInfo(),
-            Positioned(
-              top: 8,
-              right: 8,
-              child: DoctorAppointmentAddingButton(),
-            ),
-          ],
+    return Column(
+      children: [
+        HeaderWidget(
+          userInfo: userInfo,
+          color: Colors.green.shade200,
+          text: 'ข้อมูลนัดพบแพทย์',
+          editButton: const DoctorAppointmentAddingButton(),
         ),
-      ),
+        const AppointmentWithDoctorInfo(),
+      ],
     );
   }
 }

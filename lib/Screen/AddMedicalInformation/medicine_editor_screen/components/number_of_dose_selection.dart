@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tanya_app_v1/Controller/medicine_info_controller.dart';
-import 'package:fraction/fraction.dart';
 
 class NumberOfDoseSelection extends StatefulWidget {
   const NumberOfDoseSelection({super.key, required this.controller});
@@ -13,92 +12,23 @@ class NumberOfDoseSelection extends StatefulWidget {
 }
 
 class _NumberOfDoseSelectionState extends State<NumberOfDoseSelection> {
+  // medicine state injection
   final medicineInfoState = Get.find<MedicineEditorState>();
 
   final List<String> items = ['One', 'Two', 'Three', 'Four'];
-
   final List<String> pillsType = ['เม็ด'];
-
   final List<String> waterType = ['ช้อนชา', 'ช้อนโต๊ะ', 'ซีซี', 'มิลลิลิตร'];
-
   final List<String> arrowType = ['ยูนิต', 'กรัม', 'มิลลิกรัม', 'ไมโครกรัม'];
-
-  final List<String> dropType = ['หยด', 'ซีซี', 'มิลลิลิตร'];
-
-  List<String>? selectedListType(String type) {
-    if (type == "pills") {
-      return pillsType;
-    } else if (type == "water") {
-      return waterType;
-    } else if (type == "arrow") {
-      return arrowType;
-    } else if (type == "drop") {
-      return dropType;
-    } else {
-      return null;
-    }
-  }
-
-  String? doseDisplay(String type) {
-    if (type == "pills" || type == "water") {
-      return "ขนาดรับประทาน";
-    } else if (type == "arrow") {
-      return "ขนาดฉีด";
-    } else if (type == "drop") {
-      return "จำนวนหยด";
-    }
-    return null;
-  }
-
-  String? get _nDoseError {
-    final text = widget.controller.value.text;
-    if (text.isEmpty) {
-      return "ข้อผิดพลาด : กรุณาระบุขนาด";
-    }
-    // check number & support /
-    final textNumber = double.tryParse(text);
-    if (textNumber == null) {
-      // check "/" in word
-      int slashIdx = text.indexOf("/");
-      if (slashIdx != -1) {
-        final splitted = text.split("/");
-        final prenum = splitted[0];
-        final postnum = splitted[1];
-        if (prenum.isEmpty || postnum.isEmpty) {
-          return "ข้อผิดพลาด : กรุณาระบุเป็นตัวเลข";
-        }
-        return null;
-      }
-      return "ข้อผิดพลาด : กรุณาระบุเป็นตัวเลข";
-    } else {
-      // check over for เม็ด
-      if (medicineInfoState.selected_type_unit.value == "เม็ด") {
-        if (textNumber > 30) {
-          return "คำเตือน : ระบุขนาดเกิน 30 เม็ด";
-        }
-      }
-      // check over for cc
-      if (medicineInfoState.selected_type_unit.value == "ซีซี") {
-        if (textNumber > 120) {
-          return "คำเตือน : ระบุขนาดเกิน 120 ซีซี";
-        }
-      }
-      // check over for ml
-      if (medicineInfoState.selected_type_unit.value == "มิลลิลิตร") {
-        if (textNumber > 45) {
-          return "คำเตือน : ระบุขนาดเกิน 45 มิลลิลิตร";
-        }
-      }
-    }
-    //
-    return null;
-  }
+  final List<String> dropType = ['หยด', 'ซีซี', 'มิลลิลิตร', 'ครั้ง', 'พัฟ'];
 
   @override
   void initState() {
     super.initState();
-    widget.controller.text =
-        medicineInfoState.nTake.value.toFraction().toString();
+    if (medicineInfoState.nTake.value % 1 == 0) {
+      widget.controller.text = medicineInfoState.nTake.toInt().toString();
+    } else {
+      widget.controller.text = medicineInfoState.nTake.value.toString();
+    }
   }
 
   @override
@@ -182,46 +112,74 @@ class _NumberOfDoseSelectionState extends State<NumberOfDoseSelection> {
         ],
       ),
     );
-    // Obx(
-    //   () => Row(
-    //     children: [
-    //       NumberOfDoseCard(
-    //         text: "1",
-    //         onTap: () {
-    //           medicineInfoState.nTake(1);
-    //         },
-    //         selection: medicineInfoState.nTake.value == 1,
-    //       ),
-    //       NumberOfDoseCard(
-    //         text: "2",
-    //         onTap: () {
-    //           medicineInfoState.nTake(2);
-    //         },
-    //         selection: medicineInfoState.nTake.value == 2,
-    //       ),
-    //       NumberOfDoseCard(
-    //         text: "3",
-    //         onTap: () {
-    //           medicineInfoState.nTake(3);
-    //         },
-    //         selection: medicineInfoState.nTake.value == 3,
-    //       ),
-    //       NumberOfDoseCard(
-    //         text: "4",
-    //         onTap: () {
-    //           medicineInfoState.nTake(4);
-    //         },
-    //         selection: medicineInfoState.nTake.value == 4,
-    //       ),
-    //       NumberOfDoseCard(
-    //         text: "5",
-    //         onTap: () {
-    //           medicineInfoState.nTake(5);
-    //         },
-    //         selection: medicineInfoState.nTake.value == 5,
-    //       ),
-    //     ],
-    //   ),
-    // );
+  }
+
+  List<String>? selectedListType(String type) {
+    if (type == "pills") {
+      return pillsType;
+    } else if (type == "water") {
+      return waterType;
+    } else if (type == "arrow") {
+      return arrowType;
+    } else if (type == "drop") {
+      return dropType;
+    } else {
+      return null;
+    }
+  }
+
+  String? doseDisplay(String type) {
+    if (type == "pills" || type == "water") {
+      return "ขนาดการกิน";
+    } else if (type == "arrow") {
+      return "ขนาดการฉีด";
+    } else if (type == "drop") {
+      return "ขนาดการหยอด/พ่น";
+    }
+    return null;
+  }
+
+  String? get _nDoseError {
+    final text = widget.controller.value.text;
+    if (text.isEmpty) {
+      return "ข้อผิดพลาด : กรุณาระบุขนาด";
+    }
+    // check number & support /
+    final textNumber = double.tryParse(text);
+    if (textNumber == null) {
+      // check "/" in word
+      int slashIdx = text.indexOf("/");
+      if (slashIdx != -1) {
+        final splitted = text.split("/");
+        final prenum = splitted[0];
+        final postnum = splitted[1];
+        if (prenum.isEmpty || postnum.isEmpty) {
+          return "ข้อผิดพลาด : กรุณาระบุเป็นตัวเลข";
+        }
+        return null;
+      }
+      return "ข้อผิดพลาด : กรุณาระบุเป็นตัวเลข";
+    } else {
+      // check over for เม็ด
+      if (medicineInfoState.selected_type_unit.value == "เม็ด") {
+        if (textNumber > 30) {
+          return "คำเตือน : ระบุขนาดเกิน 30 เม็ด";
+        }
+      }
+      // check over for cc
+      if (medicineInfoState.selected_type_unit.value == "ซีซี") {
+        if (textNumber > 120) {
+          return "คำเตือน : ระบุขนาดเกิน 120 ซีซี";
+        }
+      }
+      // check over for ml
+      if (medicineInfoState.selected_type_unit.value == "มิลลิลิตร") {
+        if (textNumber > 45) {
+          return "คำเตือน : ระบุขนาดเกิน 45 มิลลิลิตร";
+        }
+      }
+    }
+    //
+    return null;
   }
 }

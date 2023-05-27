@@ -10,26 +10,13 @@ class TimeScheduleSelectionCard extends StatelessWidget {
       required this.backgroundColor,
       required this.selection,
       super.key});
+
   final String title;
   final double height;
   final Function()? onTap;
   final Color borderColor;
   final Color backgroundColor;
   final bool selection;
-
-  _borderSelection(bool selectedState, Color borderColor) {
-    return selectedState
-        ? RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-            side: BorderSide(
-              width: 0,
-              color: borderColor,
-            ),
-          )
-        : RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +26,11 @@ class TimeScheduleSelectionCard extends StatelessWidget {
         child: Card(
           elevation: 3.0,
           color: selection ? backgroundColor : null,
-          shape: _borderSelection(selection, borderColor),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+              side: selection
+                  ? BorderSide(width: 3, color: borderColor)
+                  : BorderSide.none),
           child: SizedBox(
             height: height,
             child: Center(
@@ -57,4 +48,18 @@ class TimeScheduleSelectionCard extends StatelessWidget {
       ),
     );
   }
+
+  // _borderSelection(bool selectedState, Color borderColor) {
+  //   return selectedState
+  //       ? RoundedRectangleBorder(
+  //           borderRadius: BorderRadius.circular(10),
+  //           side: BorderSide(
+  //             width: 0,
+  //             color: borderColor,
+  //           ),
+  //         )
+  //       : RoundedRectangleBorder(
+  //           borderRadius: BorderRadius.circular(10),
+  //         );
+  // }
 }

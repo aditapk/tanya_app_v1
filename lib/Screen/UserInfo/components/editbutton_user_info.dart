@@ -35,22 +35,5 @@ class EditButtonUserInfo extends StatelessWidget {
             : const Icon(Icons.add),
       ),
     );
-    // ElevatedButton(
-    //     style: ElevatedButton.styleFrom(
-    //       backgroundColor: Colors.blue.shade400,
-    //       shape: RoundedRectangleBorder(
-    //         borderRadius: BorderRadius.circular(25),
-    //       ),
-    //     ),
-    //     onPressed: onPressed,
-    //     child: checkPersonalInfo(userInfo)
-    //         ? Center(
-    //             child: Icon(
-    //             Icons.edit_document,
-    //             color: Colors.black,
-    //           ))
-    //         : Center(child: Icon(Icons.add))
-    //     //Text(checkPersonalInfo(userInfo) ? 'แก้ไข' : 'เพิ่ม'),
-    //     );
   }
 }

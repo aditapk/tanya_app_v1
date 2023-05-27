@@ -42,6 +42,7 @@ android {
         // Sets Java compatibility to Java 8
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+        
     }
 
     kotlinOptions {
@@ -54,7 +55,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.example.tanya_app_v1"
+        applicationId "com.indiectlab.tanya"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration.
         minSdkVersion 27 //21 //flutter.minSdkVersion

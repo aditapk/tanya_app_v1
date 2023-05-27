@@ -14,9 +14,12 @@ import 'package:tanya_app_v1/GetXBinding/medicine_state_binding.dart';
 import 'package:tanya_app_v1/Model/medicine_info_model.dart';
 import 'package:tanya_app_v1/Model/notify_info.dart';
 import 'package:tanya_app_v1/Services/notification_handling.dart';
+import 'package:tanya_app_v1/constants.dart';
 import 'package:tanya_app_v1/utils/constans.dart';
 
 import '../../../Controller/medicine_info_controller.dart';
+import '../../../Model/medicine_information.dart';
+import '../../../Model/notify_information.dart';
 import '../../../Services/notify_services.dart';
 import '../../MedicineInformation/to_choose_medicine_info_list.dart';
 // for random variable
@@ -37,113 +40,14 @@ class AddNotifyDetailScreen extends StatefulWidget {
   State<AddNotifyDetailScreen> createState() => _AddNotifyDetailScreenState();
 }
 
-class MedicineInformation {
-  String? name;
-  String? description;
-  String? type;
-  String? unit;
-  double? nTake;
-  String? order;
-  List<bool>? periodTime;
-  String? picturePath;
-  int? color;
-  int? id;
-
-  MedicineInfo asMedicineInfo() {
-    return MedicineInfo(
-      name: name!,
-      description: description!,
-      type: type!,
-      unit: unit!,
-      nTake: nTake!,
-      order: order!,
-      period_time: periodTime!,
-      picture_path: picturePath,
-      color: color!,
-      id: id!,
-    );
-  }
-
-  MedicineInformation({
-    this.name,
-    this.description,
-    this.type,
-    this.unit,
-    this.nTake,
-    this.order,
-    this.periodTime,
-    this.picturePath,
-    this.color,
-    this.id,
-  });
-}
-
-class NotifyInformation {
-  String? name;
-  String? detail;
-  DateTime? startDate;
-  DateTime? endDate;
-  MedicineInformation? selectedMedicine;
-  TimeOfDay? morningTime;
-  TimeOfDay? lunchTime;
-  TimeOfDay? eveningTime;
-  TimeOfDay? beforeToBedTime;
-
-  bool get enableMorningTime {
-    return morningTime != null ? true : false;
-  }
-
-  bool get enableLunchTime {
-    return lunchTime != null ? true : false;
-  }
-
-  bool get enableEveningTime {
-    return eveningTime != null ? true : false;
-  }
-
-  bool get enableBeforeToBedTime {
-    return beforeToBedTime != null ? true : false;
-  }
-
-  NotifyInformation({
-    this.name,
-    this.detail,
-    this.startDate,
-    this.endDate,
-    this.selectedMedicine,
-    this.morningTime,
-    this.lunchTime,
-    this.eveningTime,
-    this.beforeToBedTime,
-  });
-}
-
-class NofifyEachDayInformation {
-  String? name;
-  String? detail;
-  String medicineInformation;
-  String date;
-  String time;
-  String status;
-  int numberOfNotify;
-  NofifyEachDayInformation({
-    this.name,
-    this.detail,
-    required this.medicineInformation,
-    required this.date,
-    required this.time,
-    required this.status,
-    required this.numberOfNotify,
-  });
-}
-
 class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
   //int numberOfNotifyTimeItem = 0;
+  var notifyStateController = Get.put(NotificationState());
 
   NotifyInformation notifyInformation = NotifyInformation();
-  NotifyService notifyService = NotifyService(); // notification services
-  //final medicineInfoState = Get.find<MedicineEditorState>();
-
+  //NotifyService notifyService = NotifyService(); // notification services
+  late DateTime startDate;
+  late DateTime endDate;
   // State variable
   TextEditingController notifyNameController = TextEditingController();
   TextEditingController notifyDetailController = TextEditingController();
@@ -160,147 +64,6 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
   TextEditingController notifyBeforetoBedTimeController =
       TextEditingController();
 
-  // // ---
-  // getNotifyID(String payload) {
-  //   var notifyInfoObject = jsonDecode(payload);
-  //   return notifyInfoObject["notifyID"];
-  // }
-
-  // void onDidReceiveLocalNotificationIOS(
-  //     int id, String? title, String? body, String? payload) async {
-  //   //print("$id, $title");
-  // }
-
-  // generateNewSchedule(int notifyID, NotifyInfoModel? notifyInfo,
-  //     {required NotifyService notifyService}) async {
-  //   var date = notifyInfo!.date;
-  //   var now = DateTime.now();
-  //   var minuteDiff = now.difference(date).inMinutes;
-  //   if (minuteDiff <= 1) {
-  //     var nextDateTime = now.add(const Duration(seconds: 10));
-  //     // Convert string payload
-  //     var notifyPayload = jsonEncode({
-  //       "notifyID": notifyID,
-  //       "notifyInfo": notifyInfo.toJson(),
-  //     });
-  //     notifySet(
-  //       notifyService: notifyService,
-  //       id: notifyID,
-  //       scheduleTime: nextDateTime,
-  //       payload: notifyPayload,
-  //       numNotify: notifyInfo.status,
-  //       imagePath: notifyInfo.medicineInfo.picture_path!,
-  //     );
-  //   } else {
-  //     Get.dialog(
-  //       AlertDialog(
-  //         title: const Text(
-  //           "คำเตือน!",
-  //           style: TextStyle(color: Colors.red),
-  //         ),
-  //         content: const Text(
-  //             "ไม่สามารถเลื่อนการแจ้งเตือนได้ เนื่องจากล่วงเลยกินยามามากกว่า 1 ชั่วโมงแล้ว"),
-  //         actions: [
-  //           TextButton(
-  //             onPressed: () {
-  //               Get.back();
-  //             },
-  //             child: const Text("OK"),
-  //           )
-  //         ],
-  //       ),
-  //     );
-
-  //     // แจ้งเตือนไปยังผู้ดูแล
-  //     await notifyToCarePerson();
-  //   }
-  // }
-
-  // Future<void> onDidReceiveNotificationAndroid(
-  //     NotificationResponse notificationResponse) async {
-  //   switch (notificationResponse.notificationResponseType) {
-  //     case NotificationResponseType.selectedNotification:
-  //       // ignore: todo
-  //       // When click on notification
-  //       // .notificationResponseType
-  //       // .id
-  //       // .actonId
-  //       // .input
-  //       // .payload
-  //       //print(notificationResponse.payload);
-  //       var notifyID = getNotifyID(notificationResponse.payload!);
-  //       var notifyBox = Hive.box<NotifyInfoModel>('user_notify_info');
-  //       var notifyInfo = notifyBox.getAt(notifyID);
-  //       var status = await Get.to(
-  //           () => NotifyHandleScreen(
-  //                 notifyID: notifyID,
-  //               ),
-  //           binding: appInfoBinding());
-
-  //       switch (status) {
-  //         case "OK":
-  //           notifyInfo!.status = 0;
-  //           notifyInfo.save();
-  //           break;
-  //         case "PENDING":
-  //           await notifyService.inintializeNotification(
-  //             onDidReceiveNotificationAndroid: onDidReceiveNotificationAndroid,
-  //             onDidReceiveNotificationIOS: onDidReceiveLocalNotificationIOS,
-  //           );
-  //           generateNewSchedule(notifyID, notifyInfo,
-  //               notifyService: notifyService);
-  //           break;
-  //       }
-
-  //       break;
-  //     case NotificationResponseType.selectedNotificationAction:
-  //       // ignore: todo
-  //       // When action on notification is clicked
-  //       //print(notificationResponse.actionId);
-  //       //print(notificationResponse.payload);
-  //       var notifyID = getNotifyID(notificationResponse.payload!);
-  //       var notifyBox = Hive.box<NotifyInfoModel>('user_notify_info');
-  //       var notifyInfo = notifyBox.getAt(notifyID);
-
-  //       switch (notificationResponse.actionId) {
-  //         case "OK":
-  //           // notify status -> complete
-  //           notifyInfo!.status = 0;
-  //           notifyInfo.save();
-  //           break;
-  //         case "PENDING":
-  //           // create notify service
-  //           await notifyService.inintializeNotification(
-  //             onDidReceiveNotificationAndroid: onDidReceiveNotificationAndroid,
-  //             onDidReceiveNotificationIOS: onDidReceiveLocalNotificationIOS,
-  //           );
-  //           generateNewSchedule(notifyID, notifyInfo,
-  //               notifyService: notifyService);
-  //           break;
-  //       }
-  //       break;
-  //   }
-  // }
-
-  // notifyToCarePerson() async {
-  //   // LINE notify
-  //   var userInfoBox = Hive.box<UserInfo>('user_info');
-  //   var userInfo = userInfoBox.get(0);
-
-  //   if (userInfo?.lineToken != null) {
-  //     Uri lineNotifyUrl = Uri.https('notify-api.line.me', 'api/notify');
-  //     await http.post(
-  //       lineNotifyUrl,
-  //       headers: {
-  //         "Authorization": "Bearer ${userInfo?.lineToken}",
-  //         "Content-Type": "application/x-www-form-urlencoded",
-  //       },
-  //       body:
-  //           "message=\nญาติของท่านยังไม่กินยาตามเวลา กรุณาเตือนญาติของท่านกินยาด้วยค่ะ",
-  //     );
-  //   }
-  // }
-
   //List<bool> peroidDateSelected = [false, true, true, true, true, true, true];
   bool periodMondaySelected = false;
   bool periodTuesdaySelected = false;
@@ -310,23 +73,300 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
   bool periodSaturdaySelected = false;
   bool periodSundaySelected = false;
 
+  TextStyle get titleStyle {
+    return const TextStyle(
+      fontSize: 20,
+      fontWeight: FontWeight.bold,
+    );
+  }
+
   @override
   void initState() {
     super.initState();
 
-    // intial notification service
-    // medicineInfoState.notifyServices.value.inintializeNotification(
-    //   onDidReceiveNotificationAndroid: onDidReceiveNotificationAndroid,
-    //   onDidReceiveNotificationIOS: onDidReceiveLocalNotificationIOS,
-    // );
-    // medicineInfoState.notifyServices.value.requestPermission();
-    selectedStartNotifyDateController.text = DateFormat.yMMMd('th_TH')
-        .formatInBuddhistCalendarThai(widget.selectedDate);
-    selectedEndNotifyDateController.text = DateFormat.yMMMd('th_TH')
-        .formatInBuddhistCalendarThai(widget.selectedDate);
-    notifyInformation.startDate = widget.selectedDate;
-    notifyInformation.endDate = widget.selectedDate;
+    startDate = DateTime(widget.selectedDate.year, widget.selectedDate.month,
+        widget.selectedDate.day);
+    endDate = DateTime(widget.selectedDate.year, widget.selectedDate.month,
+        widget.selectedDate.day, 23, 59, 59);
+    selectedStartNotifyDateController.text =
+        DateFormat.yMMMd('th_TH').formatInBuddhistCalendarThai(startDate);
+    selectedEndNotifyDateController.text =
+        DateFormat.yMMMd('th_TH').formatInBuddhistCalendarThai(endDate);
+    notifyInformation.startDate = startDate;
+    notifyInformation.endDate = endDate;
     if (widget.medicineData != null) setMedicineState(widget.medicineData!);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    //if (widget.medicineData != null) setMedicineState(widget.medicineData!);
+    // initial notify
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('เพิ่มรายการแจ้งเตือน'),
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.only(
+          left: 8.0,
+          right: 8.0,
+          top: 8.0,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              MedicineSelectedCard(
+                medicineSelected:
+                    notifyInformation.selectedMedicine!.asMedicineInfo(),
+              ),
+              TextInputEditor(
+                controller: notifyNameController,
+                labelText: 'รายการแจ้งเตือน',
+              ),
+              TextInputEditor(
+                controller: notifyDetailController,
+                labelText: 'รายละเอียดการแจ้งเตือน',
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFieldEditor(
+                      title: "เริ่มการแจ้งเตือน",
+                      hintText: DateFormat.yMd('th_TH').format(
+                        notifyInformation.startDate!,
+                      ),
+                      controller: selectedStartNotifyDateController,
+                      widget: IconButton(
+                        onPressed: selectStartDateNotify,
+                        icon: const Icon(
+                          Icons.calendar_month_outlined,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: TextFieldEditor(
+                      title: "สิ้นสุดการแจ้งเตือน",
+                      hintText: DateFormat.yMMMd('th_TH')
+                          .formatInBuddhistCalendarThai(
+                        notifyInformation.endDate!,
+                      ),
+                      controller: selectedEndNotifyDateController,
+                      widget: IconButton(
+                        onPressed: selectEndDateNotify,
+                        icon: const Icon(
+                          Icons.calendar_month_outlined,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  PeriodDateSeletedCard(
+                    text: 'จันทร์',
+                    isSelected: periodMondaySelected,
+                    onTap: () {
+                      setState(() {
+                        periodMondaySelected = !periodMondaySelected;
+                      });
+                    },
+                  ),
+                  PeriodDateSeletedCard(
+                    text: 'อังคาร',
+                    isSelected: periodTuesdaySelected,
+                    onTap: () {
+                      setState(() {
+                        periodTuesdaySelected = !periodTuesdaySelected;
+                      });
+                    },
+                  ),
+                  PeriodDateSeletedCard(
+                    text: 'พุธ',
+                    isSelected: periodWednesdaySelected,
+                    onTap: () {
+                      setState(() {
+                        periodWednesdaySelected = !periodWednesdaySelected;
+                      });
+                    },
+                  ),
+                  PeriodDateSeletedCard(
+                    text: 'พฤหัส',
+                    isSelected: periodThursdaySelected,
+                    onTap: () {
+                      setState(() {
+                        periodThursdaySelected = !periodThursdaySelected;
+                      });
+                    },
+                  ),
+                  PeriodDateSeletedCard(
+                    text: 'ศุกร์',
+                    isSelected: periodFridaySelected,
+                    onTap: () {
+                      setState(() {
+                        periodFridaySelected = !periodFridaySelected;
+                      });
+                    },
+                  ),
+                  PeriodDateSeletedCard(
+                    text: 'เสาร์',
+                    isSelected: periodSaturdaySelected,
+                    onTap: () {
+                      setState(() {
+                        periodSaturdaySelected = !periodSaturdaySelected;
+                      });
+                    },
+                  ),
+                  PeriodDateSeletedCard(
+                    text: 'อาทิตย์',
+                    isSelected: periodSundaySelected,
+                    onTap: () {
+                      setState(() {
+                        periodSundaySelected = !periodSundaySelected;
+                      });
+                    },
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFieldEditor(
+                      title: "เช้า",
+                      hintText: "",
+                      controller: notifyMorningTimeController,
+                      widget: IconButton(
+                        onPressed: notifyInformation.morningTime != null
+                            ? selectNotifyMorningTime
+                            : null,
+                        icon: Icon(
+                          Icons.access_alarm_outlined,
+                          color: notifyInformation.morningTime != null
+                              ? Colors.blue
+                              : Colors.grey,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: TextFieldEditor(
+                      title: "กลางวัน",
+                      hintText: "",
+                      controller: notifyLunchTimeController,
+                      widget: IconButton(
+                        onPressed: notifyInformation.lunchTime != null
+                            ? selectNotifyLunchTime
+                            : null,
+                        icon: Icon(
+                          Icons.access_alarm_outlined,
+                          color: notifyInformation.lunchTime != null
+                              ? Colors.blue
+                              : Colors.grey,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFieldEditor(
+                      title: "เย็น",
+                      hintText: "",
+                      controller: notifyEveningTimeController,
+                      widget: IconButton(
+                        onPressed: notifyInformation.eveningTime != null
+                            ? selectNotifyEveningTime
+                            : null,
+                        icon: Icon(
+                          Icons.access_alarm_outlined,
+                          color: notifyInformation.eveningTime != null
+                              ? Colors.blue
+                              : Colors.grey,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: TextFieldEditor(
+                      title: "ก่อนนอน",
+                      hintText: "",
+                      controller: notifyBeforetoBedTimeController,
+                      widget: IconButton(
+                        onPressed: notifyInformation.beforeToBedTime != null
+                            ? selectNotifyBeforetoBedTime
+                            : null,
+                        icon: Icon(
+                          Icons.access_alarm_outlined,
+                          color: notifyInformation.beforeToBedTime != null
+                              ? Colors.blue
+                              : Colors.grey,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 60,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green.shade400,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          onPressed: makeNotify,
+                          child: const Text(
+                            'ตกลง',
+                            style: TextStyle(fontSize: 20),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 16,
+                    ),
+                    Expanded(
+                      child: SizedBox(
+                        height: 60,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red.shade400,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12))),
+                          onPressed: () {
+                            Get.back(result: false);
+                          },
+                          child: const Text(
+                            'ยกเลิก',
+                            style: TextStyle(
+                              fontSize: 20,
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   // เริ่มการแจ้งเตือน
@@ -338,17 +378,21 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
       lastDate: DateTime(2032),
     );
     if (pickerDate != null) {
+      var pickerStartDate =
+          DateTime(pickerDate.year, pickerDate.month, pickerDate.day, 0, 0, 0);
       setState(() {
-        selectedStartNotifyDateController.text =
-            DateFormat.yMMMd('th_TH').formatInBuddhistCalendarThai(pickerDate);
-        notifyInformation.startDate = pickerDate;
+        selectedStartNotifyDateController.text = DateFormat.yMMMd('th_TH')
+            .formatInBuddhistCalendarThai(pickerStartDate);
+        notifyInformation.startDate = pickerStartDate;
       });
 
       if (pickerDate.isAfter(notifyInformation.endDate!)) {
         setState(() {
-          selectedEndNotifyDateController.text = DateFormat.yMMMd('th_TH')
-              .formatInBuddhistCalendarThai(pickerDate);
-          notifyInformation.endDate = pickerDate;
+          var tEndDate = DateTime(
+              pickerDate.year, pickerDate.month, pickerDate.day, 23, 59, 59);
+          selectedEndNotifyDateController.text =
+              DateFormat.yMMMd('th_TH').formatInBuddhistCalendarThai(tEndDate);
+          notifyInformation.endDate = tEndDate;
         });
       }
     }
@@ -363,16 +407,20 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
       lastDate: DateTime(2032),
     );
     if (pickerDate != null) {
+      var pickerEndDate = DateTime(
+          pickerDate.year, pickerDate.month, pickerDate.day, 23, 59, 59);
       setState(() {
-        selectedEndNotifyDateController.text =
-            DateFormat.yMMMd('th_TH').formatInBuddhistCalendarThai(pickerDate);
-        notifyInformation.endDate = pickerDate;
+        selectedEndNotifyDateController.text = DateFormat.yMMMd('th_TH')
+            .formatInBuddhistCalendarThai(pickerEndDate);
+        notifyInformation.endDate = pickerEndDate;
       });
       if (pickerDate.isBefore(notifyInformation.startDate!)) {
+        var tStartDate = DateTime(
+            pickerDate.year, pickerDate.month, pickerDate.day, 0, 0, 0);
         setState(() {
           selectedStartNotifyDateController.text = DateFormat.yMMMd('th_TH')
-              .formatInBuddhistCalendarThai(pickerDate);
-          notifyInformation.startDate = pickerDate;
+              .formatInBuddhistCalendarThai(tStartDate);
+          notifyInformation.startDate = tStartDate;
         });
       }
     }
@@ -516,28 +564,21 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
   }
 
   autofillName(NotifyInformation notifyInfo) {
-    String autoName = "<type>ยา";
+    //String autoName = "<type>ยา";
+    String typeName = "";
     switch (notifyInfo.selectedMedicine!.type) {
       case "pills":
       case "water":
-        autoName = autoName.replaceAll("<type>", "กิน");
+        typeName = "กิน";
         break;
       case "arrow":
-        autoName = autoName.replaceAll("<type>", "ฉีด");
+        typeName = "ฉีด";
         break;
       case "drop":
-        autoName = autoName.replaceAll("<type>", "หยอด");
+        typeName = "หยด";
         break;
     }
-    return "$autoName ${notifyInfo.selectedMedicine!.name}";
-  }
-
-  autofillDetail(NotifyInformation notifyInfo) {
-    String autoDetail = notifyInfo.selectedMedicine!.description == null ||
-            notifyInfo.selectedMedicine!.description!.isEmpty
-        ? "ไม่ระบุรายละเอียดยา"
-        : notifyInfo.selectedMedicine!.description!;
-    return autoDetail;
+    return "$typeNameยา ${notifyInfo.selectedMedicine!.name}";
   }
 
   // ตกลง
@@ -546,8 +587,8 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
     await notifyInit();
 
     // notification List
-    var startDate = cleanTimeOfDay(notifyInformation.startDate!);
-    var endDate = cleanTimeOfDay(notifyInformation.endDate!);
+    var startDate = notifyInformation.startDate!;
+    var endDate = notifyInformation.endDate!;
     var days = endDate.difference(startDate).inDays + 1;
 
     var notifyState = Get.find<NotificationState>();
@@ -645,9 +686,21 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
     for (int day = 0; day < nDate; day++) {
       DateTime nextDate = date.add(Duration(days: day));
 
-      if (nextDate.isAfter(now)) {
-        if (periodDays.every((selected) => selected == false)) {
-          // not selected generate every days
+      //if (nextDate.isAfter(now)) {
+      if (periodDays.every((selected) => selected == false)) {
+        // not selected generate every days
+        await generateNotifyItem(
+          specificDate: nextDate,
+          specificTime: scheduleTime,
+          boxNotify: boxNotify,
+          date: date,
+          day: day,
+          notifyService: notifyService,
+          createNotify: nextDate.isAfter(now),
+        );
+      } else {
+        if (periodDays[0] && (nextDate.weekday == DateTime.monday)) {
+          // generate every Monday
           await generateNotifyItem(
             specificDate: nextDate,
             specificTime: scheduleTime,
@@ -655,87 +708,85 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
             date: date,
             day: day,
             notifyService: notifyService,
+            createNotify: nextDate.isAfter(now),
           );
-        } else {
-          if (periodDays[0] && (nextDate.weekday == DateTime.monday)) {
-            // generate every Monday
-            await generateNotifyItem(
-              specificDate: nextDate,
-              specificTime: scheduleTime,
-              boxNotify: boxNotify,
-              date: date,
-              day: day,
-              notifyService: notifyService,
-            );
-          }
-          if (periodDays[1] && (nextDate.weekday == DateTime.tuesday)) {
-            // generate every Tuesday
-            await generateNotifyItem(
-              specificDate: nextDate,
-              specificTime: scheduleTime,
-              boxNotify: boxNotify,
-              date: date,
-              day: day,
-              notifyService: notifyService,
-            );
-          }
-          if (periodDays[2] && (nextDate.weekday == DateTime.wednesday)) {
-            // generate every Wednesday
-            await generateNotifyItem(
-              specificDate: nextDate,
-              specificTime: scheduleTime,
-              boxNotify: boxNotify,
-              date: date,
-              day: day,
-              notifyService: notifyService,
-            );
-          }
-          if (periodDays[3] && (nextDate.weekday == DateTime.thursday)) {
-            // generate every Thursday
-            await generateNotifyItem(
-              specificDate: nextDate,
-              specificTime: scheduleTime,
-              boxNotify: boxNotify,
-              date: date,
-              day: day,
-              notifyService: notifyService,
-            );
-          }
-          if (periodDays[4] && (nextDate.weekday == DateTime.friday)) {
-            // generate every Friday
-            await generateNotifyItem(
-              specificDate: nextDate,
-              specificTime: scheduleTime,
-              boxNotify: boxNotify,
-              date: date,
-              day: day,
-              notifyService: notifyService,
-            );
-          }
-          if (periodDays[5] && (nextDate.weekday == DateTime.saturday)) {
-            // generate every Saturday
-            await generateNotifyItem(
-              specificDate: nextDate,
-              specificTime: scheduleTime,
-              boxNotify: boxNotify,
-              date: date,
-              day: day,
-              notifyService: notifyService,
-            );
-          }
-          if (periodDays[6] && (nextDate.weekday == DateTime.sunday)) {
-            // generate every Sunday
-            await generateNotifyItem(
-              specificDate: nextDate,
-              specificTime: scheduleTime,
-              boxNotify: boxNotify,
-              date: date,
-              day: day,
-              notifyService: notifyService,
-            );
-          }
+        }
+        if (periodDays[1] && (nextDate.weekday == DateTime.tuesday)) {
+          // generate every Tuesday
+          await generateNotifyItem(
+            specificDate: nextDate,
+            specificTime: scheduleTime,
+            boxNotify: boxNotify,
+            date: date,
+            day: day,
+            notifyService: notifyService,
+            createNotify: nextDate.isAfter(now),
+          );
+        }
+        if (periodDays[2] && (nextDate.weekday == DateTime.wednesday)) {
+          // generate every Wednesday
+          await generateNotifyItem(
+            specificDate: nextDate,
+            specificTime: scheduleTime,
+            boxNotify: boxNotify,
+            date: date,
+            day: day,
+            notifyService: notifyService,
+            createNotify: nextDate.isAfter(now),
+          );
+        }
+        if (periodDays[3] && (nextDate.weekday == DateTime.thursday)) {
+          // generate every Thursday
+          await generateNotifyItem(
+            specificDate: nextDate,
+            specificTime: scheduleTime,
+            boxNotify: boxNotify,
+            date: date,
+            day: day,
+            notifyService: notifyService,
+            createNotify: nextDate.isAfter(now),
+          );
+        }
+        if (periodDays[4] && (nextDate.weekday == DateTime.friday)) {
+          // generate every Friday
+          await generateNotifyItem(
+            specificDate: nextDate,
+            specificTime: scheduleTime,
+            boxNotify: boxNotify,
+            date: date,
+            day: day,
+            notifyService: notifyService,
+            createNotify: nextDate.isAfter(now),
+          );
+        }
+        if (periodDays[5] && (nextDate.weekday == DateTime.saturday)) {
+          // generate every Saturday
+          await generateNotifyItem(
+            specificDate: nextDate,
+            specificTime: scheduleTime,
+            boxNotify: boxNotify,
+            date: date,
+            day: day,
+            notifyService: notifyService,
+            createNotify: nextDate.isAfter(now),
+          );
+        }
+        if (periodDays[6] && (nextDate.weekday == DateTime.sunday)) {
+          // generate every Sunday
+          await generateNotifyItem(
+            specificDate: nextDate,
+            specificTime: scheduleTime,
+            boxNotify: boxNotify,
+            date: date,
+            day: day,
+            notifyService: notifyService,
+            createNotify: nextDate.isAfter(now),
+          );
         }
       }
+      //} else {
+
+      //}
     }
   }
 
@@ -746,14 +797,20 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
     required DateTime date,
     required int day,
     required NotifyService notifyService,
+    required bool createNotify,
   }) async {
+    MedicineInfo medicineInfo =
+        notifyInformation.selectedMedicine!.asMedicineInfo();
+    String notifyName = notifyNameController.text.isEmpty
+        ? "${_displayPrefixType(medicineInfo.type)}ยา ${medicineInfo.name}"
+        : notifyNameController.text;
+    String notifyDetail = notifyDetailController.text.isEmpty
+        ? "อย่าลืม${_displayPrefixType(medicineInfo.type)}ยา"
+        : notifyDetailController.text;
+
     var notifyData = NotifyInfoModel(
-      name: notifyNameController.text.isNotEmpty
-          ? notifyNameController.text
-          : autofillName(notifyInformation),
-      description: notifyDetailController.text.isNotEmpty
-          ? notifyDetailController.text
-          : autofillDetail(notifyInformation),
+      name: notifyName,
+      description: notifyDetail,
       medicineInfo: notifyInformation.selectedMedicine!.asMedicineInfo(),
       date: specificDate,
       time: TimeOfDayModel(
@@ -763,22 +820,38 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
     );
     var dataId = await boxNotify.add(notifyData);
 
-    // Convert string payload
-    var notifyPayload = jsonEncode({
-      "notifyID": dataId,
-      "notifyInfo": notifyData.toJson(),
-    });
     // set notification
-    notifySet(
-      notifyService: notifyService,
-      id: dataId,
-      scheduleTime: date.add(
-        Duration(days: day),
-      ),
-      payload: notifyPayload,
-      numNotify: notifyData.status,
-      imagePath: notifyData.medicineInfo.picture_path!,
-    );
+    if (createNotify) {
+      // Convert string payload
+      var notifyPayload = jsonEncode({
+        "notifyID": dataId,
+        "notifyInfo": notifyData.toJson(),
+      });
+      notifySet(
+        notifyName: notifyName,
+        notifyDetail: notifyDetail,
+        notifyService: notifyService,
+        id: dataId,
+        scheduleTime: date.add(
+          Duration(days: day),
+        ),
+        payload: notifyPayload,
+        numNotify: notifyData.status,
+        imagePath: notifyData.medicineInfo.picture_path!,
+      );
+    }
+  }
+
+  _displayPrefixType(String type) {
+    if (type == "pills" || type == "water") {
+      return "กิน";
+    } else if (type == "arrow") {
+      return "ฉีด";
+    } else if (type == "drop") {
+      return "หยอด/พ่น";
+    } else {
+      return "";
+    }
   }
 
   notifySet(
@@ -787,14 +860,16 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
       String? payload,
       required String imagePath,
       required int numNotify,
-      required NotifyService notifyService}) async {
+      required NotifyService notifyService,
+      required String notifyName,
+      required String notifyDetail}) async {
     await notifyService.scheduleNotify(
       channelID: "Medicine Notify",
       channelName: "Medicine",
       channelDescription: "Medicine Notification for user",
       notifyID: id,
-      notifyTitle: notifyNameController.text,
-      notifyDetail: notifyDetailController.text,
+      notifyTitle: notifyName,
+      notifyDetail: notifyDetail,
       notifyPayload: payload,
       scheduleTime: scheduleTime,
       notifyId: id,
@@ -829,294 +904,6 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
             NotificationHandeling.medicineOnDidReceiveNotificationAndroid);
     await notifyState.medicineNotification.value.requestPermission();
   }
-
-  @override
-  Widget build(BuildContext context) {
-    //if (widget.medicineData != null) setMedicineState(widget.medicineData!);
-    // initial notify
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('เพิ่มรายการแจ้งเตือน'),
-        centerTitle: true,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.only(
-          left: 8.0,
-          right: 8.0,
-          top: 8.0,
-        ),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              MedicineSelectedCard(
-                medicineSelected:
-                    notifyInformation.selectedMedicine!.asMedicineInfo(),
-              ),
-              TextInputEditor(
-                controller: notifyNameController,
-                labelText: 'รายการแจ้งเตือน',
-              ),
-              TextInputEditor(
-                controller: notifyDetailController,
-                labelText: 'รายละเอียดการแจ้งเตือน',
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 8, bottom: 8),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextFieldEditor(
-                        title: "เริ่มการแจ้งเตือน",
-                        hintText: DateFormat.yMd('th_TH').format(
-                          notifyInformation.startDate!,
-                        ),
-                        controller: selectedStartNotifyDateController,
-                        widget: IconButton(
-                          onPressed: selectStartDateNotify,
-                          icon: const Icon(
-                            Icons.calendar_month_outlined,
-                            color: Colors.blue,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: TextFieldEditor(
-                        title: "สิ้นสุดการแจ้งเตือน",
-                        hintText: DateFormat.yMMMd('th_TH')
-                            .formatInBuddhistCalendarThai(
-                          notifyInformation.endDate!,
-                        ),
-                        controller: selectedEndNotifyDateController,
-                        widget: IconButton(
-                          onPressed: selectEndDateNotify,
-                          icon: const Icon(
-                            Icons.calendar_month_outlined,
-                            color: Colors.blue,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Row(
-                children: [
-                  PeriodDateSeletedCard(
-                    text: 'จันทร์',
-                    isSelected: periodMondaySelected,
-                    onTap: () {
-                      setState(() {
-                        periodMondaySelected = !periodMondaySelected;
-                      });
-                    },
-                  ),
-                  PeriodDateSeletedCard(
-                    text: 'อังคาร',
-                    isSelected: periodTuesdaySelected,
-                    onTap: () {
-                      setState(() {
-                        periodTuesdaySelected = !periodTuesdaySelected;
-                      });
-                    },
-                  ),
-                  PeriodDateSeletedCard(
-                    text: 'พุธ',
-                    isSelected: periodWednesdaySelected,
-                    onTap: () {
-                      setState(() {
-                        periodWednesdaySelected = !periodWednesdaySelected;
-                      });
-                    },
-                  ),
-                  PeriodDateSeletedCard(
-                    text: 'พฤหัส',
-                    isSelected: periodThursdaySelected,
-                    onTap: () {
-                      setState(() {
-                        periodThursdaySelected = !periodThursdaySelected;
-                      });
-                    },
-                  ),
-                  PeriodDateSeletedCard(
-                    text: 'ศุกร์',
-                    isSelected: periodFridaySelected,
-                    onTap: () {
-                      setState(() {
-                        periodFridaySelected = !periodFridaySelected;
-                      });
-                    },
-                  ),
-                  PeriodDateSeletedCard(
-                    text: 'เสาร์',
-                    isSelected: periodSaturdaySelected,
-                    onTap: () {
-                      setState(() {
-                        periodSaturdaySelected = !periodSaturdaySelected;
-                      });
-                    },
-                  ),
-                  PeriodDateSeletedCard(
-                    text: 'อาทิตย์',
-                    isSelected: periodSundaySelected,
-                    onTap: () {
-                      setState(() {
-                        periodSundaySelected = !periodSundaySelected;
-                      });
-                    },
-                  ),
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextFieldEditor(
-                        title: "เช้า",
-                        hintText: "",
-                        controller: notifyMorningTimeController,
-                        widget: IconButton(
-                          onPressed: notifyInformation.morningTime != null
-                              ? selectNotifyMorningTime
-                              : null,
-                          icon: Icon(
-                            Icons.access_alarm_outlined,
-                            color: notifyInformation.morningTime != null
-                                ? Colors.blue
-                                : Colors.grey,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: TextFieldEditor(
-                        title: "กลางวัน",
-                        hintText: "",
-                        controller: notifyLunchTimeController,
-                        widget: IconButton(
-                          onPressed: notifyInformation.lunchTime != null
-                              ? selectNotifyLunchTime
-                              : null,
-                          icon: Icon(
-                            Icons.access_alarm_outlined,
-                            color: notifyInformation.lunchTime != null
-                                ? Colors.blue
-                                : Colors.grey,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextFieldEditor(
-                        title: "เย็น",
-                        hintText: "",
-                        controller: notifyEveningTimeController,
-                        widget: IconButton(
-                          onPressed: notifyInformation.eveningTime != null
-                              ? selectNotifyEveningTime
-                              : null,
-                          icon: Icon(
-                            Icons.access_alarm_outlined,
-                            color: notifyInformation.eveningTime != null
-                                ? Colors.blue
-                                : Colors.grey,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: TextFieldEditor(
-                        title: "ก่อนนอน",
-                        hintText: "",
-                        controller: notifyBeforetoBedTimeController,
-                        widget: IconButton(
-                          onPressed: notifyInformation.beforeToBedTime != null
-                              ? selectNotifyBeforetoBedTime
-                              : null,
-                          icon: Icon(
-                            Icons.access_alarm_outlined,
-                            color: notifyInformation.beforeToBedTime != null
-                                ? Colors.blue
-                                : Colors.grey,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: SizedBox(
-                        height: 60,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green.shade400,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          onPressed: makeNotify,
-                          child: const Text(
-                            'ตกลง',
-                            style: TextStyle(fontSize: 20),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      width: 16,
-                    ),
-                    Expanded(
-                      child: SizedBox(
-                        height: 60,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red.shade400,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12))),
-                          onPressed: () {
-                            Get.back(result: false);
-                          },
-                          child: const Text(
-                            'ยกเลิก',
-                            style: TextStyle(
-                              fontSize: 20,
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              )
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  TextStyle get titleStyle {
-    return const TextStyle(
-      fontSize: 20,
-      fontWeight: FontWeight.bold,
-    );
-  }
 }
 
 class TextInputEditor extends StatelessWidget {
@@ -1150,15 +937,15 @@ class MedicineSelectedCard extends StatelessWidget {
   });
   final MedicineInfo medicineSelected;
 
-  final String emptyPicture = "assets/images/dummy_picture.jpg";
-
   _displayPrefixType(String type) {
     if (type == "pills" || type == "water") {
-      return "รับประทาน";
+      return "กิน";
     } else if (type == "arrow") {
-      return "ใช้ฉีด";
+      return "ฉีด";
     } else if (type == "drop") {
-      return "ใช้หยด";
+      return "หยอด/พ่น";
+    } else {
+      return "";
     }
   }
 
@@ -1167,6 +954,8 @@ class MedicineSelectedCard extends StatelessWidget {
       return "ก่อนอาหาร";
     } else if (order == "after") {
       return "หลังอาหาร";
+    } else {
+      return "";
     }
   }
 
@@ -1221,7 +1010,7 @@ class MedicineSelectedCard extends StatelessWidget {
                           height: 100,
                         )
                       : Image.asset(
-                          "assets/images/dummy_picture.jpg",
+                          emptyPicture,
                           fit: BoxFit.cover,
                           width: 100,
                           height: 100,
@@ -1231,36 +1020,36 @@ class MedicineSelectedCard extends StatelessWidget {
                   width: 8,
                 ),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        medicineSelected.name,
-                        style: const TextStyle(
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        medicineSelected.description,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Row(
-                        children: [
-                          Text(
-                              "${_displayPrefixType(medicineSelected.type)}   ${medicineSelected.nTake.toFraction()}"),
-                          const SizedBox(
-                            width: 10,
+                  child: Container(
+                    padding: const EdgeInsets.only(left: 10, top: 2),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: Colors.white70,
+                    ),
+                    height: 100,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          medicineSelected.name,
+                          style: const TextStyle(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.bold,
                           ),
-                          Text(medicineSelected.unit)
-                        ],
-                      ),
-                      medicineSelected.order != ""
-                          ? Text(_displayEatOrder(medicineSelected.order))
-                          : Container(),
-                      Text(_displayPeriodTime(medicineSelected.period_time)),
-                    ],
+                        ),
+                        Text(
+                          medicineSelected.description,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                            "${_displayPrefixType(medicineSelected.type)} ครั้งละ ${medicineSelected.nTake.toFraction()} ${medicineSelected.unit}"),
+                        medicineSelected.order != ""
+                            ? Text(_displayEatOrder(medicineSelected.order))
+                            : Container(),
+                        Text(_displayPeriodTime(medicineSelected.period_time)),
+                      ],
+                    ),
                   ),
                 )
               ],
@@ -1287,10 +1076,7 @@ class PeriodDateSeletedCard extends StatelessWidget {
   TextStyle periodDayTextStyly(bool isSelected) {
     return isSelected
         ? const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          )
+            fontSize: 13, color: Colors.white, fontWeight: FontWeight.bold)
         : const TextStyle(fontSize: 13, fontWeight: FontWeight.bold);
   }
 
@@ -1300,11 +1086,11 @@ class PeriodDateSeletedCard extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Card(
-          elevation: 3.0,
+          elevation: 5.0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
+            borderRadius: BorderRadius.circular(14),
           ),
-          color: isSelected ? Colors.blue.shade400 : Colors.grey.shade400,
+          color: isSelected ? Colors.blue.shade400 : Colors.white,
           child: SizedBox(
             height: 50,
             child: Center(

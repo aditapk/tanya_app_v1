@@ -8,7 +8,7 @@ import 'package:tanya_app_v1/utils/constans.dart';
 
 import 'package:buddhist_datetime_dateformat_sns/buddhist_datetime_dateformat_sns.dart';
 
-import '../../../Services/notify_services.dart';
+import '../../../Controller/medicine_info_controller.dart';
 
 class DoctorAppointmentEditor extends StatefulWidget {
   const DoctorAppointmentEditor({super.key});
@@ -23,119 +23,8 @@ class _DoctorAppointmentEditorState extends State<DoctorAppointmentEditor> {
   TextEditingController timeTextController = TextEditingController();
   late DateTime selectedDate;
   late TimeOfDay selectedTime;
-  NotifyService appointmentService = NotifyService();
-
-  // void onDidReceiveLocalNotificationIOS(
-  //     int id, String? title, String? body, String? payload) async {
-  //   // ignore: todo
-  //   //print("$id, $title");
-  // }
-
-  // createNewDoctorAppointmentNotification(dynamic payload) {
-  //   int appointmentID = payload['id'];
-  //   var appointmentDateTime = DateTime.parse(payload['appointmentDateTime']);
-  //   int delayDays = payload['delayDays'];
-  //   var dateDisplay = payload['dateDisplay'];
-  //   var timeDisplay = payload['timeDisplay'];
-
-  //   if (delayDays == 1) {
-  //     return;
-  //   }
-  //   switch (delayDays) {
-  //     case 7:
-  //       delayDays = 3; // notify before 3 day
-  //       break;
-  //     case 3:
-  //       delayDays = 1; // notify before 1 day
-  //       break;
-  //   }
-  //   // set notify again
-  //   DateTime notifyTime =
-  //       appointmentDateTime.subtract(Duration(days: delayDays)); // test
-
-  //   setAppointmentNotify(
-  //     notifyID: appointmentID,
-  //     notifyTime: notifyTime,
-  //     appointmentTime: appointmentDateTime,
-  //     delayDays: delayDays,
-  //     dateDisplay: dateDisplay,
-  //     timeDisplay: timeDisplay,
-  //   );
-  // }
-
-  // void onDidReceiveNotificationAndroid(
-  //     NotificationResponse notificationResponse) async {
-  //   switch (notificationResponse.notificationResponseType) {
-  //     case NotificationResponseType.selectedNotification:
-  //       // ignore: todo
-  //       // When click on notification
-  //       // .notificationResponseType
-  //       // .id
-  //       // .actonId
-  //       // .input
-  //       // .payload
-  //       //var notifyID = getNotifyID(notificationResponse.payload!);
-  //       //Get.to(() => NotifyHandleScreen(
-  //       //      notifyID: notifyID,
-  //       //    ));
-  //       var payload = jsonDecode(notificationResponse.payload!);
-  //       var dateDisplay = payload['dateDisplay'];
-  //       var timeDisplay = payload['timeDisplay'];
-  //       Get.defaultDialog(
-  //           title: 'แจ้งเตือนนัดหมายพบแพทย์',
-  //           middleText: 'วันที่ $dateDisplay\nเวลา $timeDisplay',
-  //           middleTextStyle: const TextStyle(
-  //             fontSize: 16,
-  //           ),
-  //           confirm: Expanded(
-  //             child: Row(
-  //               mainAxisAlignment: MainAxisAlignment.center,
-  //               children: [
-  //                 TextButton(
-  //                   onPressed: () {
-  //                     createNewDoctorAppointmentNotification(payload);
-  //                     Get.back();
-  //                   },
-  //                   child: const Text(
-  //                     'แจ้งเตือนอีกครั้ง',
-  //                     style: TextStyle(fontSize: 18),
-  //                   ),
-  //                 ),
-  //                 TextButton(
-  //                     onPressed: () {
-  //                       Get.back();
-  //                     },
-  //                     child: const Text(
-  //                       'ไม่ต้องแจ้งเตือน',
-  //                       style: TextStyle(fontSize: 18),
-  //                     )),
-  //               ],
-  //             ),
-  //           ));
-  //       break;
-  //     case NotificationResponseType.selectedNotificationAction:
-  //       // ignore: todo
-
-  //       // When action on notification is clicked
-  //       //print(notificationResponse.actionId);
-  //       //print(notificationResponse.payload);
-  //       // var notifyID = getNotifyID(notificationResponse.payload!);
-  //       // var notifyBox = Hive.box<NotifyInfoModel>('user_notify_info');
-  //       // var notifyInfo = notifyBox.getAt(notifyID);
-  //       if (notificationResponse.actionId == "OK") {
-  //         // // notify status -> complete
-  //         // notifyInfo!.status = 0;
-  //         // notifyInfo.save();
-  //         //print(notificationResponse.payload);
-  //       }
-  //       if (notificationResponse.actionId == "PENDING") {
-  //         //print(notificationResponse.payload);
-  //         var payload = jsonDecode(notificationResponse.payload!);
-  //         createNewDoctorAppointmentNotification(payload);
-  //       }
-  //       break;
-  //   }
-  // }
+  // NotifyService appointmentService = NotifyService();
+  var notifyStateController = Get.put(NotificationState());
 
   @override
   void initState() {
@@ -156,6 +45,115 @@ class _DoctorAppointmentEditorState extends State<DoctorAppointmentEditor> {
     doctorAppointment!.notifyID = appointmendID;
     await doctorAppointment.save();
     return appointmendID;
+  }
+
+  saveAppointment() async {
+    DateTime appointmentDateTime = DateTime(
+      selectedDate.year,
+      selectedDate.month,
+      selectedDate.day,
+      selectedTime.hour,
+      selectedTime.minute,
+    );
+    var now = DateTime.now();
+
+    String appointmentDate = DateFormat.yMMMMEEEEd('th')
+        .formatInBuddhistCalendarThai(appointmentDateTime);
+    String appointmentTime = TimeOfDay(
+            hour: appointmentDateTime.hour, minute: appointmentDateTime.minute)
+        .format(context);
+
+    // init notification
+    await notifyStateController.appointmentNotification.value
+        .inintializeNotification(
+            onDidReceiveNotificationIOS: null,
+            onDidReceiveNotificationAndroid: NotificationHandeling
+                .appointmentOnDidReceiveNotificationAndroid);
+
+    // var nDays = appointmentDateTime.difference(now).inDays;
+    // var nMinites = appointmentDateTime.difference(now).inMinutes;
+
+    if (appointmentDateTime.isBefore(now)) {
+      // can't notify
+      Get.defaultDialog(
+        title: 'วันเวลานัดหมายไม่ถูกต้อง',
+        titleStyle: const TextStyle(fontWeight: FontWeight.bold),
+        content: const Text(
+          'วันและเวลานัดหมายต้องเป็นวันและเวลาล่วงหน้า',
+          textAlign: TextAlign.center,
+        ),
+      );
+    } else {
+      var tAppointmentdate = DateTime(appointmentDateTime.year,
+          appointmentDateTime.month, appointmentDateTime.day, 0, 0);
+      var tCurrentdate = DateTime(now.year, now.month, now.day, 0, 0);
+      var nDays = tAppointmentdate.difference(tCurrentdate).inDays;
+
+      late DateTime notifyDateTime;
+      late int delays;
+      if (nDays >= 7) {
+        delays = 7;
+        notifyDateTime = appointmentDateTime.subtract(Duration(days: delays));
+      } else if (nDays >= 3 && nDays < 7) {
+        delays = 3;
+        notifyDateTime = appointmentDateTime.subtract(Duration(days: delays));
+      } else if (nDays >= 1 && nDays < 3) {
+        delays = 1;
+        notifyDateTime = appointmentDateTime.subtract(Duration(days: delays));
+      } else {
+        delays = 1;
+        notifyDateTime = appointmentDateTime;
+      }
+
+      int appointmentID = await updateToDatabase(appointmentDateTime);
+
+      await NotificationHandeling.setAppointmentNotify(
+        notifyService: notifyStateController.appointmentNotification.value,
+        notifyID: appointmentID,
+        notifyTime: notifyDateTime,
+        appointmentTime: appointmentDateTime,
+        delayDays: delays,
+        dateDisplay: appointmentDate,
+        timeDisplay: appointmentTime,
+      );
+      Get.back();
+    }
+
+    // await NotificationHandeling.setAppointmentNotify(
+    //   notifyService: notifyStateController.appointmentNotification.value,
+    //   notifyID: appointmentID,
+    //   notifyTime: appointmentDateTime,
+    //   appointmentTime: appointmentDateTime,
+    //   delayDays: 1,
+    //   dateDisplay: appointmentDate,
+    //   timeDisplay: appointmentTime,
+    // );
+
+    // int delayDays = 7;
+    // var notifyTime = appointmentDateTime.subtract(Duration(days: delayDays));
+
+    // if (notifyTime.isAfter(DateTime.now())) {
+    //   int appointmentID = await updateToDatabase(appointmentDateTime);
+    //   await NotificationHandeling.setAppointmentNotify(
+    //     notifyService: appointmentService,
+    //     notifyID: appointmentID,
+    //     notifyTime: notifyTime,
+    //     appointmentTime: appointmentDateTime,
+    //     delayDays: delayDays,
+    //     dateDisplay: appointmentDate,
+    //     timeDisplay: appointmentTime,
+    //   );
+    //   Get.back();
+    // } else {
+    //   Get.defaultDialog(
+    //     title: 'วันนัดหมายไม่ถูกต้อง',
+    //     titleStyle: const TextStyle(fontWeight: FontWeight.bold),
+    //     content: Text(
+    //       'กรุณากำหนดวันนัดหมายล่วงหน้า\nอย่างน้อย 7 วัน โดยกำหนดตั้งแต่\nวันที่ ${DateFormat.yMMMd('th').formatInBuddhistCalendarThai(DateTime.now().add(const Duration(days: 8)))} เป็นต้นไป',
+    //       textAlign: TextAlign.center,
+    //     ),
+    //   );
+    // }
   }
 
   @override
@@ -199,6 +197,7 @@ class _DoctorAppointmentEditorState extends State<DoctorAppointmentEditor> {
                   },
                   icon: const Icon(
                     Icons.calendar_month_outlined,
+                    color: Colors.green,
                   ),
                 ),
                 border: OutlineInputBorder(
@@ -237,6 +236,7 @@ class _DoctorAppointmentEditorState extends State<DoctorAppointmentEditor> {
                   },
                   icon: const Icon(
                     Icons.access_alarm_outlined,
+                    color: Colors.green,
                   ),
                 ),
                 border: OutlineInputBorder(
@@ -258,52 +258,7 @@ class _DoctorAppointmentEditorState extends State<DoctorAppointmentEditor> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                onPressed: () async {
-                  DateTime appointmentDateTime = DateTime(
-                    selectedDate.year,
-                    selectedDate.month,
-                    selectedDate.day,
-                    selectedTime.hour,
-                    selectedTime.minute,
-                  );
-                  //if (appointmentDateTime.isAfter(DateTime.now())) {
-                  String appointmentDate = DateFormat.yMMMMEEEEd('th')
-                      .formatInBuddhistCalendarThai(appointmentDateTime);
-                  String appointmentTime = TimeOfDay(
-                          hour: appointmentDateTime.hour,
-                          minute: appointmentDateTime.minute)
-                      .format(context);
-
-                  // init notification
-                  await appointmentService.inintializeNotification(
-                      onDidReceiveNotificationIOS: null,
-                      onDidReceiveNotificationAndroid: NotificationHandeling
-                          .appointmentOnDidReceiveNotificationAndroid);
-
-                  int delayDays = 7;
-                  var notifyTime = appointmentDateTime
-                      .subtract(Duration(minutes: delayDays));
-
-                  if (notifyTime.isAfter(DateTime.now())) {
-                    int appointmentID =
-                        await updateToDatabase(appointmentDateTime);
-                    await NotificationHandeling.setAppointmentNotify(
-                      notifyService: appointmentService,
-                      notifyID: appointmentID,
-                      notifyTime: notifyTime,
-                      appointmentTime: appointmentDateTime,
-                      delayDays: delayDays,
-                      dateDisplay: appointmentDate,
-                      timeDisplay: appointmentTime,
-                    );
-                    Get.back();
-                  } else {
-                    Get.defaultDialog(
-                        title: 'วันนัดหมายไม่ถูกต้อง',
-                        content: Text(
-                            'กรุณากำหนดวันนัดหมายล่วงหน้า\nอย่างน้อย 7 วัน \nวันที่ ${DateFormat.yMMMd('th').formatInBuddhistCalendarThai(DateTime.now().add(const Duration(days: 8)))} เป็นต้นไป'));
-                  }
-                },
+                onPressed: saveAppointment,
                 child: const Text(
                   'บันทึกนัดหมาย',
                   style: TextStyle(fontSize: 20),

@@ -15,9 +15,7 @@ import 'package:intl/intl.dart';
 import 'package:tanya_app_v1/Services/hive_db_services.dart';
 
 import 'GetXBinding/medicine_state_binding.dart';
-
 import 'Screen/Login/login_screen_selection.dart';
-
 // ---
 
 // Global variable
@@ -36,15 +34,22 @@ Future<void> main() async {
   // Initialization
   WidgetsFlutterBinding.ensureInitialized(); // Widget Binding before runApp
 
-  // _configureLocalTimeZone();
+  // init background service
+  // await BackgroundService.intialization();
 
-  //log("main()");
-  await initializeDateFormatting('th'); // initialize local date time format
-  //log("-> initial Date Formatting");
+  // initialize local date time format
+  await initializeDateFormatting('th');
+
+  // Hive Database initialization
   await HiveDatabaseService.initialization();
 
-  // ---
+  // notification initialization
+  // await NotifyService().inintializeNotification(
+  //     onDidReceiveNotificationIOS: null,
+  //     onDidReceiveNotificationAndroid:
+  //         NotificationHandeling.medicineOnDidReceiveNotificationAndroid);
 
+  // start app
   runApp(const MyApp());
 }
 
@@ -60,11 +65,6 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void initState() {
-    // ignore: todo
-    // TODO: implement initState
-    // localization
-    //     .init(mapLocales: [MapLocale('th', {})], initLanguageCode: 'en');
-
     super.initState();
   }
 
@@ -74,15 +74,15 @@ class _MyAppState extends State<MyApp> {
       initialBinding: AppInfoBinding(),
       debugShowCheckedModeBanner: false,
       title: 'Medical Reminder',
-      theme: ThemeData(
-        primaryColor: Colors.blue,
-        brightness: Brightness.light,
-      ),
-      darkTheme: ThemeData(
-        primaryColor: Colors.blue,
-        brightness: Brightness.dark,
-      ),
-      themeMode: ThemeMode.light,
+      // theme: ThemeData(
+      //   primaryColor: Colors.blue,
+      //   brightness: Brightness.light,
+      // ),
+      // darkTheme: ThemeData(
+      //   primaryColor: Colors.blue,
+      //   brightness: Brightness.dark,
+      // ),
+      // themeMode: ThemeMode.light,
       // localizationsDelegates: localization.localizationsDelegates,
       // supportedLocales: localization.supportedLocales,
       // locale: const Locale('th'),

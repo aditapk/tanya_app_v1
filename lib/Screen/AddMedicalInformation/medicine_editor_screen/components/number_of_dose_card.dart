@@ -12,22 +12,6 @@ class NumberOfDoseCard extends StatelessWidget {
   final Function()? onTap;
   final bool selection;
 
-  _borderSelection(bool select) {
-    if (select) {
-      return RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-        side: const BorderSide(
-          width: 0,
-          color: Colors.green,
-        ),
-      );
-    } else {
-      return RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Expanded(
@@ -36,7 +20,15 @@ class NumberOfDoseCard extends StatelessWidget {
         child: Card(
           elevation: 3.0,
           color: selection ? Colors.green[100] : null,
-          shape: _borderSelection(selection),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+            side: selection
+                ? const BorderSide(
+                    width: 0,
+                    color: Colors.green,
+                  )
+                : BorderSide.none,
+          ),
           child: SizedBox(
             height: 50,
             child: Center(
@@ -52,4 +44,20 @@ class NumberOfDoseCard extends StatelessWidget {
       ),
     );
   }
+
+  // _borderSelection(bool select) {
+  //   if (select) {
+  //     return RoundedRectangleBorder(
+  //       borderRadius: BorderRadius.circular(10),
+  //       side: const BorderSide(
+  //         width: 0,
+  //         color: Colors.green,
+  //       ),
+  //     );
+  //   } else {
+  //     return RoundedRectangleBorder(
+  //       borderRadius: BorderRadius.circular(10),
+  //     );
+  //   }
+  // }
 }
