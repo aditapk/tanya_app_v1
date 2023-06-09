@@ -8,8 +8,6 @@ import 'package:tanya_app_v1/utils/constans.dart';
 
 import 'package:buddhist_datetime_dateformat_sns/buddhist_datetime_dateformat_sns.dart';
 
-import '../../../Controller/medicine_info_controller.dart';
-
 class DoctorAppointmentEditor extends StatefulWidget {
   const DoctorAppointmentEditor({super.key});
 
@@ -24,7 +22,7 @@ class _DoctorAppointmentEditorState extends State<DoctorAppointmentEditor> {
   late DateTime selectedDate;
   late TimeOfDay selectedTime;
   // NotifyService appointmentService = NotifyService();
-  var notifyStateController = Get.put(NotificationState());
+  //var notifyStateController = Get.put(NotificationState());
 
   @override
   void initState() {
@@ -62,13 +60,6 @@ class _DoctorAppointmentEditorState extends State<DoctorAppointmentEditor> {
     String appointmentTime = TimeOfDay(
             hour: appointmentDateTime.hour, minute: appointmentDateTime.minute)
         .format(context);
-
-    // init notification
-    await notifyStateController.appointmentNotification.value
-        .inintializeNotification(
-            onDidReceiveNotificationIOS: null,
-            onDidReceiveNotificationAndroid: NotificationHandeling
-                .appointmentOnDidReceiveNotificationAndroid);
 
     // var nDays = appointmentDateTime.difference(now).inDays;
     // var nMinites = appointmentDateTime.difference(now).inMinutes;
@@ -108,7 +99,6 @@ class _DoctorAppointmentEditorState extends State<DoctorAppointmentEditor> {
       int appointmentID = await updateToDatabase(appointmentDateTime);
 
       await NotificationHandeling.setAppointmentNotify(
-        notifyService: notifyStateController.appointmentNotification.value,
         notifyID: appointmentID,
         notifyTime: notifyDateTime,
         appointmentTime: appointmentDateTime,

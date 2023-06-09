@@ -1,5 +1,3 @@
-// ignore_for_file: must_be_immutable
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
@@ -30,7 +28,7 @@ class MedicineInfoEditorScreen extends StatefulWidget {
 
 class _MedicineInfoEditorScreenState extends State<MedicineInfoEditorScreen> {
   final medicineInfoState = Get.find<MedicineEditorState>();
-  int? index;
+
   final _nameTextController = TextEditingController();
   final _detailTextController = TextEditingController();
   final _numberOfDoseController = TextEditingController();
@@ -67,7 +65,6 @@ class _MedicineInfoEditorScreenState extends State<MedicineInfoEditorScreen> {
     // add data to state
     if (widget.medicineData != null) {
       _updateCurrenState(widget.medicineData!);
-      //print(widget.medicineData!.id);
     } else {
       var boxMedicineInfo =
           Hive.box<MedicineInfo>(HiveDatabaseName.MEDICINE_INFO);
@@ -214,9 +211,6 @@ class _MedicineInfoEditorScreenState extends State<MedicineInfoEditorScreen> {
     // number of dose
     _numberOfDoseController.text = medicineData.nTake.toString();
 
-    // update data to widget state
-    //medicineInfoState.name(medicineData.name); // update name
-    //medicineInfoState.description(medicineData.description); // update description
     medicineInfoState.selected_type(medicineData.type); // update type
     medicineInfoState.selected_type_unit(medicineData.unit);
     medicineInfoState.nTake(medicineData.nTake); // update nTake

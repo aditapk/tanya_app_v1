@@ -4,16 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:tanya_app_v1/Model/notify_info.dart';
+import 'package:tanya_app_v1/Services/notify_services.dart';
 
-import '../../../Controller/medicine_info_controller.dart';
 import '../../../constants.dart';
 
 class NotifyMedicineCard extends StatelessWidget {
-  NotifyMedicineCard({super.key, required this.notifyInfo});
+  const NotifyMedicineCard({super.key, required this.notifyInfo});
 
   final NotifyInfoModel notifyInfo;
 
-  final notifyStateController = Get.put(NotificationState());
+  //final notifyStateController = Get.put(NotificationState());
 
   @override
   Widget build(BuildContext context) {
@@ -77,8 +77,7 @@ class NotifyMedicineCard extends StatelessWidget {
                   ]);
               if (deleteConfirm) {
                 //delete from notificaion list of device
-                await notifyStateController
-                    .medicineNotification.value.localNotificationsPlugin
+                await NotifyService.localNotificationsPlugin
                     .cancel(notifyInfo.key);
                 // delete this notifyInfo from Hive database
                 await notifyInfo.delete();
@@ -227,15 +226,10 @@ class MedicineCard extends StatelessWidget {
                         style: const TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 16),
                       ),
-                      getOrder(notifyInfo.medicineInfo.order).isEmpty
-                          ? Text(
-                              '${getThaiType(notifyInfo.medicineInfo.type)} ครั้งละ ${getNTake(notifyInfo.medicineInfo.nTake)} ${notifyInfo.medicineInfo.unit}',
-                              style: const TextStyle(fontSize: 16),
-                            )
-                          : Text(
-                              '${getOrder(notifyInfo.medicineInfo.order).isEmpty ? "" : "${getOrder(notifyInfo.medicineInfo.order)},"} ${getThaiType(notifyInfo.medicineInfo.type)} ครั้งละ ${getNTake(notifyInfo.medicineInfo.nTake)} ${notifyInfo.medicineInfo.unit}',
-                              style: const TextStyle(fontSize: 16),
-                            ),
+                      Text(
+                        '${getThaiType(notifyInfo.medicineInfo.type)} ครั้งละ ${getNTake(notifyInfo.medicineInfo.nTake)} ${notifyInfo.medicineInfo.unit}',
+                        style: const TextStyle(fontSize: 16),
+                      ),
                     ],
                   ),
                 ),

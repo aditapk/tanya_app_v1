@@ -12,6 +12,7 @@ import 'package:tanya_app_v1/GetXBinding/medicine_state_binding.dart';
 import 'package:tanya_app_v1/Model/medicine_info_model.dart';
 import 'package:tanya_app_v1/Model/notify_info.dart';
 import 'package:tanya_app_v1/Screen/AddMedicalInformation/medicine_editor_screen/medicine_info_editor_screen.dart';
+import 'package:tanya_app_v1/Services/notify_services.dart';
 import 'package:tanya_app_v1/utils/constans.dart';
 
 import '../../../../Controller/medicine_info_controller.dart';
@@ -23,13 +24,13 @@ import 'medicine_info_display_card.dart';
 import 'picture_edit_bottomsheet.dart';
 
 class MedicineInfoCard extends StatelessWidget {
-  MedicineInfoCard({
+  const MedicineInfoCard({
     required this.index,
     required this.medicineData,
     super.key,
   });
   // notify state controller injection
-  final notifyStateController = Get.put(NotificationState());
+  //final notifyStateController = Get.put(NotificationState());
 
   // input of medicine information card
   final MedicineInfo? medicineData;
@@ -179,7 +180,10 @@ class MedicineInfoCard extends StatelessWidget {
     bool? notified = await Get.to(
       () => AddNotifyDetailScreen(
         selectedDate: DateTime(
-            DateTime.now().year, DateTime.now().month, DateTime.now().day),
+          DateTime.now().year,
+          DateTime.now().month,
+          DateTime.now().day,
+        ),
         medicineData: medicineData,
       ),
       binding: AppInfoBinding(),
@@ -203,13 +207,12 @@ class MedicineInfoCard extends StatelessWidget {
 
   deleteNotify(MedicineInfo medicineData) async {
     // get controller
-    var notifyState = Get.find<NotificationState>();
+    //var notifyState = Get.find<NotificationState>();
     var notifyBox = Hive.box<NotifyInfoModel>(HiveDatabaseName.NOTIFY_INFO);
     var notifyList = notifyBox.values;
     for (var notify in notifyList) {
       if (notify.medicineInfo.id == medicineData.id) {
-        await notifyState.medicineNotification.value.localNotificationsPlugin
-            .cancel(notify.key);
+        await NotifyService.localNotificationsPlugin.cancel(notify.key);
         await notify.delete();
         // delete local notification
       }

@@ -9,3 +9,5 @@ const double hSizeButton = 50;
 const Color defaultColor = Color(0xff38b2ac);
 
 const String emptyPicture = "assets/images/dummy_picture.jpg";
+
+const int offsetID = 900000;

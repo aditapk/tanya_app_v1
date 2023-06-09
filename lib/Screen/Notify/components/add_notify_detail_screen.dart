@@ -5,7 +5,6 @@ import 'dart:io';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fraction/fraction.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
@@ -17,7 +16,6 @@ import 'package:tanya_app_v1/Services/notification_handling.dart';
 import 'package:tanya_app_v1/constants.dart';
 import 'package:tanya_app_v1/utils/constans.dart';
 
-import '../../../Controller/medicine_info_controller.dart';
 import '../../../Model/medicine_information.dart';
 import '../../../Model/notify_information.dart';
 import '../../../Services/notify_services.dart';
@@ -42,7 +40,7 @@ class AddNotifyDetailScreen extends StatefulWidget {
 
 class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
   //int numberOfNotifyTimeItem = 0;
-  var notifyStateController = Get.put(NotificationState());
+  //var notifyStateController = Get.put(NotificationState());
 
   NotifyInformation notifyInformation = NotifyInformation();
   //NotifyService notifyService = NotifyService(); // notification services
@@ -584,18 +582,24 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
   // ตกลง
   makeNotify() async {
     // notify Init
-    await notifyInit();
+    // var notifyService = await notifyInit();
 
     // notification List
     var startDate = notifyInformation.startDate!;
     var endDate = notifyInformation.endDate!;
     var days = endDate.difference(startDate).inDays + 1;
 
-    var notifyState = Get.find<NotificationState>();
+    //var notifyState = Get.find<NotificationState>();
+
+    var notifyService = NotifyService();
+    await notifyService.inintializeNotification(
+      onDidReceiveNotification: NotificationHandeling.onDidReceiveNotification,
+    );
+    await notifyService.requestPermission(); //request permission
 
     if (notifyInformation.enableMorningTime) {
       generateNotifySchedule(
-        notifyService: notifyState.medicineNotification.value,
+        notifyService: notifyService,
         startDate: startDate,
         nDate: days,
         scheduleTime: notifyInformation.morningTime!,
@@ -612,7 +616,7 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
     }
     if (notifyInformation.enableLunchTime) {
       generateNotifySchedule(
-        notifyService: notifyState.medicineNotification.value,
+        notifyService: notifyService,
         startDate: startDate,
         nDate: days,
         scheduleTime: notifyInformation.lunchTime!,
@@ -629,7 +633,7 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
     }
     if (notifyInformation.enableEveningTime) {
       generateNotifySchedule(
-        notifyService: notifyState.medicineNotification.value,
+        notifyService: notifyService,
         startDate: startDate,
         nDate: days,
         scheduleTime: notifyInformation.eveningTime!,
@@ -646,7 +650,7 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
     }
     if (notifyInformation.enableBeforeToBedTime) {
       generateNotifySchedule(
-        notifyService: notifyState.medicineNotification.value,
+        notifyService: notifyService,
         startDate: startDate,
         nDate: days,
         scheduleTime: notifyInformation.beforeToBedTime!,
@@ -784,9 +788,6 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
           );
         }
       }
-      //} else {
-
-      //}
     }
   }
 
@@ -796,8 +797,8 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
     required Box<NotifyInfoModel> boxNotify,
     required DateTime date,
     required int day,
-    required NotifyService notifyService,
     required bool createNotify,
+    required NotifyService notifyService,
   }) async {
     MedicineInfo medicineInfo =
         notifyInformation.selectedMedicine!.asMedicineInfo();
@@ -818,27 +819,40 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
         minute: specificTime.minute,
       ),
     );
-    var dataId = await boxNotify.add(notifyData);
+    var notifyID = await boxNotify.add(notifyData);
 
     // set notification
     if (createNotify) {
       // Convert string payload
       var notifyPayload = jsonEncode({
-        "notifyID": dataId,
+        "channelName": "medicine",
+        "notifyID": notifyID,
         "notifyInfo": notifyData.toJson(),
       });
-      notifySet(
-        notifyName: notifyName,
+
+      await notifyService.scheduleMedicineNotify(
+        notifyID: notifyID,
+        notifyTitle: notifyName,
         notifyDetail: notifyDetail,
-        notifyService: notifyService,
-        id: dataId,
+        notifyPayload: notifyPayload,
         scheduleTime: date.add(
           Duration(days: day),
         ),
-        payload: notifyPayload,
-        numNotify: notifyData.status,
         imagePath: notifyData.medicineInfo.picture_path!,
       );
+
+      // notifySet(
+      //   notifyName: notifyName,
+      //   notifyDetail: notifyDetail,
+      //   notifyService: notifyService,
+      //   id: dataId,
+      //   scheduleTime: date.add(
+      //     Duration(days: day),
+      //   ),
+      //   payload: notifyPayload,
+      //   numNotify: notifyData.status,
+      //   imagePath: notifyData.medicineInfo.picture_path!,
+      // );
     }
   }
 
@@ -854,55 +868,46 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
     }
   }
 
-  notifySet(
-      {required int id,
-      required DateTime scheduleTime,
-      String? payload,
-      required String imagePath,
-      required int numNotify,
-      required NotifyService notifyService,
-      required String notifyName,
-      required String notifyDetail}) async {
-    await notifyService.scheduleNotify(
-      channelID: "Medicine Notify",
-      channelName: "Medicine",
-      channelDescription: "Medicine Notification for user",
-      notifyID: id,
-      notifyTitle: notifyName,
-      notifyDetail: notifyDetail,
-      notifyPayload: payload,
-      scheduleTime: scheduleTime,
-      notifyId: id,
-      imagePath: imagePath,
-      notifyAction: const <AndroidNotificationAction>[
-        AndroidNotificationAction(
-          'OK',
-          'ตกลง',
-          showsUserInterface: true,
-        ),
-        AndroidNotificationAction(
-          'PENDING',
-          'เลื่อนไปก่อน',
-          showsUserInterface: true,
-        )
-      ],
-    );
-  }
+  // notifySet(
+  //     {required int id,
+  //     required DateTime scheduleTime,
+  //     String? payload,
+  //     required String imagePath,
+  //     required int numNotify,
+  //     required NotifyService notifyService,
+  //     required String notifyName,
+  //     required String notifyDetail}) async {
+  //   await notifyService.scheduleMedicineNotify(
+  //     notifyID: id,
+  //     notifyTitle: notifyName,
+  //     notifyDetail: notifyDetail,
+  //     notifyPayload: payload,
+  //     scheduleTime: scheduleTime,
+  //     notifyId: id,
+  //     imagePath: imagePath,
+  //   );
+  // }
 
   TextStyle get periodDayTextStyly {
     return const TextStyle(fontSize: 13, fontWeight: FontWeight.bold);
   }
 
-  Future<void> notifyInit() async {
-    var notifyState = Get.find<NotificationState>();
+  Future<NotifyService> notifyInit() async {
+    // var notifyState = Get.find<NotificationState>();
     // await notifyState.medicineNotification.value.inintializeNotification(
     //     onDidReceiveNotificationIOS: onDidReceiveLocalNotificationIOS,
     //     onDidReceiveNotificationAndroid: onDidReceiveNotificationAndroid);
-    await notifyState.medicineNotification.value.inintializeNotification(
-        onDidReceiveNotificationIOS: null,
-        onDidReceiveNotificationAndroid:
-            NotificationHandeling.medicineOnDidReceiveNotificationAndroid);
-    await notifyState.medicineNotification.value.requestPermission();
+    // await notifyState.medicineNotification.value.inintializeNotification(
+    //     onDidReceiveNotificationIOS: null,
+    //     onDidReceiveNotificationAndroid:
+    //         NotificationHandeling.medicineOnDidReceiveNotificationAndroid);
+    var notifyService = NotifyService();
+    await notifyService.inintializeNotification(
+      onDidReceiveNotification: NotificationHandeling.onDidReceiveNotification,
+    );
+    await notifyService.requestPermission();
+
+    return notifyService;
   }
 }
 

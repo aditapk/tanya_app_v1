@@ -5,6 +5,7 @@ import 'package:tanya_app_v1/Model/doctor_appointment.dart';
 import 'package:tanya_app_v1/Model/medicine_info_model.dart';
 import 'package:tanya_app_v1/Model/notify_info.dart';
 import 'package:tanya_app_v1/Model/user_login_model.dart';
+import 'package:tanya_app_v1/utils/constans.dart';
 
 import '../Model/user_info_model.dart';
 
@@ -38,24 +39,25 @@ class HiveDatabaseService {
 
   static Future<void> openAllBox() async {
     // open user_medicine_info box
-    await Hive.openBox<MedicineInfo>('user_medicine_info');
+    await Hive.openBox<MedicineInfo>(HiveDatabaseName.MEDICINE_INFO);
     // open user_notify_info box
-    await Hive.openBox<NotifyInfoModel>('user_notify_info');
+    await Hive.openBox<NotifyInfoModel>(HiveDatabaseName.NOTIFY_INFO);
     // open user_login box
-    await Hive.openBox<UserLogin>('user_login');
+    await Hive.openBox<UserLogin>(HiveDatabaseName.USER_LOGIN);
     // open user_info box
-    await Hive.openBox<UserInfo>('user_info');
+    await Hive.openBox<UserInfo>(HiveDatabaseName.USER_INFO);
     // open doctor_appointment box
-    await Hive.openBox<DoctorAppointMent>('doctor_appointment');
+    await Hive.openBox<DoctorAppointMent>(
+        HiveDatabaseName.DOCTOR_APPOINMENT_INFO);
   }
 
   // for test
   static Future<void> deleteBox() async {
-    await Hive.deleteBoxFromDisk('user_notify_info');
-    await Hive.deleteBoxFromDisk('doctor_appointment');
-    await Hive.deleteBoxFromDisk('user_info');
-    await Hive.deleteBoxFromDisk('user_notify_info');
-    await Hive.deleteBoxFromDisk('user_medicine_info');
+    await Hive.deleteBoxFromDisk(HiveDatabaseName.NOTIFY_INFO);
+    await Hive.deleteBoxFromDisk(HiveDatabaseName.DOCTOR_APPOINMENT_INFO);
+    await Hive.deleteBoxFromDisk(HiveDatabaseName.USER_INFO);
+    await Hive.deleteBoxFromDisk(HiveDatabaseName.MEDICINE_INFO);
+    await Hive.deleteBoxFromDisk(HiveDatabaseName.USER_LOGIN);
   }
 
   // static Future<void> clearBox() async {

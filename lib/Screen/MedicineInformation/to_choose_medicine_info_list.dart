@@ -64,9 +64,7 @@ class _ToChooseMedicineState extends State<ToChooseMedicine> {
                       ),
                     ),
                     onPressed: () {
-                      Get.off(() => const HomeAppScreen(
-                            selectedPage: 1,
-                          ));
+                      Get.off(() => const HomeAppScreen());
                     },
                     child: const Text(
                       "เพิ่มรายการยา",

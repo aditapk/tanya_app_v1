@@ -6,6 +6,6 @@ class AppInfoBinding implements Bindings {
   void dependencies() {
     Get.lazyPut<MedicineEditorState>(() => MedicineEditorState());
     Get.lazyPut<ReportFilterState>(() => ReportFilterState());
-    Get.lazyPut<NotificationState>(() => NotificationState());
+    Get.lazyPut<PageState>(() => PageState());
   }
 }

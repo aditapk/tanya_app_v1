@@ -16,40 +16,40 @@ import 'package:tanya_app_v1/Services/hive_db_services.dart';
 
 import 'GetXBinding/medicine_state_binding.dart';
 import 'Screen/Login/login_screen_selection.dart';
+import 'Services/notification_handling.dart';
+import 'Services/notify_services.dart';
 // ---
-
-// Global variable
-
-//var boxTasks;
-//var medicineInfo;
-
-// Local Notification Setting Up
-// final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-//     FlutterLocalNotificationsPlugin();
 
 // ---
 
 Future<void> main() async {
+  //debugPrint('main: Initialization');
+
+  // Widget Binding before runApp
+  WidgetsFlutterBinding.ensureInitialized();
+  //debugPrint('\tWidgetsFlutterBinding');
+
   Intl.defaultLocale = 'th';
-  // Initialization
-  WidgetsFlutterBinding.ensureInitialized(); // Widget Binding before runApp
 
   // init background service
-  // await BackgroundService.intialization();
+  //await BackgroundService.intialization();
 
   // initialize local date time format
   await initializeDateFormatting('th');
+  //debugPrint('\tDateFormat Initial');
 
   // Hive Database initialization
   await HiveDatabaseService.initialization();
+  //debugPrint('\tDatabase Initial');
 
-  // notification initialization
-  // await NotifyService().inintializeNotification(
-  //     onDidReceiveNotificationIOS: null,
-  //     onDidReceiveNotificationAndroid:
-  //         NotificationHandeling.medicineOnDidReceiveNotificationAndroid);
+  //notification initialization in case application is log off
+  await NotifyService().inintializeNotification(
+    onDidReceiveNotification: NotificationHandeling.onDidReceiveNotification,
+  );
+  //debugPrint('\tNotification Intial');
 
-  // start app
+  // run My App
+  //debugPrint('main: Running');
   runApp(const MyApp());
 }
 
@@ -61,8 +61,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  //final FlutterLocalization localization = FlutterLocalization.instance;
-
   @override
   void initState() {
     super.initState();
@@ -74,37 +72,7 @@ class _MyAppState extends State<MyApp> {
       initialBinding: AppInfoBinding(),
       debugShowCheckedModeBanner: false,
       title: 'Medical Reminder',
-      // theme: ThemeData(
-      //   primaryColor: Colors.blue,
-      //   brightness: Brightness.light,
-      // ),
-      // darkTheme: ThemeData(
-      //   primaryColor: Colors.blue,
-      //   brightness: Brightness.dark,
-      // ),
-      // themeMode: ThemeMode.light,
-      // localizationsDelegates: localization.localizationsDelegates,
-      // supportedLocales: localization.supportedLocales,
-      // locale: const Locale('th'),
-      // for test
-      //home:
-      //TestImagePickerApp(),
-      //const MedicineListScreen(),
-      //MedicineListScreen(),
-
       home: const LoginScreenSelection(),
-      //WelcomeScreen(),
-      //SplashScreen(),
-      //ShowNotifyListScreen(), // Home App
-      //TestLocalNotify(),
-      // AnimatedSplashScreen(
-      //   duration: 3000,
-      //   splashIconSize: 500,
-      //   splash: const SplashScreen(),
-      //   nextScreen: const WelcomeScreen(),
-      //   splashTransition: SplashTransition.slideTransition,
-      //   //pageTransitionType: PageTransitionType.bottomToTop,
-      // ),
     );
   }
 }

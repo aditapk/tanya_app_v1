@@ -1,74 +1,48 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
 import 'package:tanya_app_v1/constants.dart';
-//import 'package:timezone/data/latest_all.dart' as tz;
-//import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 
 class NotifyService {
-  FlutterLocalNotificationsPlugin localNotificationsPlugin =
+  static FlutterLocalNotificationsPlugin localNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
   Future<void> inintializeNotification({
-    required onDidReceiveNotificationIOS,
-    required onDidReceiveNotificationAndroid,
+    required onDidReceiveNotification,
   }) async {
     tz.initializeTimeZones();
+
+    // IOS
     List<DarwinNotificationCategory> iosNotificationCategories =
         const <DarwinNotificationCategory>[
       DarwinNotificationCategory(
-        'default',
-        // actions: <DarwinNotificationAction>[
-        //   DarwinNotificationAction.text(
-        //     'OK',
-        //     'ตกลง',
-        //     buttonTitle: 'ตกลง',
-        //   ),
-        //   DarwinNotificationAction.text(
-        //     'PENDING',
-        //     'เลื่อนไปก่อน',
-        //     buttonTitle: 'เลื่อนไปก่อน',
-        //   ),
-        // ],
+        'แจ้งเตือนยา',
       ),
       DarwinNotificationCategory(
-        'Doctor Appointment',
-        // actions: <DarwinNotificationAction>[
-        //   DarwinNotificationAction.plain(
-        //     'OK',
-        //     'ตกลง',
-        //   ),
-        //   DarwinNotificationAction.plain(
-        //     'PENDING',
-        //     'เตือนอีกครั้ง',
-        //   ),
-        // ],
+        'แจ้งเตือนนัดหมาย',
       ),
     ];
+
     final DarwinInitializationSettings iOSInitializationSettings =
         DarwinInitializationSettings(
       requestAlertPermission: false,
       requestBadgePermission: false,
       requestSoundPermission: false,
-      onDidReceiveLocalNotification: onDidReceiveNotificationIOS,
       notificationCategories: iosNotificationCategories,
     );
 
     const AndroidInitializationSettings androidInitializationSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
-    // const AndroidInitializationSettings androidInitializationSettings =
-    //     AndroidInitializationSettings('launch_background');
     final InitializationSettings initializationSettings =
         InitializationSettings(
             iOS: iOSInitializationSettings,
             android: androidInitializationSettings);
 
     await localNotificationsPlugin.initialize(initializationSettings,
-        onDidReceiveNotificationResponse: onDidReceiveNotificationAndroid);
+        onDidReceiveNotificationResponse: onDidReceiveNotification);
   }
 
   Future<void> requestPermission() async {
@@ -101,20 +75,17 @@ class NotifyService {
     }
   }
 
-  Future<void> scheduleNotify({
-    required String channelID,
-    required String channelName,
-    String? channelDescription,
+  // medicine notify schedule
+  Future<void> scheduleMedicineNotify({
     required int notifyID,
-    String? notifyTitle,
-    String? notifyDetail,
-    String? notifyPayload,
+    required String notifyTitle,
+    required String notifyDetail,
+    required String notifyPayload,
     required DateTime scheduleTime,
-    required int notifyId,
     List<AndroidNotificationAction>? notifyAction,
     required String imagePath,
   }) async {
-    var notifyData = jsonDecode(notifyPayload!);
+    var notifyData = jsonDecode(notifyPayload);
     var medicineInfo = notifyData["notifyInfo"]["medicineInfo"];
     var name = medicineInfo["name"];
     var type = medicineInfo["type"];
@@ -131,13 +102,6 @@ class NotifyService {
 
     double nTake = medicineInfo["nTake"];
     var order = medicineInfo["order"];
-
-    // if (notifyTitle!.isEmpty) {
-    //   notifyTitle = "ถึงเวลา${getWordType(type)}ยา $name";
-    // }
-    // if (notifyDetail!.isEmpty) {
-    //   notifyDetail = "อย่าลืม${getWordType(type)}ยานะครับ";
-    // }
 
     String nTakeStr;
 
@@ -192,24 +156,36 @@ class NotifyService {
       hideExpandedLargeIcon: true,
     );
 
+    // notify detail of android
     AndroidNotificationDetails androidNotificationDetails =
         AndroidNotificationDetails(
-      channelID,
-      channelName,
-      channelDescription: channelDescription,
+      'medicine',
+      'แจ้งเตือนยา',
+      channelDescription: 'การแจ้งเตือนรายการยา',
       importance: Importance.max,
       priority: Priority.high,
       playSound: true,
-      ticker: 'medicine notification ticker',
-      actions: notifyAction,
+      ticker: 'medicine',
       styleInformation: bigPictureStyleInformation,
       largeIcon: FilePathAndroidBitmap(imagePath),
+      actions: const <AndroidNotificationAction>[
+        AndroidNotificationAction(
+          'OK',
+          'ตกลง',
+          showsUserInterface: true,
+        ),
+        AndroidNotificationAction(
+          'PENDING',
+          'เลื่อนไปก่อน',
+          showsUserInterface: true,
+        )
+      ],
     );
 
     // check file is exist
     DarwinNotificationDetails? iosNotificationDetails =
         const DarwinNotificationDetails(
-      categoryIdentifier: 'default',
+      categoryIdentifier: 'แจ้งเตือนยา',
     );
 
     NotificationDetails notificationDetails = NotificationDetails(
@@ -217,13 +193,9 @@ class NotifyService {
       iOS: iosNotificationDetails,
     );
 
-    // await localNotificationsPlugin.show(
-    //     notifyID, notifyTitle, notifyDetail, notificationDetails,
-    //     payload: notifyPayload);
     var schedule1 = tz.TZDateTime.from(scheduleTime, tz.local);
-    // var schedule2 = schedule1.add(Duration(seconds: 5));
     await localNotificationsPlugin.zonedSchedule(
-      notifyId,
+      notifyID,
       notifyTitle,
       '$notifyDetail เวลา ${DateFormat('HH:mm น.').format(datetime)}',
       schedule1,
@@ -235,29 +207,43 @@ class NotifyService {
     );
   }
 
+  // appointment notify
   Future<void> scheduleDoctorAppointmentNotify({
     required int notifyID,
     required DateTime notifyDate,
     String? title,
     String? detail,
     String? payload,
-    List<AndroidNotificationAction>? actions,
+    required int delayDays,
   }) async {
     AndroidNotificationDetails androidNotificationDetails =
         AndroidNotificationDetails(
-      'Doctor Appointment ID',
-      'Doctor Appointment',
-      channelDescription: 'Notify channel for Doctor Appointment',
+      'doctor_appointment',
+      'แจ้งเตือนนัดหมาย',
+      channelDescription: 'การแจ้งเตือนสำหรับการนัดหมายพบแพทย์',
       importance: Importance.max,
       priority: Priority.high,
       playSound: true,
-      ticker: 'doctor appoinment ticker',
-      actions: actions,
+      ticker: 'doctor appointment',
+      actions: delayDays > 1
+          ? const <AndroidNotificationAction>[
+              AndroidNotificationAction(
+                'PENDING',
+                'แจ้งเตือนอีกครั้ง',
+                showsUserInterface: true,
+              ),
+              AndroidNotificationAction(
+                'OK',
+                'ไม่ต้องแจ้งเตือน',
+                showsUserInterface: true,
+              )
+            ]
+          : null,
     );
 
     DarwinNotificationDetails iosNotificationDetails =
         const DarwinNotificationDetails(
-      categoryIdentifier: 'Doctor Appointment',
+      categoryIdentifier: 'แจ้งเตือนนัดหมาย',
     );
     NotificationDetails notificationDetails = NotificationDetails(
       android: androidNotificationDetails,
@@ -266,7 +252,7 @@ class NotifyService {
 
     var scheduledDate = tz.TZDateTime.from(notifyDate, tz.local);
     await localNotificationsPlugin.zonedSchedule(
-      notifyID,
+      notifyID + offsetID,
       title,
       detail,
       scheduledDate,

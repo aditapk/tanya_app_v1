@@ -3,8 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../Services/notify_services.dart';
-
 class MedicineEditorState extends GetxController {
   final name = "".obs;
   final description = "".obs;
@@ -25,7 +23,11 @@ class ReportFilterState extends GetxController {
   final filterEndDate = DateTime.now().add(const Duration(days: 7)).obs;
 }
 
-class NotificationState extends GetxController {
-  final medicineNotification = NotifyService().obs;
-  final appointmentNotification = NotifyService().obs;
+class PageState extends GetxController {
+  final pageController = PageController(initialPage: 0).obs;
 }
+
+// class NotificationState extends GetxController {
+//   final medicineNotification = NotifyService().obs;
+//   final appointmentNotification = NotifyService().obs;
+// }
