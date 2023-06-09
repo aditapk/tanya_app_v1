@@ -9,4 +9,5 @@ class HiveDatabaseName {
   static const MEDICINE_INFO = 'user_medicine_info';
   // ignore: constant_identifier_names
   static const DOCTOR_APPOINMENT_INFO = 'doctor_appointment';
+  // some commend
 }
