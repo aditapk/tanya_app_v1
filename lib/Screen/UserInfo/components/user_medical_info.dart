@@ -193,6 +193,13 @@ class MedicalTagDisplay extends StatelessWidget {
     return false;
   }
 
+  isOnePrecision(double num) {
+    if (num * 10 % 1 == 0) {
+      return true;
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return value != null
@@ -208,8 +215,10 @@ class MedicalTagDisplay extends StatelessWidget {
                   text: value is double
                       ? isInt(value!)
                           ? value!.toInt().toString()
-                          : value!.toStringAsFixed(1)
-                      : value,
+                          : isOnePrecision(value!)
+                              ? value!.toStringAsFixed(1)
+                              : value!.toStringAsFixed(2)
+                      : value!,
                   style: const TextStyle(
                     fontWeight: FontWeight.normal,
                   ),

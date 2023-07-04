@@ -260,7 +260,7 @@ class _TextFieldUserMedicalInfoState extends State<TextFieldUserMedicalInfo> {
                     if (pressureHighTextController.text.isNotEmpty &&
                         pressureLowTextController.text.isNotEmpty) {
                       widget.userInfo!.pressure =
-                          '${pressureHighTextController.text}/${pressureLowTextController.text}';
+                          '${double.parse(pressureHighTextController.text).toInt()}/${double.parse(pressureLowTextController.text).toInt()}';
                     } else {
                       widget.userInfo!.pressure = null;
                     }
@@ -382,7 +382,7 @@ class _TextFieldUserMedicalInfoState extends State<TextFieldUserMedicalInfo> {
                       if (pressureHighTextController.text.isNotEmpty &&
                           pressureLowTextController.text.isNotEmpty) {
                         userInfo.pressure =
-                            '${pressureHighTextController.text}/${pressureLowTextController.text}';
+                            '${double.parse(pressureHighTextController.text).toInt()}/${double.parse(pressureLowTextController.text).toInt()}';
                         userInfo.lastUpdate = DateTime.now();
                       } else {
                         userInfo.pressure = null;
@@ -483,7 +483,7 @@ class _TextFieldUserMedicalInfoState extends State<TextFieldUserMedicalInfo> {
                             : null,
                         pressure: pressureHighTextController.text.isNotEmpty &&
                                 pressureLowTextController.text.isNotEmpty
-                            ? '${pressureLowTextController.text}/${pressureHighTextController.text}'
+                            ? '${double.parse(pressureHighTextController.text).toInt()}/${double.parse(pressureLowTextController.text).toInt()}'
                             : null,
                         lastUpdate:
                             pressureHighTextController.text.isNotEmpty &&
@@ -593,7 +593,8 @@ class TextInfoDouble extends StatelessWidget {
               children: [
                 Expanded(
                   child: TextFormField(
-                    keyboardType: TextInputType.number,
+                    keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true, signed: true),
                     controller: leftController,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
@@ -608,7 +609,8 @@ class TextInfoDouble extends StatelessWidget {
                 ),
                 Expanded(
                   child: TextFormField(
-                    keyboardType: TextInputType.number,
+                    keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true, signed: true),
                     controller: rightController,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
@@ -672,7 +674,8 @@ class TextInputSingle extends StatelessWidget {
                     ),
                   )
                 : TextFormField(
-                    keyboardType: TextInputType.number,
+                    keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true, signed: true),
                     controller: controller,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
