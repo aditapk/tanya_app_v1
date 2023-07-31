@@ -9,8 +9,15 @@ import 'medicine_info_card.dart';
 class DisplayMedicineInfoList extends StatelessWidget {
   const DisplayMedicineInfoList({
     Key? key,
+    required this.changeImageShowCaseKey,
+    required this.toMedicineNotifyShowCaseKey,
+    required this.editMedicineShowCaseKey,
+    required this.deleteMedicineShowCaseKey,
   }) : super(key: key);
-
+  final GlobalKey changeImageShowCaseKey;
+  final GlobalKey toMedicineNotifyShowCaseKey;
+  final GlobalKey editMedicineShowCaseKey;
+  final GlobalKey deleteMedicineShowCaseKey;
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
@@ -22,12 +29,15 @@ class DisplayMedicineInfoList extends StatelessWidget {
           var medicineInfoList = medicineboxInfo.toList();
 
           return ListView.builder(
-            itemCount: medicineInfoList.length,
-            itemBuilder: (context, index) => MedicineInfoCard(
-              index: index,
-              medicineData: medicineInfoList[index],
-            ),
-          );
+              itemCount: medicineInfoList.length,
+              itemBuilder: (context, index) => MedicineInfoCard(
+                    index: index,
+                    medicineData: medicineInfoList[index],
+                    imageShowCaseKey: changeImageShowCaseKey,
+                    toMedicineNotifyShowCaseKey: toMedicineNotifyShowCaseKey,
+                    editMedicineShowCaseKey: editMedicineShowCaseKey,
+                    deleteMedecineShowCaseKey: deleteMedicineShowCaseKey,
+                  ));
         } else {
           return const EmptyMedicineList(
             emptyDescription: "เพิ่มรายการยา กรุณากดปุ่ม + ",

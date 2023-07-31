@@ -73,6 +73,7 @@ class _MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       title: 'Medical Reminder',
       home: const LoginScreenSelection(),
+      //const IntroScreen(),
     );
   }
 }

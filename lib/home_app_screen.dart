@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:open_file_plus/open_file_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
+import 'package:showcaseview/showcaseview.dart';
 import 'package:tanya_app_v1/Controller/medicine_info_controller.dart';
 import 'package:tanya_app_v1/Model/user_login_model.dart';
 import 'package:tanya_app_v1/Screen/AddMedicalInformation/medicine_editor_screen/medicine_info_editor_screen.dart';
@@ -19,7 +20,9 @@ import 'package:tanya_app_v1/Screen/UserInfo/user_info_screen.dart';
 import 'package:tanya_app_v1/Services/hive_db_services.dart';
 import 'package:tanya_app_v1/Services/notify_services.dart';
 import 'package:tanya_app_v1/utils/constans.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../GetXBinding/medicine_state_binding.dart';
+import 'Model/medicine_info_model.dart';
 import 'Model/notify_info.dart';
 import 'Model/user_info_model.dart';
 import 'Screen/Notify/notify_screen.dart';
@@ -31,9 +34,11 @@ class HomeAppScreen extends StatefulWidget {
   const HomeAppScreen({
     super.key,
     this.selectedPage,
+    this.context,
   });
 
   final int? selectedPage;
+  final BuildContext? context;
 
   @override
   State<HomeAppScreen> createState() => _HomeAppScreenState();
@@ -48,21 +53,11 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
     }
 
     _pageController = PageController(initialPage: _selectedIndex);
-    super.initState();
-    //initializeDateFormatting('th_TH');
-    // updatePicturePath();
-  }
 
-  // void updatePicturePath() async {
-  //   var medicineBox = Hive.box<MedicineInfo>(HiveDatabaseName.MEDICINE_INFO);
-  //   var medicines = medicineBox.values;
-  //   for (var medicine in medicines) {
-  //     print(medicine.name);
-  //     print(medicine.picture_path);
-  //   }
-  //   var dir = await getApplicationDocumentsDirectory();
-  //   print(dir.path);
-  // }
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback(
+        (_) => ShowCaseWidget.of(context).startShowCase([helpShowCaseKey]));
+  }
 
   @override
   void dispose() {
@@ -77,16 +72,39 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
     "ข้อมูลผู้ใช้",
   ];
 
-  final List<Widget> bodyPageList = <Widget>[
-    const DisplayMedicineInfoList(), //หน้า รายการยา
-    const NotifyScreen(), // หน้า รายการแจ้งเตือน
-    const MedicineReportScreen(),
-    const UserInfoScreen(),
-  ];
+  // final List<Widget> bodyPageList = <Widget>[
+  //   DisplayMedicineInfoList(
+  //     showCaseKey: _medicineInfoShowCaseKey,
+  //   ), //หน้า รายการยา
+  //   const NotifyScreen(), // หน้า รายการแจ้งเตือน
+  //   const MedicineReportScreen(),
+  //   const UserInfoScreen(),
+  // ];
 
   late PageController _pageController;
 
   int _selectedIndex = 0;
+
+  final helpShowCaseKey = GlobalKey();
+
+  // Page Medicine List
+  final addMedicineFloatingButtonShowCaseKey = GlobalKey();
+  final changeImageOnCardShowCaseKey = GlobalKey();
+  final toMedicineNotifyDetailShowCaseKey = GlobalKey();
+  final editMedicineShowCaseKey = GlobalKey();
+  final deleteMedicineShowCaseKey = GlobalKey();
+
+  // Page Notify
+  final chooseDateShowcaseKey = GlobalKey();
+
+  // Page Report
+  final chooseIntervalDateShowCaseKey = GlobalKey();
+  final generatePDFFloatingButtonShowCaseKey = GlobalKey();
+
+  // Page User Info
+  final generalInfoShowCaseKey = GlobalKey();
+  final medicineInfoShowCaseKey = GlobalKey();
+  final appointmentInfoShowCase = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -102,6 +120,20 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
               itemBuilder: (context) => const [
+                    PopupMenuItem(
+                      value: 3,
+                      child: ListTile(
+                        leading: Icon(Icons.help),
+                        title: Text('คู่มือการใช้งาน'),
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 4,
+                      child: ListTile(
+                        leading: Icon(Icons.face),
+                        title: Text('ตอบปัญหาการใช้งาน'),
+                      ),
+                    ),
                     PopupMenuItem(
                       value: 0,
                       child: ListTile(
@@ -193,11 +225,83 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
                                 style: TextStyle(fontSize: 16),
                               )),
                         ]);
+                    break;
+                  case 3:
+                    // open url
+                    final Uri url = Uri.parse(Introduction.DOCUMENT_LINK);
+                    if (await canLaunchUrl(url)) {
+                      await launchUrl(url);
+                    } else {
+                      // have some problem for open url
+                    }
+                    break;
+                  case 4:
+                    final Uri url = Uri.parse(Introduction.FACEBOOK_LINK);
+                    if (await canLaunchUrl(url)) {
+                      await launchUrl(url);
+                    } else {
+                      // have some problem for open url
+                    }
+                    break;
                 }
               }),
           title: Text(titlePageList[_selectedIndex]),
           centerTitle: true,
           actions: [
+            Showcase(
+              key: helpShowCaseKey,
+              targetBorderRadius: BorderRadius.circular(12),
+              description: "ปุ่มแนะนำวิธีใช้งาน",
+              child: IconButton(
+                  onPressed: () {
+                    if (_selectedIndex == 0) {
+                      // handle empty case
+                      var medicineBox = Hive.box<MedicineInfo>(
+                          HiveDatabaseName.MEDICINE_INFO);
+                      if (medicineBox.isEmpty) {
+                        setState(() {
+                          ShowCaseWidget.of(context).startShowCase([
+                            addMedicineFloatingButtonShowCaseKey,
+                          ]);
+                        });
+                      } else {
+                        setState(() {
+                          ShowCaseWidget.of(context).startShowCase([
+                            changeImageOnCardShowCaseKey,
+                            toMedicineNotifyDetailShowCaseKey,
+                            editMedicineShowCaseKey,
+                            deleteMedicineShowCaseKey,
+                          ]);
+                        });
+                      }
+                    } else if (_selectedIndex == 1) {
+                      setState(() {
+                        ShowCaseWidget.of(context).startShowCase([
+                          chooseDateShowcaseKey,
+                        ]);
+                      });
+                    } else if (_selectedIndex == 2) {
+                      setState(() {
+                        ShowCaseWidget.of(context).startShowCase([
+                          chooseIntervalDateShowCaseKey,
+                          generatePDFFloatingButtonShowCaseKey
+                        ]);
+                      });
+                    } else if (_selectedIndex == 3) {
+                      setState(() {
+                        ShowCaseWidget.of(context).startShowCase([
+                          generalInfoShowCaseKey,
+                          medicineInfoShowCaseKey,
+                          appointmentInfoShowCase,
+                        ]);
+                      });
+                    }
+                  },
+                  icon: const Icon(
+                    Icons.help_outline_rounded,
+                    size: 24,
+                  )),
+            ),
             Padding(
               padding: const EdgeInsets.only(right: 8),
               child: GestureDetector(
@@ -235,7 +339,25 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
         body: PageView(
           controller: _pageController,
           onPageChanged: _onPageChanged,
-          children: bodyPageList,
+          children: [
+            DisplayMedicineInfoList(
+              changeImageShowCaseKey: changeImageOnCardShowCaseKey,
+              toMedicineNotifyShowCaseKey: toMedicineNotifyDetailShowCaseKey,
+              editMedicineShowCaseKey: editMedicineShowCaseKey,
+              deleteMedicineShowCaseKey: deleteMedicineShowCaseKey,
+            ), //หน้า รายการยา
+            NotifyScreen(
+              showcaseKey: chooseDateShowcaseKey,
+            ), // หน้า รายการแจ้งเตือน
+            MedicineReportScreen(
+              showcaseKey: chooseIntervalDateShowCaseKey,
+            ),
+            UserInfoScreen(
+              generalInfoShowCaseKey: generalInfoShowCaseKey,
+              medicalInfoShowCaseKey: medicineInfoShowCaseKey,
+              appointmentInfoShowCaseKey: appointmentInfoShowCase,
+            ),
+          ],
         ),
         bottomNavigationBar: BottomNavigationBar(
           elevation: 0,
@@ -263,14 +385,24 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
           ],
         ),
         floatingActionButton: _selectedIndex == 0
-            ? FloatingActionButton(
-                onPressed: _createMedicineInfo,
-                child: const Icon(Icons.add),
+            ? Showcase(
+                key: addMedicineFloatingButtonShowCaseKey,
+                targetBorderRadius: BorderRadius.circular(30),
+                description: "ปุ่มเพิ่มรายการยา",
+                child: FloatingActionButton(
+                  onPressed: _createMedicineInfo,
+                  child: const Icon(Icons.add),
+                ),
               )
             : _selectedIndex == 2
-                ? FloatingActionButton(
-                    onPressed: generatePDFReport,
-                    child: const Icon(Icons.picture_as_pdf),
+                ? Showcase(
+                    key: generatePDFFloatingButtonShowCaseKey,
+                    targetBorderRadius: BorderRadius.circular(30),
+                    description: "สร้างเอกสารสรุปการกินยา",
+                    child: FloatingActionButton(
+                      onPressed: generatePDFReport,
+                      child: const Icon(Icons.picture_as_pdf),
+                    ),
                   )
                 : null,
         floatingActionButtonLocation: FloatingActionButtonLocation.startFloat);

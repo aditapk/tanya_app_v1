@@ -8,6 +8,7 @@ import 'package:hive/hive.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:showcaseview/showcaseview.dart';
 import 'package:tanya_app_v1/GetXBinding/medicine_state_binding.dart';
 import 'package:tanya_app_v1/Model/medicine_info_model.dart';
 import 'package:tanya_app_v1/Model/notify_info.dart';
@@ -28,6 +29,10 @@ class MedicineInfoCard extends StatelessWidget {
     required this.index,
     required this.medicineData,
     super.key,
+    required this.imageShowCaseKey,
+    required this.toMedicineNotifyShowCaseKey,
+    required this.editMedicineShowCaseKey,
+    required this.deleteMedecineShowCaseKey,
   });
   // notify state controller injection
   //final notifyStateController = Get.put(NotificationState());
@@ -35,6 +40,10 @@ class MedicineInfoCard extends StatelessWidget {
   // input of medicine information card
   final MedicineInfo? medicineData;
   final int index;
+  final GlobalKey imageShowCaseKey;
+  final GlobalKey toMedicineNotifyShowCaseKey;
+  final GlobalKey editMedicineShowCaseKey;
+  final GlobalKey deleteMedecineShowCaseKey;
 
   // build widget function
   @override
@@ -49,6 +58,7 @@ class MedicineInfoCard extends StatelessWidget {
         children: [
           GestureDetector(
             onLongPress: toMedicineNotifyPage,
+            onTap: toMedicineNotifyPage,
             child: Card(
               elevation: 3.0,
               shape: RoundedRectangleBorder(
@@ -68,9 +78,17 @@ class MedicineInfoCard extends StatelessWidget {
                         right: 5,
                       ),
                       child: GestureDetector(
-                        child: ImageCard(
-                          image: medicineData?.picture_path,
-                        ),
+                        child: index == 0
+                            ? Showcase(
+                                key: imageShowCaseKey,
+                                targetBorderRadius: BorderRadius.circular(12),
+                                description: "เปลี่ยนแปลงรูปภาพ",
+                                child: ImageCard(
+                                  image: medicineData?.picture_path,
+                                ))
+                            : ImageCard(
+                                image: medicineData?.picture_path,
+                              ),
                         onTap: () {
                           Get.bottomSheet(
                             PictureEditBottomSheet(
@@ -84,9 +102,17 @@ class MedicineInfoCard extends StatelessWidget {
                       ),
                     ),
                     Expanded(
-                      child: MedicineInfoDisplayCard(
-                        medicineData: medicineData,
-                      ),
+                      child: index != 0
+                          ? MedicineInfoDisplayCard(
+                              medicineData: medicineData,
+                            )
+                          : Showcase(
+                              key: toMedicineNotifyShowCaseKey,
+                              targetBorderRadius: BorderRadius.circular(12),
+                              description: "กดเพื่อตั้งเวลาการแจ้งเตือนกินยา",
+                              child: MedicineInfoDisplayCard(
+                                medicineData: medicineData,
+                              )),
                     ),
                   ],
                 ),
@@ -98,9 +124,13 @@ class MedicineInfoCard extends StatelessWidget {
           // ),
           EditMedicineInfoButton(
             onPressed: _editMedicineInfo,
+            index: index,
+            showcaseKey: editMedicineShowCaseKey,
           ),
           DeleteMedicineInfoButton(
             onPressed: _deleteMedicineInfo,
+            index: index,
+            showcaseKey: deleteMedecineShowCaseKey,
           ),
         ],
       ),

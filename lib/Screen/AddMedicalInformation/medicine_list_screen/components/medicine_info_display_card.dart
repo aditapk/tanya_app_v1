@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:tanya_app_v1/Model/medicine_info_model.dart';
 
 class MedicineInfoDisplayCard extends StatelessWidget {
-  const MedicineInfoDisplayCard({this.medicineData, super.key});
+  const MedicineInfoDisplayCard({
+    this.medicineData,
+    super.key,
+  });
 
   final MedicineInfo? medicineData;
 

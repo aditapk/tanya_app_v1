@@ -8,7 +8,16 @@ import 'components/user_info_card.dart';
 import 'components/user_medical_info_card.dart';
 
 class UserInfoScreen extends StatefulWidget {
-  const UserInfoScreen({super.key});
+  const UserInfoScreen({
+    super.key,
+    required this.generalInfoShowCaseKey,
+    required this.medicalInfoShowCaseKey,
+    required this.appointmentInfoShowCaseKey,
+  });
+
+  final GlobalKey generalInfoShowCaseKey;
+  final GlobalKey medicalInfoShowCaseKey;
+  final GlobalKey appointmentInfoShowCaseKey;
 
   @override
   State<UserInfoScreen> createState() => _UserInfoScreenState();
@@ -33,18 +42,21 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                     height: 5,
                   ),
                   UserInfoCard(
+                    showcaseKey: widget.generalInfoShowCaseKey,
                     userInfo: userInfo,
                   ),
                   const SizedBox(
                     height: 5,
                   ),
                   UserMedicalInfoCard(
+                    showcaseKey: widget.medicalInfoShowCaseKey,
                     userInfo: userInfo,
                   ),
                   const SizedBox(
                     height: 5,
                   ),
                   UserAppointmentWithDoctorCard(
+                    showcaseKey: widget.appointmentInfoShowCaseKey,
                     userInfo: userInfo,
                   ),
                 ],
