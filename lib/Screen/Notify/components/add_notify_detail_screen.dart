@@ -117,14 +117,14 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
                 medicineSelected:
                     notifyInformation.selectedMedicine!.asMedicineInfo(),
               ),
-              TextInputEditor(
-                controller: notifyNameController,
-                labelText: 'รายการแจ้งเตือน',
-              ),
-              TextInputEditor(
-                controller: notifyDetailController,
-                labelText: 'รายละเอียดการแจ้งเตือน',
-              ),
+              // TextInputEditor(
+              //   controller: notifyNameController,
+              //   labelText: 'รายการแจ้งเตือน',
+              // ),
+              // TextInputEditor(
+              //   controller: notifyDetailController,
+              //   labelText: 'รายละเอียดการแจ้งเตือน',
+              // ),
               Row(
                 children: [
                   Expanded(
@@ -840,19 +840,6 @@ class _AddNotifyDetailScreenState extends State<AddNotifyDetailScreen> {
         ),
         imagePath: notifyData.medicineInfo.picture_path!,
       );
-
-      // notifySet(
-      //   notifyName: notifyName,
-      //   notifyDetail: notifyDetail,
-      //   notifyService: notifyService,
-      //   id: dataId,
-      //   scheduleTime: date.add(
-      //     Duration(days: day),
-      //   ),
-      //   payload: notifyPayload,
-      //   numNotify: notifyData.status,
-      //   imagePath: notifyData.medicineInfo.picture_path!,
-      // );
     }
   }
 

@@ -1,2 +1,3 @@
 hive GENERATED command
 
+how to release

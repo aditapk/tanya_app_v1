@@ -122,6 +122,15 @@ class NotifyHandleScreen extends StatelessWidget {
                                               fontSize: 18,
                                               fontWeight: FontWeight.bold)),
                                       onPressed: () {
+                                        // Future delay time
+                                        // Future.delayed(
+                                        //     const Duration(seconds: 10), () {
+                                        //   if (notifyInfo.status == 0) {
+                                        //     print('กินแล้ว');
+                                        //   } else {
+                                        //     print('ยังไม่กิน');
+                                        //   }
+                                        // });
                                         Get.back(result: "PENDING");
                                       },
                                     ),

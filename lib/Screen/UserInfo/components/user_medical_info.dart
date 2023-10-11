@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:tanya_app_v1/utils/constans.dart';
+import 'package:tanya_app_v1/utils/user_info_utils.dart';
 
 import '../../../Model/user_info_model.dart';
 import 'dart:math';
@@ -28,9 +29,7 @@ class UserMedicalInfo extends StatelessWidget {
             builder: (_, userInfoBox, __) {
               var userInfo = userInfoBox.get(0);
               if (userInfo != null) {
-                if (userInfo.weight != null ||
-                    userInfo.hight != null ||
-                    userInfo.pressure != null) {
+                if (!UserInfoUtils.isNullMedicalInfo(userInfo)) {
                   return Container(
                     padding: const EdgeInsets.all(10),
                     width: MediaQuery.of(context).size.width,
@@ -239,23 +238,24 @@ class MedicalTagDisplay extends StatelessWidget {
               ],
             ),
           )
-        : RichText(
-            text: TextSpan(
-              text: '$tag: ',
-              style: const TextStyle(
-                color: Colors.black,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-              children: const [
-                TextSpan(
-                  text: 'ยังไม่มีข้อมูล',
-                  style: TextStyle(
-                    fontWeight: FontWeight.normal,
-                  ),
-                )
-              ],
-            ),
-          );
+        : Container();
+    // RichText(
+    //     text: TextSpan(
+    //       text: '$tag: ',
+    //       style: const TextStyle(
+    //         color: Colors.black,
+    //         fontSize: 20,
+    //         fontWeight: FontWeight.bold,
+    //       ),
+    //       children: const [
+    //         TextSpan(
+    //           text: 'ยังไม่มีข้อมูล',
+    //           style: TextStyle(
+    //             fontWeight: FontWeight.normal,
+    //           ),
+    //         )
+    //       ],
+    //     ),
+    //   );
   }
 }

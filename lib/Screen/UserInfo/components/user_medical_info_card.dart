@@ -11,9 +11,11 @@ class UserMedicalInfoCard extends StatelessWidget {
   const UserMedicalInfoCard({
     super.key,
     required this.userInfo,
+    required this.showcaseKey,
   });
 
   final UserInfo? userInfo;
+  final GlobalKey showcaseKey;
 
   editHealthCareData() {
     showDialog(
@@ -53,6 +55,7 @@ class UserMedicalInfoCard extends StatelessWidget {
             userInfo: userInfo,
             color: Colors.pink.shade200,
             editButton: EditButtonUserMedicalInfo(
+              showcaseKey: showcaseKey,
               userInfo: userInfo,
               onPressed: editHealthCareData,
             ),

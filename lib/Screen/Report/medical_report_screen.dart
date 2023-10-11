@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
+import 'package:showcaseview/showcaseview.dart';
 import 'package:tanya_app_v1/Controller/medicine_info_controller.dart';
 import 'package:tanya_app_v1/Model/notify_info.dart';
 import 'package:tanya_app_v1/Screen/Report/components/selected_interval_time.dart';
@@ -12,7 +13,12 @@ import '../../Model/notify_report.dart';
 import 'components/medicine_report_card.dart';
 
 class MedicineReportScreen extends StatefulWidget {
-  const MedicineReportScreen({super.key});
+  const MedicineReportScreen({
+    super.key,
+    required this.showcaseKey,
+  });
+
+  final GlobalKey showcaseKey;
 
   @override
   State<MedicineReportScreen> createState() => _MedicineReportScreenState();
@@ -140,64 +146,87 @@ class _MedicineReportScreenState extends State<MedicineReportScreen> {
               color: Theme.of(context).primaryColor,
             ),
             child: Padding(
-              padding: const EdgeInsets.only(
-                  left: 15, right: 15, top: 10, bottom: 10),
-              child: GestureDetector(
-                onTap: () async {
-                  var result = await Get.defaultDialog(
-                    title: 'กำหนดช่วงวันและเวลา',
-                    titleStyle: const TextStyle(fontWeight: FontWeight.bold),
-                    content: SelectedIntervalTime(
-                        startDateTime: reportState.filterStartDate.value,
-                        endDateTime: reportState.filterEndDate.value),
-                  );
-                  if (result != null) {
-                    setState(() {
-                      reportState.filterStartDate.value =
-                          result['startDateTime'];
-                      reportState.filterEndDate.value = result['endDateTime'];
-                      // timeIntervalTextController.text =
-                      //     '${DateFormat.yMMMd('th').formatInBuddhistCalendarThai(reportState.filterStartDate.value)}  -  ${DateFormat.yMMMd('th').formatInBuddhistCalendarThai(reportState.filterEndDate.value)}';
-                    });
-                  }
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    color: Colors.white,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        timeIntervalTextController.text,
-                        maxLines: 1,
-                        overflow: TextOverflow.clip,
-                        style: const TextStyle(fontSize: 15),
+                padding: const EdgeInsets.only(
+                    left: 15, right: 15, top: 10, bottom: 10),
+                child: Showcase(
+                  key: widget.showcaseKey,
+                  targetBorderRadius: BorderRadius.circular(12),
+                  description: "กำหนดช่วงเวลาสรุปผลการกินยา",
+                  child: GestureDetector(
+                    onTap: () async {
+                      var result = await Get.defaultDialog(
+                        title: 'กำหนดช่วงวันและเวลา',
+                        titleStyle:
+                            const TextStyle(fontWeight: FontWeight.bold),
+                        content: SelectedIntervalTime(
+                            startDateTime: reportState.filterStartDate.value,
+                            endDateTime: reportState.filterEndDate.value),
+                      );
+                      if (result != null) {
+                        setState(() {
+                          reportState.filterStartDate.value =
+                              result['startDateTime'];
+                          reportState.filterEndDate.value =
+                              result['endDateTime'];
+                          // timeIntervalTextController.text =
+                          //     '${DateFormat.yMMMd('th').formatInBuddhistCalendarThai(reportState.filterStartDate.value)}  -  ${DateFormat.yMMMd('th').formatInBuddhistCalendarThai(reportState.filterEndDate.value)}';
+                        });
+                      }
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        color: Colors.white,
                       ),
-                    ],
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            timeIntervalTextController.text,
+                            maxLines: 1,
+                            overflow: TextOverflow.clip,
+                            style: const TextStyle(fontSize: 15),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ),
+                )),
           ),
           const SizedBox(
             height: 5,
           ),
-          Expanded(
-            child: ListView.builder(
-                scrollDirection: Axis.vertical,
-                itemCount: notifyReport!.length,
-                itemBuilder: (context, index) {
-                  if (notifyReport!.isNotEmpty) {
-                    return MedicineReportCard(
-                      notifyReport: notifyReport![index],
-                    );
-                  } else {
-                    return Container();
-                  }
-                }),
-          ),
+          notifyReport!.isNotEmpty
+              ? Expanded(
+                  child: ListView.builder(
+                      scrollDirection: Axis.vertical,
+                      itemCount: notifyReport!.length,
+                      itemBuilder: (context, index) {
+                        return MedicineReportCard(
+                          notifyReport: notifyReport![index],
+                        );
+                      }),
+                )
+              : SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      const SizedBox(
+                        height: 100,
+                      ),
+                      Image.asset(
+                        "assets/images/medicine.png",
+                        height: 300,
+                      ),
+                      const SizedBox(
+                        height: 50,
+                      ),
+                      const Text(
+                        "ไม่มีข้อมูลการกินยาในช่วงเวลานี้",
+                        style: TextStyle(fontSize: 24),
+                      )
+                    ],
+                  ),
+                )
         ],
       ),
     );

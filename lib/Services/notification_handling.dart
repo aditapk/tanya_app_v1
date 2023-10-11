@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
+import 'package:showcaseview/showcaseview.dart';
 import 'package:tanya_app_v1/Services/notify_services.dart';
 import 'package:tanya_app_v1/home_app_screen.dart';
 import 'package:tanya_app_v1/utils/constans.dart';
@@ -269,9 +270,15 @@ class NotificationHandeling {
 
             Future.delayed(const Duration(seconds: 2), () async {
               //debugPrint("get to home");
-              await Get.off(() => const HomeAppScreen(
-                    selectedPage: 1,
-                  ));
+              await Get.off(
+                () => ShowCaseWidget(
+                  builder: Builder(
+                    builder: (context) => const HomeAppScreen(
+                      selectedPage: 1,
+                    ),
+                  ),
+                ),
+              );
             });
           } else if (status == "PENDING") {
             var notifyInfo = await getNotifyInfo(notifyID);
@@ -327,9 +334,15 @@ class NotificationHandeling {
           );
           Future.delayed(const Duration(seconds: 2), () async {
             //debugPrint("get to home");
-            await Get.off(() => const HomeAppScreen(
-                  selectedPage: 3,
-                ));
+            await Get.off(
+              () => ShowCaseWidget(
+                builder: Builder(
+                  builder: (context) => const HomeAppScreen(
+                    selectedPage: 3,
+                  ),
+                ),
+              ),
+            );
           });
         }
 
@@ -347,9 +360,15 @@ class NotificationHandeling {
 
               Future.delayed(const Duration(seconds: 2), () async {
                 //debugPrint("get to home");
-                await Get.off(() => const HomeAppScreen(
-                      selectedPage: 1,
-                    ));
+                await Get.off(
+                  () => ShowCaseWidget(
+                    builder: Builder(
+                      builder: (context) => const HomeAppScreen(
+                        selectedPage: 1,
+                      ),
+                    ),
+                  ),
+                );
               });
               break;
             case "PENDING":
@@ -374,9 +393,15 @@ class NotificationHandeling {
           }
           Future.delayed(const Duration(seconds: 2), () async {
             //debugPrint("get to home");
-            await Get.off(() => const HomeAppScreen(
-                  selectedPage: 3,
-                ));
+            await Get.off(
+              () => ShowCaseWidget(
+                builder: Builder(
+                  builder: (context) => const HomeAppScreen(
+                    selectedPage: 3,
+                  ),
+                ),
+              ),
+            );
           });
         }
       // // have to implement on above

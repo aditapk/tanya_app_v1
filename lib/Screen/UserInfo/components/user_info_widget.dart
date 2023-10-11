@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:tanya_app_v1/utils/constans.dart';
+import 'package:tanya_app_v1/utils/user_info_utils.dart';
 
 import '../../../Model/user_info_model.dart';
 import 'editbutton_user_info.dart';
@@ -20,9 +21,7 @@ class UserInfoWidget extends StatelessWidget {
           return const EmptyDataUserInfoWidget();
         } else {
           var userInfo = userInfoBox.get(0);
-          if (userInfo?.name != null &&
-              userInfo?.address != null &&
-              userInfo?.doctorName != null) {
+          if (!UserInfoUtils.isNullPersonalInfo(userInfo)) {
             return Padding(
               padding: const EdgeInsets.only(left: 8, right: 8),
               child: Column(
@@ -32,8 +31,9 @@ class UserInfoWidget extends StatelessWidget {
                 ],
               ),
             );
+          } else {
+            return const EmptyDataUserInfoWidget();
           }
-          return const EmptyDataUserInfoWidget();
         }
       },
     );
@@ -89,61 +89,96 @@ class UserInfoDetail extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            RichText(
-              text: TextSpan(
-                text: 'ชื่อ ',
-                style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold),
-                children: [
-                  TextSpan(
-                    text: userInfo?.name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            RichText(
-              text: TextSpan(
-                text: 'ที่อยู่ ',
-                style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold),
-                children: [
-                  TextSpan(
-                    text: userInfo?.address,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            RichText(
-              text: TextSpan(
-                text: 'แพทย์ผู้รักษา ',
-                style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold),
-                children: [
-                  TextSpan(
-                    text: userInfo?.doctorName,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ),
-                ],
-              ),
-            )
+            DisplayText(tag: "ชื่อ", value: userInfo?.name),
+            DisplayText(tag: "ที่อยู่", value: userInfo?.address),
+            DisplayText(tag: "แพทย์ผู้รักษา", value: userInfo?.doctorName),
+            // RichText(
+            //   text: TextSpan(
+            //     text: 'ชื่อ ',
+            //     style: const TextStyle(
+            //         color: Colors.black,
+            //         fontSize: 20,
+            //         fontWeight: FontWeight.bold),
+            //     children: [
+            //       TextSpan(
+            //         text: userInfo?.name,
+            //         style: const TextStyle(
+            //           fontWeight: FontWeight.normal,
+            //         ),
+            //       ),
+            //     ],
+            //   ),
+            // ),
+            // RichText(
+            //   text: TextSpan(
+            //     text: 'ที่อยู่ ',
+            //     style: const TextStyle(
+            //         color: Colors.black,
+            //         fontSize: 20,
+            //         fontWeight: FontWeight.bold),
+            //     children: [
+            //       TextSpan(
+            //         text: userInfo?.address,
+            //         style: const TextStyle(
+            //           fontWeight: FontWeight.normal,
+            //         ),
+            //       ),
+            //     ],
+            //   ),
+            // ),
+            // RichText(
+            //   text: TextSpan(
+            //     text: 'แพทย์ผู้รักษา ',
+            //     style: const TextStyle(
+            //         color: Colors.black,
+            //         fontSize: 20,
+            //         fontWeight: FontWeight.bold),
+            //     children: [
+            //       TextSpan(
+            //         text: userInfo?.doctorName,
+            //         style: const TextStyle(
+            //           fontWeight: FontWeight.normal,
+            //         ),
+            //       ),
+            //     ],
+            //   ),
+            // )
           ],
         ),
       ),
     );
+  }
+}
+
+class DisplayText extends StatelessWidget {
+  const DisplayText({
+    super.key,
+    required this.tag,
+    required this.value,
+  });
+  final String tag;
+  final String? value;
+  @override
+  Widget build(BuildContext context) {
+    return value != null
+        ? RichText(
+            text: TextSpan(
+              text: '$tag ',
+              style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold),
+              children: [
+                TextSpan(
+                  text: value,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.normal,
+                  ),
+                ),
+              ],
+            ),
+          )
+        : Container();
   }
 }
 
@@ -154,7 +189,10 @@ class UserInfoHeader extends StatelessWidget {
     required this.onPressed,
     required this.color,
     required this.text,
+    required this.showcaseKey,
   });
+
+  final GlobalKey showcaseKey;
 
   bool checkExistUser() {
     var userInfoBox = Hive.box<UserInfo>(HiveDatabaseName.USER_INFO);
@@ -194,6 +232,7 @@ class UserInfoHeader extends StatelessWidget {
               ),
             ),
             EditButtonUserInfo(
+              showcaseKey: showcaseKey,
               onPressed: onPressed,
               userInfo: userInfo,
             ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:showcaseview/showcaseview.dart';
 import 'package:tanya_app_v1/home_app_screen.dart';
 import 'package:tanya_app_v1/utils/constans.dart';
 
@@ -64,7 +65,13 @@ class _ToChooseMedicineState extends State<ToChooseMedicine> {
                       ),
                     ),
                     onPressed: () {
-                      Get.off(() => const HomeAppScreen());
+                      Get.off(
+                        () => ShowCaseWidget(
+                          builder: Builder(
+                            builder: (context) => const HomeAppScreen(),
+                          ),
+                        ),
+                      );
                     },
                     child: const Text(
                       "เพิ่มรายการยา",

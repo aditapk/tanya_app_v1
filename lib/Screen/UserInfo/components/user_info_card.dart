@@ -10,9 +10,11 @@ class UserInfoCard extends StatelessWidget {
   const UserInfoCard({
     super.key,
     required this.userInfo,
+    required this.showcaseKey,
   });
 
   final UserInfo? userInfo;
+  final GlobalKey showcaseKey;
 
   editUserInfo() {
     showDialog(
@@ -58,6 +60,7 @@ class UserInfoCard extends StatelessWidget {
           userInfo: userInfo,
           color: Colors.blue.shade200,
           editButton: EditButtonUserInfo(
+            showcaseKey: showcaseKey,
             userInfo: userInfo,
             onPressed: editUserInfo,
           ),

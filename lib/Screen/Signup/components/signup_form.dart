@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
+import 'package:showcaseview/showcaseview.dart';
 import 'package:tanya_app_v1/Model/user_login_model.dart';
 //import 'package:tanya_app_v1/Screen/Notify/notify_screen_old.dart';
 import 'package:tanya_app_v1/Screen/Login/login_screen.dart';
 import 'package:tanya_app_v1/components/already_have_an_account_acheck.dart';
 import 'package:tanya_app_v1/constants.dart';
+import 'package:tanya_app_v1/home_app_screen.dart';
 import 'package:tanya_app_v1/utils/constans.dart';
 
 class SignUpForm extends StatefulWidget {
@@ -36,9 +38,20 @@ class _SignUpFormState extends State<SignUpForm> {
         userLogin.logOut = true;
         await userLogin.save();
       }
-      Get.to(() => const LoginScreen());
+      // Get.to(() => const LoginScreen());
+
+      Get.to(
+        () => ShowCaseWidget(
+          builder: Builder(
+            builder: (context) => const HomeAppScreen(),
+          ),
+        ),
+      );
     } else {
-      //
+      // show popup
+      Get.defaultDialog(
+          title: "การสมัครสมาชิก",
+          middleText: "ต้องระบุข้อมูลผู้ใช้และรหัสผ่าน\nเพื่อสมัครสมาชิก");
     }
   }
 

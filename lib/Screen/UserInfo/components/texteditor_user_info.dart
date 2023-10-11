@@ -5,6 +5,7 @@ import 'package:hive/hive.dart';
 import 'package:tanya_app_v1/utils/constans.dart';
 
 import '../../../Model/user_info_model.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:http/http.dart' as http;
 
@@ -184,6 +185,20 @@ class _TextFieldUserInfoState extends State<TextFieldUserInfo> {
               ))
             ],
           ),
+          TextButton(
+            onPressed: () async {
+              final Uri url = Uri.parse(Introduction.DOCUMENT_LINK);
+              if (await canLaunchUrl(url)) {
+                await launchUrl(url);
+              } else {
+                // have some problem for open url
+              }
+            },
+            child: const Text(
+              'ขั้นตอนวิธีการสร้าง LINE token',
+              style: TextStyle(fontSize: 18),
+            ),
+          ),
           const SizedBox(
             height: 10,
           ),
@@ -232,16 +247,28 @@ class _TextFieldUserInfoState extends State<TextFieldUserInfo> {
                   } else {
                     if (nameTextController.text.isNotEmpty) {
                       widget.userInfo!.name = nameTextController.text;
+                    } else {
+                      widget.userInfo!.name = null;
                     }
+
                     if (addressTextController.text.isNotEmpty) {
                       widget.userInfo!.address = addressTextController.text;
+                    } else {
+                      widget.userInfo!.address = null;
                     }
+
                     if (doctorTextController.text.isNotEmpty) {
                       widget.userInfo!.doctorName = doctorTextController.text;
+                    } else {
+                      widget.userInfo!.doctorName = null;
                     }
+
                     if (lineTokenTextController.text.isNotEmpty) {
                       widget.userInfo!.lineToken = lineTokenTextController.text;
+                    } else {
+                      widget.userInfo!.lineToken = null;
                     }
+
                     await widget.userInfo!.save();
                   }
 

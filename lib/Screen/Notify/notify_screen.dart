@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 //import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:showcaseview/showcaseview.dart';
 //import 'package:path/path.dart';
 import 'package:tanya_app_v1/Model/notify_info.dart';
 import 'package:tanya_app_v1/Screen/Notify/components/notify_medicine_card.dart';
@@ -19,8 +20,9 @@ import '../../constants.dart';
 class NotifyScreen extends StatefulWidget {
   const NotifyScreen({
     Key? key,
+    required this.showcaseKey,
   }) : super(key: key);
-
+  final GlobalKey showcaseKey;
   @override
   State<NotifyScreen> createState() => _NotifyScreenState();
 }
@@ -89,33 +91,13 @@ class _NotifyScreenState extends State<NotifyScreen> {
                 currentDate = selectedDate ?? currentDate;
               });
             },
-            child: Container(
-              height: 50,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                color: Colors.white,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.calendar_month_outlined,
-                    color: Theme.of(context).primaryColor,
-                  ),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  Text(
-                    DateFormat.yMMMMEEEEd('th').formatInBuddhistCalendarThai(
-                      currentDate,
-                    ),
-                    style: const TextStyle(
-                      fontSize: 18,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            child: Showcase(
+                key: widget.showcaseKey,
+                targetBorderRadius: BorderRadius.circular(12),
+                description: "เลือกดูรายการแจ้งเตือนยาในแต่ละวัน",
+                child: ChooseDate(
+                  currentDate: currentDate,
+                )),
           ),
         ),
         ValueListenableBuilder(
@@ -177,6 +159,41 @@ class _NotifyScreenState extends State<NotifyScreen> {
   }
 }
 
+class ChooseDate extends StatelessWidget {
+  const ChooseDate({super.key, required this.currentDate});
+  final DateTime currentDate;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 50,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.calendar_month_outlined,
+            color: Theme.of(context).primaryColor,
+          ),
+          const SizedBox(
+            width: 10,
+          ),
+          Text(
+            DateFormat.yMMMMEEEEd('th').formatInBuddhistCalendarThai(
+              currentDate,
+            ),
+            style: const TextStyle(
+              fontSize: 18,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class MedicineCardList extends StatelessWidget {
   const MedicineCardList({
     super.key,
@@ -213,15 +230,17 @@ class EmptyNotifyList extends StatelessWidget {
           ),
           Image.asset(
             "assets/images/empty_notify_list.png",
-            width: 200,
-            height: 200,
+            height: 300,
           ),
           const SizedBox(
             height: 50,
           ),
           const Text(
             "วันนี้ไม่มีรายการแจ้งเตือน",
-            style: TextStyle(fontSize: 20),
+            style: TextStyle(
+              fontSize: 24,
+            ),
+            textAlign: TextAlign.center,
           )
         ],
       ),
