@@ -47,9 +47,9 @@ class PictureEditBottomSheet extends StatelessWidget {
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12))),
                       onPressed: onChoose,
-                      child: Row(
+                      child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
+                        children: [
                           Icon(Icons.photo),
                           SizedBox(
                             width: 5,
@@ -75,9 +75,9 @@ class PictureEditBottomSheet extends StatelessWidget {
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12))),
                       onPressed: onTakephoto,
-                      child: Row(
+                      child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
+                        children: [
                           Icon(Icons.photo_camera),
                           SizedBox(
                             width: 5,

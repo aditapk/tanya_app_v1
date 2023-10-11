@@ -20,7 +20,9 @@ class LoginScreenSelection extends StatelessWidget {
             ? const LoginScreen()
             : ShowCaseWidget(
                 builder: Builder(
-                  builder: (context) => const HomeAppScreen(),
+                  builder: (context) => const HomeAppScreen(
+                    showHelp: true,
+                  ),
                 ),
               );
   }

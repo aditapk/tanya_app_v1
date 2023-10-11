@@ -114,7 +114,9 @@ class _LoginFormState extends State<LoginForm> {
         Get.to(
           () => ShowCaseWidget(
             builder: Builder(
-              builder: (context) => const HomeAppScreen(),
+              builder: (context) => const HomeAppScreen(
+                showHelp: true,
+              ),
             ),
           ),
           binding: AppInfoBinding(),

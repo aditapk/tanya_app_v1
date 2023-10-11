@@ -46,7 +46,9 @@ Future<void> main() async {
   await NotifyService().inintializeNotification(
     onDidReceiveNotification: NotificationHandeling.onDidReceiveNotification,
   );
-  //debugPrint('\tNotification Intial');
+
+  // init share preferences
+  //await SharePreferencesData.init();
 
   // run My App
   //debugPrint('main: Running');

@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:open_file_plus/open_file_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
+
 import 'package:showcaseview/showcaseview.dart';
 import 'package:tanya_app_v1/Controller/medicine_info_controller.dart';
 import 'package:tanya_app_v1/Model/user_login_model.dart';
@@ -20,7 +21,9 @@ import 'package:tanya_app_v1/Screen/UserInfo/user_info_screen.dart';
 import 'package:tanya_app_v1/Services/hive_db_services.dart';
 import 'package:tanya_app_v1/Services/notify_services.dart';
 import 'package:tanya_app_v1/utils/constans.dart';
+
 import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import '../../GetXBinding/medicine_state_binding.dart';
 import 'Model/medicine_info_model.dart';
 import 'Model/notify_info.dart';
@@ -35,17 +38,18 @@ class HomeAppScreen extends StatefulWidget {
     super.key,
     this.selectedPage,
     this.context,
+    this.showHelp,
   });
 
   final int? selectedPage;
   final BuildContext? context;
+  final bool? showHelp;
 
   @override
   State<HomeAppScreen> createState() => _HomeAppScreenState();
 }
 
 class _HomeAppScreenState extends State<HomeAppScreen> {
-  //var pageState = Get.put(PageState());
   @override
   void initState() {
     if (widget.selectedPage != null) {
@@ -54,9 +58,12 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
 
     _pageController = PageController(initialPage: _selectedIndex);
 
+    if (widget.showHelp ?? false) {
+      WidgetsBinding.instance.addPostFrameCallback((_) =>
+          ShowCaseWidget.of(context)
+              .startShowCase([helpShowCaseKey, helpDocShowCaseKey]));
+    }
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback(
-        (_) => ShowCaseWidget.of(context).startShowCase([helpShowCaseKey]));
   }
 
   @override
@@ -72,20 +79,13 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
     "ข้อมูลผู้ใช้",
   ];
 
-  // final List<Widget> bodyPageList = <Widget>[
-  //   DisplayMedicineInfoList(
-  //     showCaseKey: _medicineInfoShowCaseKey,
-  //   ), //หน้า รายการยา
-  //   const NotifyScreen(), // หน้า รายการแจ้งเตือน
-  //   const MedicineReportScreen(),
-  //   const UserInfoScreen(),
-  // ];
-
   late PageController _pageController;
 
   int _selectedIndex = 0;
 
+  // help
   final helpShowCaseKey = GlobalKey();
+  final helpDocShowCaseKey = GlobalKey();
 
   // Page Medicine List
   final addMedicineFloatingButtonShowCaseKey = GlobalKey();
@@ -109,142 +109,162 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
   @override
   Widget build(BuildContext context) {
     //debugPrint("home : build, _selectedIndex = $_selectedIndex");
-
     return Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
           elevation: 0,
           automaticallyImplyLeading: false,
-          leading: PopupMenuButton(
-              offset: const Offset(10, 40),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-              itemBuilder: (context) => const [
-                    PopupMenuItem(
-                      value: 3,
-                      child: ListTile(
-                        leading: Icon(Icons.help),
-                        title: Text('คู่มือการใช้งาน'),
+          leading: Showcase(
+            key: helpDocShowCaseKey,
+            targetBorderRadius: BorderRadius.circular(12),
+            description: "ปุ่มข้อมูลการใช้งานเพิ่มเติม",
+            child: PopupMenuButton(
+                offset: const Offset(10, 40),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                itemBuilder: (context) => const [
+                      PopupMenuItem(
+                        value: 3,
+                        child: ListTile(
+                          leading: Icon(Icons.help),
+                          title: Text('คู่มือการใช้งาน'),
+                        ),
                       ),
-                    ),
-                    PopupMenuItem(
-                      value: 4,
-                      child: ListTile(
-                        leading: Icon(Icons.face),
-                        title: Text('ตอบปัญหาการใช้งาน'),
+                      PopupMenuItem(
+                        value: 5,
+                        child: ListTile(
+                          leading: Icon(Icons.error),
+                          title: Text('คำถามที่พบบ่อย'),
+                        ),
                       ),
-                    ),
-                    PopupMenuItem(
-                      value: 0,
-                      child: ListTile(
-                        leading: Icon(Icons.logout),
-                        title: Text('ออกจากระบบ'),
+                      PopupMenuItem(
+                        value: 4,
+                        child: ListTile(
+                          leading: Icon(Icons.face),
+                          title: Text('ตอบปัญหาการใช้งาน'),
+                        ),
                       ),
-                    ),
-                    PopupMenuItem(
-                      value: 1,
-                      child: ListTile(
-                        leading: ImageIcon(
-                            AssetImage("assets/icons/remove-user-2.png")),
-                        title: Text('ลบข้อมูลผู้ใช้'),
+                      PopupMenuItem(
+                        value: 1,
+                        child: ListTile(
+                          leading: ImageIcon(
+                              AssetImage("assets/icons/remove-user-2.png")),
+                          title: Text('ลบข้อมูลผู้ใช้'),
+                        ),
                       ),
-                    ),
-                    PopupMenuItem(
-                      value: 2,
-                      child: ListTile(
-                        leading: Icon(Icons.delete),
-                        title: Text('ลบข้อมูลทั้งหมด'),
+                      PopupMenuItem(
+                        value: 2,
+                        child: ListTile(
+                          leading: Icon(Icons.delete),
+                          title: Text('ลบข้อมูลทั้งหมด'),
+                        ),
                       ),
-                    ),
-                  ],
-              onSelected: (value) async {
-                switch (value) {
-                  case 0:
-                    var userLoginBox =
-                        Hive.box<UserLogin>(HiveDatabaseName.USER_LOGIN);
-                    var userLogin = userLoginBox.get(0);
-                    userLogin!.logOut = true;
-                    await userLogin.save();
-                    await Get.offAll(() => const LoginScreenSelection());
-                    break;
-                  case 1:
-                    Get.defaultDialog(
-                        title: "ลบข้อมูลผู้ใช้",
-                        middleText: "ข้อมูลผู้ใช้จะถูกลบออกจากระบบ",
-                        actions: [
-                          TextButton(
-                              onPressed: () async {
-                                var userInfoBox = Hive.box<UserInfo>(
-                                    HiveDatabaseName.USER_INFO);
-                                var userInfo = userInfoBox.get(0);
-                                if (userInfo != null) {
-                                  // clear user info
-                                  var clearUserInfo = UserInfo();
-                                  userInfoBox.putAt(0, clearUserInfo);
-                                }
-                                Get.back();
-                              },
-                              child: const Text(
-                                "ตกลง",
-                                style: TextStyle(fontSize: 16),
-                              )),
-                          TextButton(
-                              onPressed: () {
-                                Get.back();
-                              },
-                              child: const Text(
-                                "ยกเลิก",
-                                style: TextStyle(fontSize: 16),
-                              )),
-                        ]);
-                    break;
-                  case 2:
-                    Get.defaultDialog(
-                        title: "ลบข้อมูลทั้งหมด",
-                        middleText: "ข้อมูลทั้งหมดจะถูกลบออกจากระบบ",
-                        actions: [
-                          TextButton(
-                              onPressed: () async {
-                                await NotifyService.localNotificationsPlugin
-                                    .cancelAll();
-                                await HiveDatabaseService.deleteBox();
-                                await HiveDatabaseService.openAllBox();
-                                await Get.offAll(
-                                    () => const LoginScreenSelection());
-                              },
-                              child: const Text(
-                                "ตกลง",
-                                style: TextStyle(fontSize: 16),
-                              )),
-                          TextButton(
-                              onPressed: () {
-                                Get.back();
-                              },
-                              child: const Text(
-                                "ยกเลิก",
-                                style: TextStyle(fontSize: 16),
-                              )),
-                        ]);
-                    break;
-                  case 3:
-                    // open url
-                    final Uri url = Uri.parse(Introduction.DOCUMENT_LINK);
-                    if (await canLaunchUrl(url)) {
-                      await launchUrl(url);
-                    } else {
-                      // have some problem for open url
-                    }
-                    break;
-                  case 4:
-                    final Uri url = Uri.parse(Introduction.FACEBOOK_LINK);
-                    if (await canLaunchUrl(url)) {
-                      await launchUrl(url);
-                    } else {
-                      // have some problem for open url
-                    }
-                    break;
-                }
-              }),
+                      PopupMenuItem(
+                        value: 0,
+                        child: ListTile(
+                          leading: Icon(Icons.logout),
+                          title: Text('ออกจากระบบ'),
+                        ),
+                      ),
+                    ],
+                onSelected: (value) async {
+                  switch (value) {
+                    case 0:
+                      var userLoginBox =
+                          Hive.box<UserLogin>(HiveDatabaseName.USER_LOGIN);
+                      var userLogin = userLoginBox.get(0);
+                      userLogin!.logOut = true;
+                      await userLogin.save();
+                      await Get.offAll(() => const LoginScreenSelection());
+                      break;
+                    case 1:
+                      Get.defaultDialog(
+                          title: "ลบข้อมูลผู้ใช้",
+                          middleText: "ข้อมูลผู้ใช้จะถูกลบออกจากระบบ",
+                          actions: [
+                            TextButton(
+                                onPressed: () async {
+                                  var userInfoBox = Hive.box<UserInfo>(
+                                      HiveDatabaseName.USER_INFO);
+                                  var userInfo = userInfoBox.get(0);
+                                  if (userInfo != null) {
+                                    // clear user info
+                                    var clearUserInfo = UserInfo();
+                                    userInfoBox.putAt(0, clearUserInfo);
+                                  }
+                                  Get.back();
+                                },
+                                child: const Text(
+                                  "ตกลง",
+                                  style: TextStyle(fontSize: 16),
+                                )),
+                            TextButton(
+                                onPressed: () {
+                                  Get.back();
+                                },
+                                child: const Text(
+                                  "ยกเลิก",
+                                  style: TextStyle(fontSize: 16),
+                                )),
+                          ]);
+                      break;
+                    case 2:
+                      Get.defaultDialog(
+                          title: "ลบข้อมูลทั้งหมด",
+                          middleText: "ข้อมูลทั้งหมดจะถูกลบออกจากระบบ",
+                          actions: [
+                            TextButton(
+                                onPressed: () async {
+                                  await NotifyService.localNotificationsPlugin
+                                      .cancelAll();
+                                  await HiveDatabaseService.deleteBox();
+                                  await HiveDatabaseService.openAllBox();
+                                  await Get.offAll(
+                                      () => const LoginScreenSelection());
+                                },
+                                child: const Text(
+                                  "ตกลง",
+                                  style: TextStyle(fontSize: 16),
+                                )),
+                            TextButton(
+                                onPressed: () {
+                                  Get.back();
+                                },
+                                child: const Text(
+                                  "ยกเลิก",
+                                  style: TextStyle(fontSize: 16),
+                                )),
+                          ]);
+                      break;
+                    case 3:
+                      // open url
+                      final Uri url = Uri.parse(Introduction.DOCUMENT_LINK);
+                      if (await canLaunchUrl(url)) {
+                        await launchUrl(url);
+                      } else {
+                        // have some problem for open url
+                      }
+                      break;
+                    case 4:
+                      String fbUrl = Introduction.FACEBOOK_LINK;
+                      //final Uri url = Uri.parse(fbUrl);
+                      if (await canLaunchUrlString(fbUrl)) {
+                        await launchUrlString(fbUrl);
+                      } else {
+                        // have some problem for open url
+                      }
+                      break;
+                    case 5:
+                      final Uri url = Uri.parse(Introduction.FAQ_LINK);
+                      if (await canLaunchUrl(url)) {
+                        await launchUrl(url);
+                      } else {
+                        // have some problem for open url
+                      }
+                      break;
+                  }
+                }),
+          ),
           title: Text(titlePageList[_selectedIndex]),
           centerTitle: true,
           actions: [

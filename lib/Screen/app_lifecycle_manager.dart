@@ -54,6 +54,9 @@ class _AppLifeCycleManagerState extends State<AppLifeCycleManager>
         // print('AppLifecyccleState: deached');
 
         break;
+      case AppLifecycleState.hidden:
+        // TODO: Handle this case.
+        break;
     }
   }
 
