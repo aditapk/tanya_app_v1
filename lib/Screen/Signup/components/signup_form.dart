@@ -26,29 +26,44 @@ class _SignUpFormState extends State<SignUpForm> {
     if (userTextController.text.isNotEmpty &&
         passTextController.text.isNotEmpty) {
       if (userLogin == null) {
+        // first Sign Up
         userLoginBox.add(UserLogin(
             username: userTextController.text,
             password: passTextController.text,
             lastTimeLogin: DateTime.now().toString(),
-            logOut: true));
+            logOut: false,
+            beginningUse: true));
+
+        // from Sign Up -> Home
+        Get.to(
+          () => ShowCaseWidget(
+            builder: Builder(
+              builder: (context) => const HomeAppScreen(
+                showHelp: true, // beginning use
+              ),
+            ),
+          ),
+        );
       } else {
+        // re-Sign Up
         userLogin.username = userTextController.text;
         userLogin.password = passTextController.text;
         userLogin.lastTimeLogin = DateTime.now().toString();
-        userLogin.logOut = true;
+        userLogin.logOut = false;
+        userLogin.beginningUse = true;
         await userLogin.save();
-      }
-      // Get.to(() => const LoginScreen());
 
-      Get.to(
-        () => ShowCaseWidget(
-          builder: Builder(
-            builder: (context) => const HomeAppScreen(
-              showHelp: true,
+        // from Sign Up -> Home
+        Get.to(
+          () => ShowCaseWidget(
+            builder: Builder(
+              builder: (context) => HomeAppScreen(
+                showHelp: userLogin.beginningUse,
+              ),
             ),
           ),
-        ),
-      );
+        );
+      }
     } else {
       // show popup
       Get.defaultDialog(

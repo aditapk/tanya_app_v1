@@ -21,13 +21,14 @@ class UserLoginAdapter extends TypeAdapter<UserLogin> {
       password: fields[1] as String,
       lastTimeLogin: fields[2] as String,
       logOut: fields[3] as bool?,
+      beginningUse: fields[4] as bool?,
     );
   }
 
   @override
   void write(BinaryWriter writer, UserLogin obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.username)
       ..writeByte(1)
@@ -35,7 +36,9 @@ class UserLoginAdapter extends TypeAdapter<UserLogin> {
       ..writeByte(2)
       ..write(obj.lastTimeLogin)
       ..writeByte(3)
-      ..write(obj.logOut);
+      ..write(obj.logOut)
+      ..writeByte(4)
+      ..write(obj.beginningUse);
   }
 
   @override

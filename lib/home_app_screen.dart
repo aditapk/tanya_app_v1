@@ -66,9 +66,18 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
     super.initState();
   }
 
+  void setBeginnerUsertoHive(bool value) {
+    var userLoginBox = Hive.box<UserLogin>(HiveDatabaseName.USER_LOGIN);
+    var userLogin = userLoginBox.get(0);
+    userLogin!.beginningUse = value;
+    userLogin.save();
+  }
+
   @override
   void dispose() {
     _pageController.dispose();
+    // set not be beginner user
+    setBeginnerUsertoHive(false);
     super.dispose();
   }
 
@@ -545,6 +554,7 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
                   'สรุปการกินยาตั้งแต่ วันที่ $startDateString ถึง วันที่ $endDateString',
                   style: pw.TextStyle(font: ttf),
                 ),
+                // ignore: deprecated_member_use
                 pw.Table.fromTextArray(
                   headerStyle: pw.TextStyle(font: ttf),
                   cellStyle: pw.TextStyle(font: ttf),

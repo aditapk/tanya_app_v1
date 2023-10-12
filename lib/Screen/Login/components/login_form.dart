@@ -110,12 +110,13 @@ class _LoginFormState extends State<LoginForm> {
       if (userTextController.text == userLogin.username &&
           passwordTextController.text == userLogin.password) {
         userLogin.logOut = false;
+        userLogin.beginningUse = true;
         await userLogin.save();
         Get.to(
           () => ShowCaseWidget(
             builder: Builder(
-              builder: (context) => const HomeAppScreen(
-                showHelp: true,
+              builder: (context) => HomeAppScreen(
+                showHelp: userLogin.beginningUse,
               ),
             ),
           ),

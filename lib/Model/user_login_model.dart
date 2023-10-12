@@ -16,10 +16,14 @@ class UserLogin extends HiveObject {
   @HiveField(3)
   bool? logOut;
 
+  @HiveField(4)
+  bool? beginningUse;
+
   UserLogin({
     required this.username,
     required this.password,
     required this.lastTimeLogin,
     this.logOut,
+    this.beginningUse,
   });
 }

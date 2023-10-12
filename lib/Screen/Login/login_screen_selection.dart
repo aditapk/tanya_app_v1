@@ -14,16 +14,33 @@ class LoginScreenSelection extends StatelessWidget {
   Widget build(BuildContext context) {
     var userLoginBox = Hive.box<UserLogin>(HiveDatabaseName.USER_LOGIN);
     var userLogin = userLoginBox.get(0);
-    return (userLogin == null)
-        ? const SignUpScreen()
-        : (userLogin.logOut!)
-            ? const LoginScreen()
-            : ShowCaseWidget(
-                builder: Builder(
-                  builder: (context) => const HomeAppScreen(
-                    showHelp: true,
-                  ),
-                ),
-              );
+
+    if (userLogin == null) {
+      // first Login
+      return const SignUpScreen();
+    } else if (userLogin.logOut!) {
+      // have logout
+      return const LoginScreen();
+    } else {
+      if (userLogin.beginningUse == null) {
+        userLogin.beginningUse = true;
+        userLogin.save();
+        return ShowCaseWidget(
+          builder: Builder(
+            builder: (context) => const HomeAppScreen(
+              showHelp: true,
+            ),
+          ),
+        );
+      } else {
+        return ShowCaseWidget(
+          builder: Builder(
+            builder: (context) => const HomeAppScreen(
+              showHelp: false,
+            ),
+          ),
+        );
+      }
+    }
   }
 }

@@ -55,7 +55,7 @@ class _AppLifeCycleManagerState extends State<AppLifeCycleManager>
 
         break;
       case AppLifecycleState.hidden:
-        // TODO: Handle this case.
+        // Handle this case.
         break;
     }
   }
