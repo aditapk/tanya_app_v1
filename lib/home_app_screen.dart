@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:buddhist_datetime_dateformat_sns/buddhist_datetime_dateformat_sns.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_native_splash/cli_commands.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
@@ -52,12 +53,6 @@ class HomeAppScreen extends StatefulWidget {
 class _HomeAppScreenState extends State<HomeAppScreen> {
   @override
   void initState() {
-    if (widget.selectedPage != null) {
-      _selectedIndex = widget.selectedPage!;
-    }
-
-    _pageController = PageController(initialPage: _selectedIndex);
-
     if (widget.showHelp ?? false) {
       WidgetsBinding.instance.addPostFrameCallback((_) =>
           ShowCaseWidget.of(context)
@@ -75,7 +70,6 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
 
   @override
   void dispose() {
-    _pageController.dispose();
     // set not be beginner user
     setBeginnerUsertoHive(false);
     super.dispose();
@@ -87,10 +81,6 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
     "ข้อมูลสรุป",
     "ข้อมูลผู้ใช้",
   ];
-
-  late PageController _pageController;
-
-  int _selectedIndex = 0;
 
   // help
   final helpShowCaseKey = GlobalKey();
@@ -117,324 +107,333 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
 
   @override
   Widget build(BuildContext context) {
-    //debugPrint("home : build, _selectedIndex = $_selectedIndex");
-    return Scaffold(
-        resizeToAvoidBottomInset: false,
-        appBar: AppBar(
-          elevation: 0,
-          automaticallyImplyLeading: false,
-          leading: Showcase(
-            key: helpDocShowCaseKey,
-            targetBorderRadius: BorderRadius.circular(12),
-            description: "ปุ่มข้อมูลการใช้งานเพิ่มเติม",
-            child: PopupMenuButton(
-                offset: const Offset(10, 40),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-                itemBuilder: (context) => const [
-                      PopupMenuItem(
-                        value: 3,
-                        child: ListTile(
-                          leading: Icon(Icons.help),
-                          title: Text('คู่มือการใช้งาน'),
-                        ),
-                      ),
-                      PopupMenuItem(
-                        value: 5,
-                        child: ListTile(
-                          leading: Icon(Icons.error),
-                          title: Text('คำถามที่พบบ่อย'),
-                        ),
-                      ),
-                      PopupMenuItem(
-                        value: 4,
-                        child: ListTile(
-                          leading: Icon(Icons.face),
-                          title: Text('ตอบปัญหาการใช้งาน'),
-                        ),
-                      ),
-                      PopupMenuItem(
-                        value: 1,
-                        child: ListTile(
-                          leading: ImageIcon(
-                              AssetImage("assets/icons/remove-user-2.png")),
-                          title: Text('ลบข้อมูลผู้ใช้'),
-                        ),
-                      ),
-                      PopupMenuItem(
-                        value: 2,
-                        child: ListTile(
-                          leading: Icon(Icons.delete),
-                          title: Text('ลบข้อมูลทั้งหมด'),
-                        ),
-                      ),
-                      PopupMenuItem(
-                        value: 0,
-                        child: ListTile(
-                          leading: Icon(Icons.logout),
-                          title: Text('ออกจากระบบ'),
-                        ),
-                      ),
-                    ],
-                onSelected: (value) async {
-                  switch (value) {
-                    case 0:
-                      var userLoginBox =
-                          Hive.box<UserLogin>(HiveDatabaseName.USER_LOGIN);
-                      var userLogin = userLoginBox.get(0);
-                      userLogin!.logOut = true;
-                      await userLogin.save();
-                      await Get.offAll(() => const LoginScreenSelection());
-                      break;
-                    case 1:
-                      Get.defaultDialog(
-                          title: "ลบข้อมูลผู้ใช้",
-                          middleText: "ข้อมูลผู้ใช้จะถูกลบออกจากระบบ",
-                          actions: [
-                            TextButton(
-                                onPressed: () async {
-                                  var userInfoBox = Hive.box<UserInfo>(
-                                      HiveDatabaseName.USER_INFO);
-                                  var userInfo = userInfoBox.get(0);
-                                  if (userInfo != null) {
-                                    // clear user info
-                                    var clearUserInfo = UserInfo();
-                                    userInfoBox.putAt(0, clearUserInfo);
-                                  }
-                                  Get.back();
-                                },
-                                child: const Text(
-                                  "ตกลง",
-                                  style: TextStyle(fontSize: 16),
-                                )),
-                            TextButton(
-                                onPressed: () {
-                                  Get.back();
-                                },
-                                child: const Text(
-                                  "ยกเลิก",
-                                  style: TextStyle(fontSize: 16),
-                                )),
-                          ]);
-                      break;
-                    case 2:
-                      Get.defaultDialog(
-                          title: "ลบข้อมูลทั้งหมด",
-                          middleText: "ข้อมูลทั้งหมดจะถูกลบออกจากระบบ",
-                          actions: [
-                            TextButton(
-                                onPressed: () async {
-                                  await NotifyService.localNotificationsPlugin
-                                      .cancelAll();
-                                  await HiveDatabaseService.deleteBox();
-                                  await HiveDatabaseService.openAllBox();
-                                  await Get.offAll(
-                                      () => const LoginScreenSelection());
-                                },
-                                child: const Text(
-                                  "ตกลง",
-                                  style: TextStyle(fontSize: 16),
-                                )),
-                            TextButton(
-                                onPressed: () {
-                                  Get.back();
-                                },
-                                child: const Text(
-                                  "ยกเลิก",
-                                  style: TextStyle(fontSize: 16),
-                                )),
-                          ]);
-                      break;
-                    case 3:
-                      // open url
-                      final Uri url = Uri.parse(Introduction.DOCUMENT_LINK);
-                      if (await canLaunchUrl(url)) {
-                        await launchUrl(url);
-                      } else {
-                        // have some problem for open url
-                      }
-                      break;
-                    case 4:
-                      String fbUrl = Introduction.FACEBOOK_LINK;
-                      //final Uri url = Uri.parse(fbUrl);
-                      if (await canLaunchUrlString(fbUrl)) {
-                        await launchUrlString(fbUrl);
-                      } else {
-                        // have some problem for open url
-                      }
-                      break;
-                    case 5:
-                      final Uri url = Uri.parse(Introduction.FAQ_LINK);
-                      if (await canLaunchUrl(url)) {
-                        await launchUrl(url);
-                      } else {
-                        // have some problem for open url
-                      }
-                      break;
-                  }
-                }),
-          ),
-          title: Text(titlePageList[_selectedIndex]),
-          centerTitle: true,
-          actions: [
-            Showcase(
-              key: helpShowCaseKey,
-              targetBorderRadius: BorderRadius.circular(12),
-              description: "ปุ่มแนะนำวิธีใช้งาน",
-              child: IconButton(
-                  onPressed: () {
-                    if (_selectedIndex == 0) {
-                      // handle empty case
-                      var medicineBox = Hive.box<MedicineInfo>(
-                          HiveDatabaseName.MEDICINE_INFO);
-                      if (medicineBox.isEmpty) {
-                        setState(() {
-                          ShowCaseWidget.of(context).startShowCase([
-                            addMedicineFloatingButtonShowCaseKey,
-                          ]);
-                        });
-                      } else {
-                        setState(() {
-                          ShowCaseWidget.of(context).startShowCase([
-                            changeImageOnCardShowCaseKey,
-                            toMedicineNotifyDetailShowCaseKey,
-                            editMedicineShowCaseKey,
-                            deleteMedicineShowCaseKey,
-                          ]);
-                        });
-                      }
-                    } else if (_selectedIndex == 1) {
-                      setState(() {
-                        ShowCaseWidget.of(context).startShowCase([
-                          chooseDateShowcaseKey,
-                        ]);
-                      });
-                    } else if (_selectedIndex == 2) {
-                      setState(() {
-                        ShowCaseWidget.of(context).startShowCase([
-                          chooseIntervalDateShowCaseKey,
-                          generatePDFFloatingButtonShowCaseKey
-                        ]);
-                      });
-                    } else if (_selectedIndex == 3) {
-                      setState(() {
-                        ShowCaseWidget.of(context).startShowCase([
-                          generalInfoShowCaseKey,
-                          medicineInfoShowCaseKey,
-                          appointmentInfoShowCase,
-                        ]);
-                      });
-                    }
-                  },
-                  icon: const Icon(
-                    Icons.help_outline_rounded,
-                    size: 24,
-                  )),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: GestureDetector(
-                onTap: () {
-                  _onItemTapped(3);
-                },
-                child: ValueListenableBuilder(
-                  valueListenable:
-                      Hive.box<UserInfo>(HiveDatabaseName.USER_INFO)
-                          .listenable(),
-                  builder: (_, userInfoBox, __) {
-                    var userInfo = userInfoBox.get(0);
-                    if (userInfo != null) {
-                      if (userInfo.picturePath != null) {
-                        return CircleAvatar(
-                          child: ClipOval(
-                            child: Image.file(
-                              File(userInfo.picturePath!),
-                              fit: BoxFit.cover,
-                              width: 40,
-                              height: 40,
+    var pageController = Get.find<PageState>();
+    return GetBuilder(
+      init: pageController,
+      builder: (controller) {
+        return Scaffold(
+            resizeToAvoidBottomInset: false,
+            appBar: AppBar(
+              elevation: 0,
+              automaticallyImplyLeading: false,
+              leading: Showcase(
+                key: helpDocShowCaseKey,
+                targetBorderRadius: BorderRadius.circular(12),
+                description: "ปุ่มข้อมูลการใช้งานเพิ่มเติม",
+                child: PopupMenuButton(
+                    offset: const Offset(10, 40),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                    itemBuilder: (context) => const [
+                          PopupMenuItem(
+                            value: 3,
+                            child: ListTile(
+                              leading: Icon(Icons.help),
+                              title: Text('คู่มือการใช้งาน'),
                             ),
                           ),
-                        );
+                          PopupMenuItem(
+                            value: 5,
+                            child: ListTile(
+                              leading: Icon(Icons.error),
+                              title: Text('คำถามที่พบบ่อย'),
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 4,
+                            child: ListTile(
+                              leading: Icon(Icons.face),
+                              title: Text('ตอบปัญหาการใช้งาน'),
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 1,
+                            child: ListTile(
+                              leading: ImageIcon(
+                                  AssetImage("assets/icons/remove-user-2.png")),
+                              title: Text('ลบข้อมูลผู้ใช้'),
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 2,
+                            child: ListTile(
+                              leading: Icon(Icons.delete),
+                              title: Text('ลบข้อมูลทั้งหมด'),
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 0,
+                            child: ListTile(
+                              leading: Icon(Icons.logout),
+                              title: Text('ออกจากระบบ'),
+                            ),
+                          ),
+                        ],
+                    onSelected: (value) async {
+                      switch (value) {
+                        case 0:
+                          var userLoginBox =
+                              Hive.box<UserLogin>(HiveDatabaseName.USER_LOGIN);
+                          var userLogin = userLoginBox.get(0);
+                          userLogin!.logOut = true;
+                          await userLogin.save();
+                          await Get.offAll(() => const LoginScreenSelection());
+                          break;
+                        case 1:
+                          Get.defaultDialog(
+                              title: "ลบข้อมูลผู้ใช้",
+                              middleText: "ข้อมูลผู้ใช้จะถูกลบออกจากระบบ",
+                              actions: [
+                                TextButton(
+                                    onPressed: () async {
+                                      var userInfoBox = Hive.box<UserInfo>(
+                                          HiveDatabaseName.USER_INFO);
+                                      var userInfo = userInfoBox.get(0);
+                                      if (userInfo != null) {
+                                        // clear user info
+                                        var clearUserInfo = UserInfo();
+                                        userInfoBox.putAt(0, clearUserInfo);
+                                      }
+                                      Get.back();
+                                    },
+                                    child: const Text(
+                                      "ตกลง",
+                                      style: TextStyle(fontSize: 16),
+                                    )),
+                                TextButton(
+                                    onPressed: () {
+                                      Get.back();
+                                    },
+                                    child: const Text(
+                                      "ยกเลิก",
+                                      style: TextStyle(fontSize: 16),
+                                    )),
+                              ]);
+                          break;
+                        case 2:
+                          Get.defaultDialog(
+                              title: "ลบข้อมูลทั้งหมด",
+                              middleText: "ข้อมูลทั้งหมดจะถูกลบออกจากระบบ",
+                              actions: [
+                                TextButton(
+                                    onPressed: () async {
+                                      await NotifyService
+                                          .localNotificationsPlugin
+                                          .cancelAll();
+                                      await HiveDatabaseService.deleteBox();
+                                      await HiveDatabaseService.openAllBox();
+                                      await Get.offAll(
+                                          () => const LoginScreenSelection());
+                                    },
+                                    child: const Text(
+                                      "ตกลง",
+                                      style: TextStyle(fontSize: 16),
+                                    )),
+                                TextButton(
+                                    onPressed: () {
+                                      Get.back();
+                                    },
+                                    child: const Text(
+                                      "ยกเลิก",
+                                      style: TextStyle(fontSize: 16),
+                                    )),
+                              ]);
+                          break;
+                        case 3:
+                          // open url
+                          final Uri url = Uri.parse(Introduction.DOCUMENT_LINK);
+                          if (await canLaunchUrl(url)) {
+                            await launchUrl(url);
+                          } else {
+                            // have some problem for open url
+                          }
+                          break;
+                        case 4:
+                          String fbUrl = Introduction.FACEBOOK_LINK;
+                          //final Uri url = Uri.parse(fbUrl);
+                          if (await canLaunchUrlString(fbUrl)) {
+                            await launchUrlString(fbUrl);
+                          } else {
+                            // have some problem for open url
+                          }
+                          break;
+                        case 5:
+                          final Uri url = Uri.parse(Introduction.FAQ_LINK);
+                          if (await canLaunchUrl(url)) {
+                            await launchUrl(url);
+                          } else {
+                            // have some problem for open url
+                          }
+                          break;
                       }
-                      return const DummyAvatarWidget();
-                    }
-                    return const DummyAvatarWidget();
-                  },
-                ),
+                    }),
               ),
-            ),
-          ],
-        ),
-        body: PageView(
-          controller: _pageController,
-          onPageChanged: _onPageChanged,
-          children: [
-            DisplayMedicineInfoList(
-              changeImageShowCaseKey: changeImageOnCardShowCaseKey,
-              toMedicineNotifyShowCaseKey: toMedicineNotifyDetailShowCaseKey,
-              editMedicineShowCaseKey: editMedicineShowCaseKey,
-              deleteMedicineShowCaseKey: deleteMedicineShowCaseKey,
-            ), //หน้า รายการยา
-            NotifyScreen(
-              showcaseKey: chooseDateShowcaseKey,
-            ), // หน้า รายการแจ้งเตือน
-            MedicineReportScreen(
-              showcaseKey: chooseIntervalDateShowCaseKey,
-            ),
-            UserInfoScreen(
-              generalInfoShowCaseKey: generalInfoShowCaseKey,
-              medicalInfoShowCaseKey: medicineInfoShowCaseKey,
-              appointmentInfoShowCaseKey: appointmentInfoShowCase,
-            ),
-          ],
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          elevation: 0,
-          currentIndex: _selectedIndex,
-          selectedItemColor: Colors.blueAccent,
-          unselectedItemColor: Colors.black54,
-          onTap: _onItemTapped,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.list),
-              label: "รายการยา",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.alarm_outlined),
-              label: "แจ้งเตือน",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.insert_chart_outlined),
-              label: "สรุป",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              label: "ผู้ใช้",
-            )
-          ],
-        ),
-        floatingActionButton: _selectedIndex == 0
-            ? Showcase(
-                key: addMedicineFloatingButtonShowCaseKey,
-                targetBorderRadius: BorderRadius.circular(30),
-                description: "ปุ่มเพิ่มรายการยา",
-                child: FloatingActionButton(
-                  onPressed: _createMedicineInfo,
-                  child: const Icon(Icons.add),
+              title: Text(titlePageList[controller.pageIndex]),
+              centerTitle: true,
+              actions: [
+                Showcase(
+                  key: helpShowCaseKey,
+                  targetBorderRadius: BorderRadius.circular(12),
+                  description: "ปุ่มแนะนำวิธีใช้งาน",
+                  child: IconButton(
+                      onPressed: () {
+                        //if (_selectedIndex == 0) {
+                        if (controller.pageIndex == 0) {
+                          // handle empty case
+                          var medicineBox = Hive.box<MedicineInfo>(
+                              HiveDatabaseName.MEDICINE_INFO);
+                          if (medicineBox.isEmpty) {
+                            setState(() {
+                              ShowCaseWidget.of(context).startShowCase([
+                                addMedicineFloatingButtonShowCaseKey,
+                              ]);
+                            });
+                          } else {
+                            setState(() {
+                              ShowCaseWidget.of(context).startShowCase([
+                                changeImageOnCardShowCaseKey,
+                                toMedicineNotifyDetailShowCaseKey,
+                                editMedicineShowCaseKey,
+                                deleteMedicineShowCaseKey,
+                              ]);
+                            });
+                          }
+                        } else if (controller.pageIndex == 1) {
+                          setState(() {
+                            ShowCaseWidget.of(context).startShowCase([
+                              chooseDateShowcaseKey,
+                            ]);
+                          });
+                        } else if (controller.pageIndex == 2) {
+                          setState(() {
+                            ShowCaseWidget.of(context).startShowCase([
+                              chooseIntervalDateShowCaseKey,
+                              generatePDFFloatingButtonShowCaseKey
+                            ]);
+                          });
+                        } else if (controller.pageIndex == 3) {
+                          setState(() {
+                            ShowCaseWidget.of(context).startShowCase([
+                              generalInfoShowCaseKey,
+                              medicineInfoShowCaseKey,
+                              appointmentInfoShowCase,
+                            ]);
+                          });
+                        }
+                      },
+                      icon: const Icon(
+                        Icons.help_outline_rounded,
+                        size: 24,
+                      )),
                 ),
-              )
-            : _selectedIndex == 2
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: GestureDetector(
+                    onTap: () {
+                      _onItemTapped(3);
+                    },
+                    child: ValueListenableBuilder(
+                      valueListenable:
+                          Hive.box<UserInfo>(HiveDatabaseName.USER_INFO)
+                              .listenable(),
+                      builder: (_, userInfoBox, __) {
+                        var userInfo = userInfoBox.get(0);
+                        if (userInfo != null) {
+                          if (userInfo.picturePath != null) {
+                            return CircleAvatar(
+                              child: ClipOval(
+                                child: Image.file(
+                                  File(userInfo.picturePath!),
+                                  fit: BoxFit.cover,
+                                  width: 40,
+                                  height: 40,
+                                ),
+                              ),
+                            );
+                          }
+                          return const DummyAvatarWidget();
+                        }
+                        return const DummyAvatarWidget();
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            body: PageView(
+              controller: controller.pageController,
+              onPageChanged: _onPageChanged,
+              children: [
+                DisplayMedicineInfoList(
+                  changeImageShowCaseKey: changeImageOnCardShowCaseKey,
+                  toMedicineNotifyShowCaseKey:
+                      toMedicineNotifyDetailShowCaseKey,
+                  editMedicineShowCaseKey: editMedicineShowCaseKey,
+                  deleteMedicineShowCaseKey: deleteMedicineShowCaseKey,
+                ), //หน้า รายการยา
+                NotifyScreen(
+                  showcaseKey: chooseDateShowcaseKey,
+                ), // หน้า รายการแจ้งเตือน
+                MedicineReportScreen(
+                  showcaseKey: chooseIntervalDateShowCaseKey,
+                ),
+                UserInfoScreen(
+                  generalInfoShowCaseKey: generalInfoShowCaseKey,
+                  medicalInfoShowCaseKey: medicineInfoShowCaseKey,
+                  appointmentInfoShowCaseKey: appointmentInfoShowCase,
+                ),
+              ],
+            ),
+            bottomNavigationBar: BottomNavigationBar(
+              elevation: 0,
+              currentIndex: controller.pageIndex,
+              selectedItemColor: Colors.blueAccent,
+              unselectedItemColor: Colors.black54,
+              onTap: _onItemTapped,
+              items: const [
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.list),
+                  label: "รายการยา",
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.alarm_outlined),
+                  label: "แจ้งเตือน",
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.insert_chart_outlined),
+                  label: "สรุป",
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.person),
+                  label: "ผู้ใช้",
+                )
+              ],
+            ),
+            floatingActionButton: controller.pageIndex == 0
                 ? Showcase(
-                    key: generatePDFFloatingButtonShowCaseKey,
+                    key: addMedicineFloatingButtonShowCaseKey,
                     targetBorderRadius: BorderRadius.circular(30),
-                    description: "สร้างเอกสารสรุปการกินยา",
+                    description: "ปุ่มเพิ่มรายการยา",
                     child: FloatingActionButton(
-                      onPressed: generatePDFReport,
-                      child: const Icon(Icons.picture_as_pdf),
+                      onPressed: _createMedicineInfo,
+                      child: const Icon(Icons.add),
                     ),
                   )
-                : null,
-        floatingActionButtonLocation: FloatingActionButtonLocation.startFloat);
+                : controller.pageIndex == 2
+                    ? Showcase(
+                        key: generatePDFFloatingButtonShowCaseKey,
+                        targetBorderRadius: BorderRadius.circular(30),
+                        description: "สร้างเอกสารสรุปการกินยา",
+                        child: FloatingActionButton(
+                          onPressed: generatePDFReport,
+                          child: const Icon(Icons.picture_as_pdf),
+                        ),
+                      )
+                    : null,
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.startFloat);
+      },
+    );
   }
 
   void _createMedicineInfo() {
@@ -579,29 +578,25 @@ class _HomeAppScreenState extends State<HomeAppScreen> {
   }
 
   void floatingAction() {
-    if (_selectedIndex == 1) {
+    var pageController = Get.find<PageState>();
+
+    if (pageController.pageIndex == 1) {
       _createMedicineInfo();
     }
-    if (_selectedIndex == 2) {
+
+    if (pageController.pageIndex == 2) {
       // print pdf
     }
   }
 
   void _onPageChanged(int newIndex) {
-    //setState(() {
-    // appStateController.pageController.value.animateToPage(newIndex,
-    //     duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
-    //});
-    //var pageState = Get.find<PageState>();
-    setState(() {
-      _selectedIndex = newIndex;
-    });
+    var pageStateController = Get.find<PageState>();
+    pageStateController.changePageIndexTo(newIndex);
   }
 
   void _onItemTapped(int newIndex) {
-    //var pageState = Get.find<PageState>();
-    _pageController.animateToPage(newIndex,
-        duration: const Duration(milliseconds: 300), curve: Curves.easeIn);
+    var pageController = Get.find<PageState>();
+    pageController.changePageto(newIndex);
   }
 }
 

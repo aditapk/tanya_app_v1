@@ -14,6 +14,7 @@ import 'package:intl/intl.dart';
 
 import 'package:tanya_app_v1/Services/hive_db_services.dart';
 
+import 'Controller/medicine_info_controller.dart';
 import 'GetXBinding/medicine_state_binding.dart';
 import 'Screen/Login/login_screen_selection.dart';
 import 'Services/notification_handling.dart';
@@ -50,6 +51,8 @@ Future<void> main() async {
   // init share preferences
   //await SharePreferencesData.init();
 
+  // put page state
+  Get.put(PageState());
   // run My App
   //debugPrint('main: Running');
   runApp(const MyApp());

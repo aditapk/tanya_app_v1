@@ -9,6 +9,7 @@ import 'package:tanya_app_v1/Services/notify_services.dart';
 import 'package:tanya_app_v1/home_app_screen.dart';
 import 'package:tanya_app_v1/utils/constans.dart';
 
+import '../Controller/medicine_info_controller.dart';
 import '../GetXBinding/medicine_state_binding.dart';
 import '../Model/notify_info.dart';
 import '../Model/user_info_model.dart';
@@ -251,6 +252,7 @@ class NotificationHandeling {
   static void onDidReceiveNotification(
       NotificationResponse notificationResponse) async {
     //debugPrint('onDidReceiveNotification');
+    var pageController = Get.find<PageState>();
     switch (notificationResponse.notificationResponseType) {
       case NotificationResponseType.selectedNotification:
         // get channel name
@@ -268,18 +270,8 @@ class NotificationHandeling {
           if (status == "OK") {
             await updateNotifyStatus(notifyID);
 
-            Future.delayed(const Duration(seconds: 2), () async {
-              //debugPrint("get to home");
-              await Get.off(
-                () => ShowCaseWidget(
-                  builder: Builder(
-                    builder: (context) => const HomeAppScreen(
-                      selectedPage: 1,
-                    ),
-                  ),
-                ),
-              );
-            });
+            // go to Medicine State List on Home Screen
+            pageController.changePageto(1);
           } else if (status == "PENDING") {
             var notifyInfo = await getNotifyInfo(notifyID);
             await generateNewSchedule(notifyID, notifyInfo,
@@ -332,18 +324,7 @@ class NotificationHandeling {
                   )
                 : null,
           );
-          Future.delayed(const Duration(seconds: 2), () async {
-            //debugPrint("get to home");
-            await Get.off(
-              () => ShowCaseWidget(
-                builder: Builder(
-                  builder: (context) => const HomeAppScreen(
-                    selectedPage: 3,
-                  ),
-                ),
-              ),
-            );
-          });
+          pageController.changePageto(3);
         }
 
         break;
@@ -357,19 +338,7 @@ class NotificationHandeling {
           switch (notificationResponse.actionId) {
             case "OK":
               await updateNotifyStatus(notifyID);
-
-              Future.delayed(const Duration(seconds: 2), () async {
-                //debugPrint("get to home");
-                await Get.off(
-                  () => ShowCaseWidget(
-                    builder: Builder(
-                      builder: (context) => const HomeAppScreen(
-                        selectedPage: 1,
-                      ),
-                    ),
-                  ),
-                );
-              });
+              pageController.changePageto(1);
               break;
             case "PENDING":
               var notifyInfo = await getNotifyInfo(notifyID);
@@ -391,18 +360,7 @@ class NotificationHandeling {
               await createNewDoctorAppointmentNotification(payloadJson);
               break;
           }
-          Future.delayed(const Duration(seconds: 2), () async {
-            //debugPrint("get to home");
-            await Get.off(
-              () => ShowCaseWidget(
-                builder: Builder(
-                  builder: (context) => const HomeAppScreen(
-                    selectedPage: 3,
-                  ),
-                ),
-              ),
-            );
-          });
+          pageController.changePageto(3);
         }
       // // have to implement on above
       // switch (notificationResponse.actionId) {

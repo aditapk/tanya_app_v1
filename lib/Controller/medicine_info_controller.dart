@@ -24,10 +24,21 @@ class ReportFilterState extends GetxController {
 }
 
 class PageState extends GetxController {
-  final pageController = PageController(initialPage: 0).obs;
-}
+  int pageIndex = 0;
+  var pageController = PageController(initialPage: 0);
 
-// class NotificationState extends GetxController {
-//   final medicineNotification = NotifyService().obs;
-//   final appointmentNotification = NotifyService().obs;
-// }
+  void changePageto(int newPage) {
+    pageIndex = newPage;
+    pageController.animateToPage(
+      newPage,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeIn,
+    );
+    update();
+  }
+
+  void changePageIndexTo(int newPageIndex) {
+    pageIndex = newPageIndex;
+    update();
+  }
+}
