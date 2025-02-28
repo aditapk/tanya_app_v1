@@ -4,9 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
-import 'package:showcaseview/showcaseview.dart';
 import 'package:tanya_app_v1/Services/notify_services.dart';
-import 'package:tanya_app_v1/home_app_screen.dart';
 import 'package:tanya_app_v1/utils/constans.dart';
 
 import '../Controller/medicine_info_controller.dart';

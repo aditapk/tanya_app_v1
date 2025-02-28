@@ -26,18 +26,14 @@ class LoginScreenSelection extends StatelessWidget {
         userLogin.beginningUse = true;
         userLogin.save();
         return ShowCaseWidget(
-          builder: Builder(
-            builder: (context) => const HomeAppScreen(
-              showHelp: true,
-            ),
+          builder: (context) => const HomeAppScreen(
+            showHelp: true,
           ),
         );
       } else {
         return ShowCaseWidget(
-          builder: Builder(
-            builder: (context) => const HomeAppScreen(
-              showHelp: false,
-            ),
+          builder: (context) => const HomeAppScreen(
+            showHelp: false,
           ),
         );
       }

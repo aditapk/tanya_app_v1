@@ -59,7 +59,7 @@ class NotifyService {
       final AndroidFlutterLocalNotificationsPlugin? andriodImplementation =
           localNotificationsPlugin.resolvePlatformSpecificImplementation<
               AndroidFlutterLocalNotificationsPlugin>();
-      await andriodImplementation?.requestPermission();
+      await andriodImplementation?.requestNotificationsPermission();
     }
   }
 
@@ -203,7 +203,7 @@ class NotifyService {
       payload: notifyPayload,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
-      androidAllowWhileIdle: true,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
     );
   }
 
@@ -260,7 +260,7 @@ class NotifyService {
       payload: payload,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
-      androidAllowWhileIdle: true,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
     );
   }
 }

@@ -37,10 +37,8 @@ class _SignUpFormState extends State<SignUpForm> {
         // from Sign Up -> Home
         Get.to(
           () => ShowCaseWidget(
-            builder: Builder(
-              builder: (context) => const HomeAppScreen(
-                showHelp: true, // beginning use
-              ),
+            builder: (context) => const HomeAppScreen(
+              showHelp: true, // beginning use
             ),
           ),
         );
@@ -56,10 +54,8 @@ class _SignUpFormState extends State<SignUpForm> {
         // from Sign Up -> Home
         Get.to(
           () => ShowCaseWidget(
-            builder: Builder(
-              builder: (context) => HomeAppScreen(
-                showHelp: userLogin.beginningUse,
-              ),
+            builder: (context) => HomeAppScreen(
+              showHelp: userLogin.beginningUse,
             ),
           ),
         );

@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:buddhist_datetime_dateformat_sns/buddhist_datetime_dateformat_sns.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_native_splash/cli_commands.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';

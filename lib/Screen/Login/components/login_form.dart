@@ -114,10 +114,8 @@ class _LoginFormState extends State<LoginForm> {
         await userLogin.save();
         Get.to(
           () => ShowCaseWidget(
-            builder: Builder(
-              builder: (context) => HomeAppScreen(
-                showHelp: userLogin.beginningUse,
-              ),
+            builder: (context) => HomeAppScreen(
+              showHelp: userLogin.beginningUse,
             ),
           ),
           binding: AppInfoBinding(),

@@ -67,9 +67,7 @@ class _ToChooseMedicineState extends State<ToChooseMedicine> {
                     onPressed: () {
                       Get.off(
                         () => ShowCaseWidget(
-                          builder: Builder(
-                            builder: (context) => const HomeAppScreen(),
-                          ),
+                          builder: (context) => const HomeAppScreen(),
                         ),
                       );
                     },

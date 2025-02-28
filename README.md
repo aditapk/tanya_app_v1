@@ -14,3 +14,15 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+## how to build
+for ios $ flutter build ipa
+for android $ flutter build appbundle
+
+## android deployment
+account
+username : aditapk2024@gmail.com
+password : Lacky1234
+
+# payment info account aditapk2024@gmail.com
+https://payments.google.com
